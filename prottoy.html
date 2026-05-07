@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prottoy Academy - প্রত্যয় একাডেমি</title>
+<link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+  :root {
+    --deep-navy: #07091e;
+    --accent-gold: #f5c518;
+    --accent-orange: #ff6b35;
+    --teal: #00b4d8;
+    --green: #22c55e;
+    --violet: #a78bfa;
+    --card-bg: rgba(255,255,255,0.055);
+    --text-light: #b8c4e8;
+  }
+
+  html { scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Hind Siliguri', sans-serif;
+    background: var(--deep-navy);
+    color: #fff;
+    overflow-x: hidden;
+  }
+
+  body::before {
+    content: '';
+    position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+    background:
+      radial-gradient(ellipse 70% 55% at 15% 15%, rgba(26,42,108,0.65) 0%, transparent 60%),
+      radial-gradient(ellipse 55% 60% at 88% 75%, rgba(0,180,216,0.12) 0%, transparent 60%),
+      radial-gradient(ellipse 45% 40% at 55% 5%,  rgba(245,197,24,0.07) 0%, transparent 50%);
+    pointer-events: none; z-index: 0;
+  }
+
+  /* NAV */
+  nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 52px;
+    background: rgba(7,9,30,0.88);
+    backdrop-filter: blur(18px);
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .logo { display: flex; align-items: center; gap: 12px; }
+  .logo-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Noto Serif Bengali', serif;
+    font-size: 22px; font-weight: 900;
+    color: #07091e;
+    box-shadow: 0 4px 18px rgba(245,197,24,0.35);
+  }
+  .logo-text { font-family: 'Noto Serif Bengali', serif; font-size: 19px; font-weight: 700; line-height: 1.25; }
+  .logo-text span { color: var(--accent-gold); }
+  .logo-sub { font-size: 10px; font-weight: 400; color: #6b7db3; letter-spacing: 2px; }
+
+  .nav-links { display: flex; align-items: center; gap: 28px; list-style: none; }
+  .nav-links a { color: var(--text-light); text-decoration: none; font-size: 15px; font-weight: 500; transition: color .2s; }
+  .nav-links a:hover { color: var(--accent-gold); }
+  .nav-cta {
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+    color: #07091e !important; font-weight: 700 !important;
+    padding: 10px 22px; border-radius: 9px;
+    box-shadow: 0 4px 14px rgba(245,197,24,0.3);
+    transition: transform .2s, box-shadow .2s !important;
+  }
+  .nav-cta:hover { transform: translateY(-2px); box-shadow: 0 7px 22px rgba(245,197,24,0.45) !important; }
+
+  /* HERO */
+  .hero {
+    position: relative; z-index: 1;
+    min-height: 100vh;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    text-align: center;
+    padding: 130px 48px 60px;
+  }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(245,197,24,0.1);
+    border: 1px solid rgba(245,197,24,0.28);
+    border-radius: 100px; padding: 6px 18px;
+    font-size: 13px; color: var(--accent-gold); font-weight: 600;
+    margin-bottom: 26px;
+    animation: fadeUp .8s ease both;
+  }
+  .badge-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-gold); animation: pulse 1.6s infinite; }
+
+  .hero h1 {
+    font-family: 'Noto Serif Bengali', serif;
+    font-size: clamp(34px, 5vw, 62px);
+    font-weight: 900; line-height: 1.2;
+    margin-bottom: 18px;
+    animation: fadeUp .8s .1s ease both;
+  }
+  .hero h1 .hl {
+    background: linear-gradient(90deg, var(--accent-gold), var(--accent-orange));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .hero p {
+    max-width: 580px; font-size: 17px; color: var(--text-light);
+    line-height: 1.75; margin: 0 auto 36px;
+    animation: fadeUp .8s .2s ease both;
+  }
+
+  .hero-btns {
+    display: flex; gap: 14px; justify-content: center; flex-wrap: wrap;
+    animation: fadeUp .8s .3s ease both;
+    margin-bottom: 56px;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+    color: #07091e; font-family: 'Hind Siliguri', sans-serif;
+    font-size: 16px; font-weight: 700;
+    padding: 13px 30px; border: none; border-radius: 10px; cursor: pointer;
+    box-shadow: 0 6px 22px rgba(245,197,24,0.35);
+    transition: transform .2s, box-shadow .2s;
+  }
+  .btn-primary:hover { transform: translateY(-3px); box-shadow: 0 10px 32px rgba(245,197,24,0.45); }
+  .btn-outline {
+    background: transparent; color: #fff;
+    font-family: 'Hind Siliguri', sans-serif; font-size: 16px; font-weight: 600;
+    padding: 13px 30px; border: 1.5px solid rgba(255,255,255,0.22); border-radius: 10px; cursor: pointer;
+    transition: border-color .2s, background .2s;
+  }
+  .btn-outline:hover { border-color: var(--teal); background: rgba(0,180,216,0.08); }
+
+  /* STATS */
+  .stats-row {
+    display: flex; justify-content: center;
+    background: rgba(255,255,255,0.04);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; overflow: hidden;
+    max-width: 680px; width: 100%;
+    animation: fadeUp .8s .4s ease both;
+  }
+  .stat-box {
+    flex: 1; padding: 20px 14px; text-align: center;
+    border-right: 1px solid rgba(255,255,255,0.07);
+  }
+  .stat-box:last-child { border-right: none; }
+  .stat-num {
+    font-family: 'Noto Serif Bengali', serif; font-size: 26px; font-weight: 900;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .stat-lbl { font-size: 12px; color: var(--text-light); margin-top: 3px; }
+
+  /* SECTION */
+  .section { position: relative; z-index: 1; padding: 72px 52px; }
+  .sec-top { margin-bottom: 42px; }
+  .sec-label {
+    font-size: 12px; font-weight: 700; letter-spacing: 3px;
+    text-transform: uppercase; color: var(--accent-gold); margin-bottom: 10px;
+  }
+  .sec-title {
+    font-family: 'Noto Serif Bengali', serif;
+    font-size: clamp(26px, 3.5vw, 40px); font-weight: 800;
+  }
+  .sec-sub { font-size: 15px; color: var(--text-light); margin-top: 8px; }
+
+  /* CATEGORY CARDS */
+  .categories-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 24px;
+  }
+
+  .cat-card {
+    position: relative; overflow: hidden;
+    border-radius: 22px;
+    padding: 36px 36px 32px;
+    border: 1px solid rgba(255,255,255,0.08);
+    cursor: pointer;
+    transition: transform .28s cubic-bezier(.22,.68,0,1.2), box-shadow .28s;
+    background: var(--card-bg);
+    backdrop-filter: blur(12px);
+  }
+  .cat-card:hover { transform: translateY(-8px) scale(1.01); }
+
+  .cat-bg-glow {
+    position: absolute; top: -40px; right: -40px;
+    width: 180px; height: 180px; border-radius: 50%;
+    opacity: 0.12; transition: opacity .3s, transform .3s;
+  }
+  .cat-card:hover .cat-bg-glow { opacity: 0.22; transform: scale(1.2); }
+
+  .cat-watermark {
+    position: absolute; bottom: -16px; right: 16px;
+    font-size: 110px; line-height: 1;
+    opacity: 0.05; pointer-events: none;
+    transition: opacity .3s;
+  }
+  .cat-card:hover .cat-watermark { opacity: 0.1; }
+
+  .cat-header { display: flex; align-items: flex-start; justify-content: space-between; margin-bottom: 20px; }
+
+  .cat-icon-wrap {
+    width: 64px; height: 64px; border-radius: 18px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 30px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+    flex-shrink: 0;
+  }
+
+  .cat-badge-new {
+    font-size: 11px; font-weight: 700; letter-spacing: 1px;
+    padding: 4px 12px; border-radius: 100px;
+  }
+
+  .cat-title {
+    font-family: 'Noto Serif Bengali', serif;
+    font-size: 24px; font-weight: 800; margin-bottom: 8px;
+  }
+
+  .cat-desc { font-size: 14px; color: var(--text-light); line-height: 1.65; margin-bottom: 22px; }
+
+  .cat-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 22px; }
+  .cat-tag {
+    font-size: 12px; font-weight: 600;
+    padding: 4px 12px; border-radius: 100px;
+    background: rgba(255,255,255,0.07);
+    color: var(--text-light);
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+
+  .cat-divider {
+    width: 100%; height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+    margin: 20px 0;
+  }
+
+  .cat-footer { display: flex; align-items: center; justify-content: space-between; }
+  .cat-count { font-size: 13px; color: var(--text-light); }
+  .cat-count strong {
+    font-size: 20px; font-weight: 800;
+    display: block; line-height: 1;
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+
+  .cat-btn {
+    display: flex; align-items: center; gap: 8px;
+    color: #fff; font-family: 'Hind Siliguri', sans-serif;
+    font-size: 14px; font-weight: 700;
+    padding: 10px 20px; border: none; border-radius: 10px; cursor: pointer;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.25);
+    transition: transform .2s;
+  }
+  .cat-btn:hover { transform: translateX(4px); }
+  .cat-btn .arrow { font-size: 18px; transition: transform .2s; }
+  .cat-card:hover .cat-btn .arrow { transform: translateX(4px); }
+
+  /* FEATURES */
+  .features-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+  .feat-card {
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 18px; padding: 30px 24px;
+    transition: transform .25s;
+  }
+  .feat-card:hover { transform: translateY(-4px); }
+  .feat-icon {
+    width: 48px; height: 48px; border-radius: 13px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 22px; margin-bottom: 16px;
+  }
+  .feat-card h3 { font-family: 'Noto Serif Bengali', serif; font-size: 18px; font-weight: 700; margin-bottom: 8px; }
+  .feat-card p { font-size: 13.5px; color: var(--text-light); line-height: 1.7; }
+
+  /* RECENT Q */
+  .q-list { display: flex; flex-direction: column; gap: 12px; }
+  .q-row {
+    display: flex; align-items: center; gap: 18px;
+    background: var(--card-bg);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 13px; padding: 18px 22px; cursor: pointer;
+    transition: background .2s, border-color .2s, transform .2s;
+  }
+  .q-row:hover { background: rgba(255,255,255,0.09); border-color: rgba(245,197,24,0.25); transform: translateX(4px); }
+  .q-badge {
+    width: 38px; height: 38px; border-radius: 9px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 15px; font-weight: 800; flex-shrink: 0;
+  }
+  .q-body { flex: 1; }
+  .q-body p { font-size: 14.5px; font-weight: 500; margin-bottom: 6px; line-height: 1.5; }
+  .q-chips { display: flex; gap: 8px; }
+  .chip { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 100px; background: rgba(255,255,255,0.07); color: var(--text-light); }
+  .q-arrow { color: var(--text-light); font-size: 20px; flex-shrink: 0; transition: transform .2s, color .2s; }
+  .q-row:hover .q-arrow { transform: translateX(4px); color: var(--accent-gold); }
+
+  /* CTA */
+  .cta-wrap { position: relative; z-index: 1; padding: 0 52px 80px; }
+  .cta-inner {
+    border-radius: 24px;
+    background: linear-gradient(135deg, #111c5e 0%, #0d1b5c 50%, #0a3660 100%);
+    border: 1px solid rgba(0,180,216,0.18);
+    padding: 56px 60px;
+    display: flex; align-items: center; justify-content: space-between; gap: 40px;
+    overflow: hidden; position: relative;
+  }
+  .cta-inner::after {
+    content: '✦';
+    position: absolute; right: 40px; bottom: -30px;
+    font-size: 220px; opacity: 0.04; line-height: 1;
+  }
+  .cta-inner h2 { font-family: 'Noto Serif Bengali', serif; font-size: 34px; font-weight: 900; margin-bottom: 10px; }
+  .cta-inner p { font-size: 15px; color: var(--text-light); }
+
+  /* FOOTER */
+  footer {
+    position: relative; z-index: 1;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    padding: 36px 52px;
+    display: flex; align-items: center; justify-content: space-between;
+    font-size: 13.5px; color: var(--text-light);
+  }
+  footer a { color: var(--text-light); text-decoration: none; transition: color .2s; }
+  footer a:hover { color: var(--accent-gold); }
+  .footer-links { display: flex; gap: 24px; }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(28px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; } 50% { opacity: 0.4; }
+  }
+
+  /* ══ HAMBURGER ══ */
+  .hamburger {
+    display: none;
+    flex-direction: column; justify-content: center; align-items: center;
+    width: 40px; height: 40px; gap: 5px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 9px; cursor: pointer;
+    transition: background .2s;
+  }
+  .hamburger:hover { background: rgba(255,255,255,0.1); }
+  .hamburger span {
+    display: block; width: 20px; height: 2px;
+    background: #fff; border-radius: 2px;
+    transition: transform .3s, opacity .3s;
+  }
+  .hamburger.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+  .hamburger.open span:nth-child(2) { opacity: 0; }
+  .hamburger.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+  /* ══ MOBILE DRAWER ══ */
+  .mobile-menu {
+    display: none;
+    position: fixed; top: 68px; left: 0; right: 0;
+    background: rgba(7,9,30,0.97);
+    backdrop-filter: blur(20px);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+    z-index: 99;
+    padding: 20px 24px 28px;
+    flex-direction: column; gap: 4px;
+    transform: translateY(-10px); opacity: 0;
+    transition: transform .25s ease, opacity .25s ease;
+  }
+  .mobile-menu.open {
+    display: flex;
+    transform: translateY(0); opacity: 1;
+  }
+  .mobile-menu a {
+    color: var(--text-light); text-decoration: none;
+    font-size: 16px; font-weight: 500;
+    padding: 13px 16px; border-radius: 10px;
+    display: block;
+    transition: background .2s, color .2s;
+  }
+  .mobile-menu a:hover { background: rgba(255,255,255,0.07); color: #fff; }
+  .mobile-menu .mob-cta {
+    margin-top: 8px;
+    background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+    color: #07091e !important; font-weight: 700 !important;
+    text-align: center; border-radius: 10px;
+  }
+
+  /* ══ TABLET — 1024px ══ */
+  @media (max-width: 1024px) {
+    nav { padding: 14px 24px; }
+    .section { padding: 56px 28px; }
+    .hero { padding: 110px 28px 56px; }
+    .features-row { grid-template-columns: repeat(2, 1fr); }
+    .cta-wrap { padding: 0 28px 60px; }
+    .cta-inner { padding: 40px 36px; gap: 28px; }
+    footer { padding: 28px 28px; }
+  }
+
+  /* ══ MOBILE — 768px ══ */
+  @media (max-width: 768px) {
+    /* NAV */
+    nav { padding: 12px 18px; }
+    .nav-links { display: none; }
+    .hamburger { display: flex; }
+
+    /* HERO */
+    .hero { padding: 100px 20px 48px; min-height: auto; }
+    .badge { font-size: 12px; padding: 5px 14px; }
+    .hero p { font-size: 15px; }
+    .hero-btns { flex-direction: column; align-items: center; }
+    .btn-primary, .btn-outline { width: 100%; max-width: 320px; text-align: center; }
+
+    /* STATS */
+    .stats-row { display: grid; grid-template-columns: 1fr 1fr; max-width: 100%; }
+    .stat-box { border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); padding: 16px 10px; }
+    .stat-box:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.07); }
+    .stat-box:nth-last-child(-n+2) { border-bottom: none; }
+    .stat-num { font-size: 20px; }
+    .stat-lbl { font-size: 11px; }
+
+    /* SECTIONS */
+    .section { padding: 48px 18px; }
+    .sec-top { margin-bottom: 28px; }
+
+    /* CATEGORIES — single column on mobile */
+    .categories-grid { grid-template-columns: 1fr; gap: 16px; }
+    .cat-card { padding: 26px 22px 22px; border-radius: 18px; }
+    .cat-title { font-size: 20px; }
+    .cat-desc { font-size: 13px; }
+    .cat-watermark { font-size: 80px; }
+
+    /* FEATURES */
+    .features-row { grid-template-columns: 1fr; gap: 14px; }
+    .feat-card { padding: 24px 20px; }
+
+    /* QUESTIONS */
+    .q-row { padding: 14px 16px; gap: 12px; }
+    .q-body p { font-size: 13.5px; }
+    .q-chips { flex-wrap: wrap; gap: 6px; }
+    .chip { font-size: 10px; }
+
+    /* CTA */
+    .cta-wrap { padding: 0 18px 56px; }
+    .cta-inner {
+      flex-direction: column; align-items: flex-start;
+      padding: 32px 26px; gap: 20px;
+    }
+    .cta-inner h2 { font-size: 24px; }
+    .cta-inner p { font-size: 14px; }
+    .cta-inner .btn-primary { width: 100%; text-align: center; font-size: 15px; padding: 13px 20px; }
+
+    /* FOOTER */
+    footer { flex-direction: column; gap: 16px; text-align: center; padding: 28px 18px; }
+    .footer-links { flex-wrap: wrap; justify-content: center; gap: 16px; }
+  }
+
+  /* ══ SMALL MOBILE — 420px ══ */
+  @media (max-width: 420px) {
+    .logo-text { font-size: 16px; }
+    .cat-tags { gap: 6px; }
+    .cat-tag { font-size: 11px; padding: 3px 9px; }
+    .cat-footer { flex-direction: column; align-items: flex-start; gap: 14px; }
+    .cat-btn { width: 100%; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+  <div class="logo">
+    <div class="logo-icon">প্র</div>
+    <div class="logo-text">
+      প্রত্যয় <span>একাডেমি</span>
+      <div class="logo-sub">PROTTOY ACADEMY</div>
+    </div>
+  </div>
+  <ul class="nav-links">
+    <li><a href="#">হোম</a></li>
+    <li><a href="#">ক্যাটাগরি</a></li>
+    <li><a href="#">মডেল টেস্ট</a></li>
+    <li><a href="#">লিডারবোর্ড</a></li>
+    <li><a href="#">ব্লগ</a></li>
+    <li><a href="#" class="nav-cta">🚀 শুরু করুন</a></li>
+  </ul>
+  <button class="hamburger" id="hamburger" aria-label="মেনু">
+    <span></span><span></span><span></span>
+  </button>
+</nav>
+
+<!-- MOBILE DRAWER -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#">🏠 হোম</a>
+  <a href="#">📂 ক্যাটাগরি</a>
+  <a href="#">📝 মডেল টেস্ট</a>
+  <a href="#">🏆 লিডারবোর্ড</a>
+  <a href="#">📰 ব্লগ</a>
+  <a href="#" class="mob-cta">🚀 শুরু করুন</a>
+</div>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge"><span class="badge-dot"></span> বাংলাদেশের সবচেয়ে বড় ডিজিটাল প্রশ্ন ব্যাংক</div>
+  <h1>সকল পরীক্ষার <span class="hl">সেরা প্রস্তুতি</span><br>এক জায়গায়</h1>
+  <p>চাকরি, ব্যাংক, ভর্তি ও বোর্ড পরীক্ষার জন্য লক্ষাধিক প্রশ্ন, মডেল টেস্ট ও বিস্তারিত সমাধান — সম্পূর্ণ বাংলায়।<br><strong style="color:#f5c518">প্রত্যয় একাডেমি</strong> — আপনার সাফল্যের সঙ্গী।</p>
+  <div class="hero-btns">
+    <button class="btn-primary">🎯 বিনামূল্যে শুরু করুন</button>
+    <button class="btn-outline">📖 ডেমো দেখুন</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat-box">
+      <div class="stat-num">১.৫ লাখ+</div>
+      <div class="stat-lbl">মোট প্রশ্ন</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">৭৫ হাজার+</div>
+      <div class="stat-lbl">সক্রিয় শিক্ষার্থী</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">৪টি</div>
+      <div class="stat-lbl">মূল ক্যাটাগরি</div>
+    </div>
+    <div class="stat-box">
+      <div class="stat-num">৯৮%</div>
+      <div class="stat-lbl">সন্তুষ্টি হার</div>
+    </div>
+  </div>
+</section>
+
+<!-- CATEGORIES -->
+<section class="section" id="categories">
+  <div class="sec-top">
+    <div class="sec-label">ক্যাটাগরিসমূহ</div>
+    <div class="sec-title">আপনি কোন পরীক্ষার জন্য প্রস্তুতি নিচ্ছেন?</div>
+    <div class="sec-sub">আপনার লক্ষ্য অনুযায়ী ক্যাটাগরি বেছে নিন এবং স্মার্ট প্র্যাকটিস শুরু করুন।</div>
+  </div>
+
+  <div class="categories-grid">
+
+    <!-- JOB SOLUTION -->
+    <div class="cat-card" style="border-color:rgba(245,197,24,0.1)">
+      <div class="cat-bg-glow" style="background:radial-gradient(circle,#f5c518,transparent 70%)"></div>
+      <div class="cat-watermark">💼</div>
+      <div class="cat-header">
+        <div class="cat-icon-wrap" style="background:linear-gradient(135deg,#f5c518,#ff6b35)">💼</div>
+        <span class="cat-badge-new" style="background:rgba(245,197,24,0.15);color:#f5c518;border:1px solid rgba(245,197,24,0.3)">★ সবচেয়ে জনপ্রিয়</span>
+      </div>
+      <div class="cat-title">Job Solution</div>
+      <div class="cat-desc">সরকারি ও বেসরকারি চাকরির বিগত বছরের প্রশ্ন ও সমাধান। BCS, PSC, NTRCA, সরকারি প্রাথমিক শিক্ষক নিয়োগ সহ সকল চাকরির পূর্ণ প্রস্তুতি।</div>
+      <div class="cat-tags">
+        <span class="cat-tag">BCS প্রিলি</span>
+        <span class="cat-tag">BCS লিখিত</span>
+        <span class="cat-tag">NTRCA</span>
+        <span class="cat-tag">সরকারি শিক্ষক</span>
+        <span class="cat-tag">PSC</span>
+        <span class="cat-tag">প্রাথমিক নিয়োগ</span>
+      </div>
+      <div class="cat-divider"></div>
+      <div class="cat-footer">
+        <div class="cat-count">
+          <strong style="background:linear-gradient(135deg,#f5c518,#ff6b35)">৪৫,০০০+</strong>
+          প্রশ্ন ও সমাধান
+        </div>
+        <button class="cat-btn" style="background:linear-gradient(135deg,#f5c518,#ff6b35);color:#07091e">দেখুন <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- BANK RECRUITMENT -->
+    <div class="cat-card" style="border-color:rgba(0,180,216,0.1)">
+      <div class="cat-bg-glow" style="background:radial-gradient(circle,#00b4d8,transparent 70%)"></div>
+      <div class="cat-watermark">🏦</div>
+      <div class="cat-header">
+        <div class="cat-icon-wrap" style="background:linear-gradient(135deg,#00b4d8,#0077b6)">🏦</div>
+        <span class="cat-badge-new" style="background:rgba(0,180,216,0.15);color:#00b4d8;border:1px solid rgba(0,180,216,0.3)">🔥 হট সেকশন</span>
+      </div>
+      <div class="cat-title">Bank Recruitment</div>
+      <div class="cat-desc">বাংলাদেশ ব্যাংক, সোনালী, জনতা, অগ্রণী ব্যাংকসহ সকল সরকারি-বেসরকারি ব্যাংক নিয়োগ পরীক্ষার বিগত প্রশ্ন ও বিস্তারিত সমাধান।</div>
+      <div class="cat-tags">
+        <span class="cat-tag">বাংলাদেশ ব্যাংক</span>
+        <span class="cat-tag">সোনালী ব্যাংক</span>
+        <span class="cat-tag">জনতা ব্যাংক</span>
+        <span class="cat-tag">অগ্রণী ব্যাংক</span>
+        <span class="cat-tag">রূপালী ব্যাংক</span>
+        <span class="cat-tag">IBBL</span>
+      </div>
+      <div class="cat-divider"></div>
+      <div class="cat-footer">
+        <div class="cat-count">
+          <strong style="background:linear-gradient(135deg,#00b4d8,#0077b6)">৩২,০০০+</strong>
+          প্রশ্ন ও সমাধান
+        </div>
+        <button class="cat-btn" style="background:linear-gradient(135deg,#00b4d8,#0077b6)">দেখুন <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- ADMISSION -->
+    <div class="cat-card" style="border-color:rgba(167,139,250,0.1)">
+      <div class="cat-bg-glow" style="background:radial-gradient(circle,#a78bfa,transparent 70%)"></div>
+      <div class="cat-watermark">🎓</div>
+      <div class="cat-header">
+        <div class="cat-icon-wrap" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">🎓</div>
+        <span class="cat-badge-new" style="background:rgba(167,139,250,0.15);color:#a78bfa;border:1px solid rgba(167,139,250,0.3)">নতুন প্রশ্ন যুক্ত</span>
+      </div>
+      <div class="cat-title">Admission</div>
+      <div class="cat-desc">ঢাকা বিশ্ববিদ্যালয়, বুয়েট, মেডিকেল কলেজ ও জাতীয় বিশ্ববিদ্যালয়সহ সকল বিশ্ববিদ্যালয়ের ভর্তি পরীক্ষার প্রশ্ন ও পূর্ণ সমাধান।</div>
+      <div class="cat-tags">
+        <span class="cat-tag">ঢাকা বিশ্ববিদ্যালয়</span>
+        <span class="cat-tag">বুয়েট</span>
+        <span class="cat-tag">মেডিকেল</span>
+        <span class="cat-tag">জাতীয় বিশ্ববিদ্যালয়</span>
+        <span class="cat-tag">GST গুচ্ছ</span>
+        <span class="cat-tag">রুয়েট / কুয়েট</span>
+      </div>
+      <div class="cat-divider"></div>
+      <div class="cat-footer">
+        <div class="cat-count">
+          <strong style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">৩৮,০০০+</strong>
+          প্রশ্ন ও সমাধান
+        </div>
+        <button class="cat-btn" style="background:linear-gradient(135deg,#a78bfa,#7c3aed)">দেখুন <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+    <!-- SCHOOL & COLLEGE -->
+    <div class="cat-card" style="border-color:rgba(34,197,94,0.1)">
+      <div class="cat-bg-glow" style="background:radial-gradient(circle,#22c55e,transparent 70%)"></div>
+      <div class="cat-watermark">📚</div>
+      <div class="cat-header">
+        <div class="cat-icon-wrap" style="background:linear-gradient(135deg,#22c55e,#16a34a)">📚</div>
+        <span class="cat-badge-new" style="background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.3)">সকল বোর্ড</span>
+      </div>
+      <div class="cat-title">School &amp; College</div>
+      <div class="cat-desc">SSC, HSC, JSC ও ৬ষ্ঠ থেকে ১০ম শ্রেণির সকল বিষয়ের বোর্ড প্রশ্ন, সৃজনশীল, MCQ ও সাজেশন — সকল শিক্ষা বোর্ড অনুযায়ী বিভক্ত।</div>
+      <div class="cat-tags">
+        <span class="cat-tag">HSC</span>
+        <span class="cat-tag">SSC</span>
+        <span class="cat-tag">JSC</span>
+        <span class="cat-tag">৬ষ্ঠ–৮ম শ্রেণি</span>
+        <span class="cat-tag">সৃজনশীল</span>
+        <span class="cat-tag">MCQ</span>
+      </div>
+      <div class="cat-divider"></div>
+      <div class="cat-footer">
+        <div class="cat-count">
+          <strong style="background:linear-gradient(135deg,#22c55e,#16a34a)">৪০,০০০+</strong>
+          প্রশ্ন ও সমাধান
+        </div>
+        <button class="cat-btn" style="background:linear-gradient(135deg,#22c55e,#16a34a)">দেখুন <span class="arrow">→</span></button>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- FEATURES -->
+<section class="section" style="padding-top:0">
+  <div class="sec-top">
+    <div class="sec-label">কেন আমরা?</div>
+    <div class="sec-title">স্মার্ট প্রস্তুতির সুবিধাসমূহ</div>
+  </div>
+  <div class="features-row">
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(245,197,24,0.13)">🎯</div>
+      <h3>AI-ভিত্তিক প্র্যাকটিস</h3>
+      <p>কৃত্রিম বুদ্ধিমত্তা আপনার দুর্বল বিষয় বিশ্লেষণ করে কাস্টমাইজড প্রশ্নসেট তৈরি করে দেয়।</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(0,180,216,0.13)">⏱️</div>
+      <h3>লাইভ মডেল টেস্ট</h3>
+      <p>টাইমার সহ প্রকৃত পরীক্ষার পরিবেশে মডেল টেস্ট দিন এবং তাৎক্ষণিক ফলাফল ও ব্যাখ্যা পান।</p>
+    </div>
+    <div class="feat-card">
+      <div class="feat-icon" style="background:rgba(167,139,250,0.13)">📊</div>
+      <h3>পারফরম্যান্স ট্র্যাকার</h3>
+      <p>প্রতিটি সেশনের পর বিষয়ভিত্তিক গ্রাফ ও রিপোর্ট দেখুন। কোথায় উন্নতি দরকার তা বুঝুন।</p>
+    </div>
+  </div>
+</section>
+
+<!-- RECENT QUESTIONS -->
+<section class="section" style="padding-top:0">
+  <div class="sec-top">
+    <div class="sec-label">সাম্প্রতিক</div>
+    <div class="sec-title">নতুন যোগ হওয়া প্রশ্নসমূহ</div>
+  </div>
+  <div class="q-list">
+    <div class="q-row">
+      <div class="q-badge" style="background:rgba(245,197,24,0.15);color:#f5c518">১</div>
+      <div class="q-body">
+        <p>৪৫তম BCS প্রিলিমিনারি — বাংলাদেশের মুক্তিযুদ্ধে মোট কতটি সেক্টর ছিল?</p>
+        <div class="q-chips"><span class="chip">Job Solution</span><span class="chip">BCS</span><span class="chip">বাংলাদেশ বিষয়াবলি</span></div>
+      </div>
+      <span class="q-arrow">›</span>
+    </div>
+    <div class="q-row">
+      <div class="q-badge" style="background:rgba(0,180,216,0.15);color:#00b4d8">২</div>
+      <div class="q-body">
+        <p>বাংলাদেশ ব্যাংক AD নিয়োগ ২০২৪ — Which of the following is NOT a function of Central Bank?</p>
+        <div class="q-chips"><span class="chip">Bank Recruitment</span><span class="chip">বাংলাদেশ ব্যাংক</span><span class="chip">English</span></div>
+      </div>
+      <span class="q-arrow">›</span>
+    </div>
+    <div class="q-row">
+      <div class="q-badge" style="background:rgba(167,139,250,0.15);color:#a78bfa">৩</div>
+      <div class="q-body">
+        <p>ঢাকা বিশ্ববিদ্যালয় ভর্তি পরীক্ষা ২০২৩-২৪ — যদি sinθ = 3/5 হয়, তাহলে cosθ = কত?</p>
+        <div class="q-chips"><span class="chip">Admission</span><span class="chip">ঢাকা বিশ্ববিদ্যালয়</span><span class="chip">গণিত</span></div>
+      </div>
+      <span class="q-arrow">›</span>
+    </div>
+    <div class="q-row">
+      <div class="q-badge" style="background:rgba(34,197,94,0.15);color:#22c55e">৪</div>
+      <div class="q-body">
+        <p>HSC পরীক্ষা ২০২৪ — রাসায়নিক বিক্রিয়ায় তাপ উৎপন্ন হলে তাকে কী ধরনের বিক্রিয়া বলে?</p>
+        <div class="q-chips"><span class="chip">School &amp; College</span><span class="chip">HSC</span><span class="chip">রসায়ন</span></div>
+      </div>
+      <span class="q-arrow">›</span>
+    </div>
+  </div>
+</section>
+
+<!-- CTA -->
+<div class="cta-wrap">
+  <div class="cta-inner">
+    <div>
+      <h2>আজই শুরু করুন — সম্পূর্ণ বিনামূল্যে!</h2>
+      <p>প্রথম ৩০ দিন সব ক্যাটাগরি ফ্রি। কোনো ক্রেডিট কার্ড লাগবে না।</p>
+    </div>
+    <button class="btn-primary" style="font-size:17px;padding:15px 38px;white-space:nowrap;flex-shrink:0">🎓 এখনই নিবন্ধন করুন</button>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer>
+  <div>© ২০২৬ প্রত্যয় একাডেমি। সর্বস্বত্ব সংরক্ষিত।</div>
+  <div class="footer-links">
+    <a href="#">গোপনীয়তা নীতি</a>
+    <a href="#">শর্তাবলি</a>
+    <a href="#">যোগাযোগ</a>
+    <a href="#">সাহায্য</a>
+  </div>
+</footer>
+
+<script>
+  const btn = document.getElementById('hamburger');
+  const menu = document.getElementById('mobileMenu');
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('open');
+    menu.classList.toggle('open');
+  });
+  // close on link click
+  menu.querySelectorAll('a').forEach(a => {
+    a.addEventListener('click', () => {
+      btn.classList.remove('open');
+      menu.classList.remove('open');
+    });
+  });
+</script>
+</body>
+</html>

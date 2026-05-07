@@ -1,0 +1,110 @@
+body {
+            font-size: 16px;
+            font-family: Arial, sans-serif;
+        }
+        .question-card {
+            border: 1px solid #fb7373;
+            border-radius: 5px;
+            overflow: hidden;
+            margin-bottom: 15px;
+            
+        }
+        .question-header {
+            padding: 10px 15px;
+            border-bottom: 1px solid #dee2e6;
+            background-color: #FCDFDD; /* Light red background */
+        }
+        .question-text {
+            font-weight: think;
+            margin: 0;
+            font-size: 18px;
+            color:#000;
+        }
+        .question-content {
+            padding: 15px;
+        }
+        .options-row {
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 5px;
+        }
+        .option {
+            flex: 1 0 48%; /* Two columns on desktop */
+            margin-right: 5px;
+            margin-bottom: 8px;
+            padding: 10px;
+            border: 1px solid #dee2e6;
+            border-radius: 3px;
+            background-color: ;
+            color:#000;
+            font-size: 17px;
+        }
+        .option:last-child {
+            margin-right: 0;
+        }
+        .option-label {
+            font-weight: bold;
+            margin-right: 5px;
+        }
+        
+        /* Mobile responsive styles */
+        @media (max-width: 576px) {
+            .option {
+                flex: 1 0 100%; /* Full width on mobile */
+                margin-right: 0;
+            }
+            .options-row {
+                flex-direction: column;
+            }
+        }
+
+       .card-footer-custom {
+            background-color: ;
+            padding: 0;
+            border-top: 1px solid #ddd;
+            margin-top: 20px;
+        }
+        .footer-toggle {
+            width: ;
+            padding: 12px;
+            border: none;
+            background: ;
+            font-weight: 500;
+            cursor: pointer;
+            color:#fff;
+        }
+        .footer-content {
+            padding: 20px;
+            background: white;
+
+        }
+
+        /* sidebar-hover*/
+    .edu-form-check {
+        margin-bottom: 10px;
+        padding: 2px;
+        border-radius: 4px;
+        transition: all 0.3s ease;
+    }
+    .edu-form-check:hover {
+        background-color: #f5f5f5;
+    }
+    .edu-form-check label:hover {
+        color: #ff0000 !important;
+        cursor: pointer;
+        text-decoration: underline;
+    }
+    .edu-form-check a:hover {
+        color: #ff0000 !important;
+        text-decoration: underline;
+        font-weight: think;
+    }
+    .edu-form-check input[type="radio"]:checked + label {
+        color: #ff0000 !important;
+        font-weight: 450;
+    }
+
+
+    /********/
+
+        
