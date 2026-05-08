@@ -30,7 +30,7 @@ class StudentExamController extends Controller
     // Start Exam (AJAX)
     public function start(Request $request, $id)
     {
-        if (!Auth::guard('student')->check()) {
+        if (!auth()->check()) {
             return response()->json(['error'=>'login_required'], 401);
         }
 
@@ -71,12 +71,12 @@ class StudentExamController extends Controller
     // Submit Exam
     public function submit(Request $request, $jobCategoryId)
     {
-        if (!Auth::guard('student')->check()) {
+        if (!auth()->check()) {
             return response()->json(['error'=>'login_required'], 401);
         }
 
         $jobCategory = JobCategory::with('questions')->findOrFail($jobCategoryId);
-        $studentId = Auth::guard('student')->id();
+        $studentId = auth()->id();
 
         $attempt = ExamAttempt::create([
             'job_category_id' => $jobCategory->id,
