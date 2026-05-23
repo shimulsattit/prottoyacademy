@@ -61,9 +61,17 @@
                 background: transparent;
                 position: relative;
                 z-index: 1;
+                overflow-x: hidden;
             }
             .bg-color-white {
                 background-color: var(--deep-navy) !important;
+            }
+            
+            /* GLOBAL RESPONSIVE FIXES */
+            @media (max-width: 768px) {
+                .edu-breadcrumb-area { padding-top: 100px !important; padding-bottom: 40px !important; }
+                .edu-breadcrumb-area .title { font-size: 24px !important; }
+                .edu-section-gap { padding-top: 40px !important; padding-bottom: 40px !important; }
             }
         </style>
         @stack('style')

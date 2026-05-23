@@ -249,10 +249,17 @@
     }
     
     @media (max-width: 768px) {
-        .options-container { grid-template-columns: 1fr; }
-        .setup-card-row { flex-wrap: wrap; }
-        .fixed-bottom-bar { width: 95%; padding: 0 20px; font-size: 14px; }
-        .bottom-info { gap: 15px; font-size: 15px; }
+        .dashboard-content-area { padding: 80px 16px 40px; }
+        .glass-card { padding: 20px; border-radius: 18px; }
+        .exam-header-banner h2 { font-size: 1.5rem; }
+        .options-container { grid-template-columns: 1fr; gap: 10px; }
+        .omr-option { padding: 12px 14px; }
+        .question-text { font-size: 16px !important; gap: 10px; }
+        .setup-card-row { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+        .setup-card { max-width: none; }
+        .fixed-bottom-bar { width: 92%; padding: 0 15px; height: 60px; bottom: 10px; border-radius: 20px; }
+        .bottom-info { gap: 10px; font-size: 14px; }
+        .btn-submit-fixed { padding: 8px 20px; font-size: 14px; }
     }
 </style>
 @endpush

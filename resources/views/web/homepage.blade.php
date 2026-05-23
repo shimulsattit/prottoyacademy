@@ -18,6 +18,7 @@
     display: flex; flex-direction: column; align-items: center; justify-content: center;
     text-align: center;
     padding: 160px 48px 100px;
+    overflow: hidden;
   }
 
   .badge-premium {
@@ -44,6 +45,7 @@
   .stat-box-exact {
     flex: 1; padding: 20px 14px; text-align: center;
     border-right: 1px solid rgba(255,255,255,0.07);
+    box-sizing: border-box;
   }
   .stat-box-exact:last-child { border-right: none; }
   .stat-num-exact {
@@ -223,10 +225,38 @@
     .features-row-exact { grid-template-columns: repeat(2, 1fr); }
   }
   @media (max-width: 768px) {
+    .hero-premium { padding: 100px 20px 60px; }
+    .badge-premium { padding: 6px 16px; font-size: 11px; margin-bottom: 20px; }
+    .stats-row-exact { flex-wrap: wrap; border-radius: 12px; }
+    .stat-box-exact { flex: 0 0 50%; padding: 15px 10px; border-right: none; border-bottom: 1px solid rgba(255,255,255,0.07); }
+    .stat-box-exact:nth-child(odd) { border-right: 1px solid rgba(255,255,255,0.07); }
+    .stat-box-exact:nth-last-child(-n+2) { border-bottom: none; }
+    .stat-num-exact { font-size: 20px; }
+    .stat-lbl-exact { font-size: 11px; }
+
+    .section-premium { padding: 48px 20px; }
+    .sec-top-premium { margin-bottom: 30px; }
+    .sec-title-premium { font-size: 24px; }
+    
     .pz-grid, .features-row-exact { grid-template-columns: 1fr; gap: 16px; }
     .pz-card { padding: 26px 22px 22px; border-radius: 18px; }
     .pz-title { font-size: 20px !important; }
+    .pz-icon-box { width: 54px; height: 54px; font-size: 24px !important; }
+    .pz-footer { flex-direction: row; align-items: center !important; justify-content: space-between !important; gap: 10px; }
+    .pz-btn { width: auto; padding: 8px 16px !important; font-size: 13px !important; }
+    .pz-num-box { font-size: 18px; }
+    .pz-stat-label { font-size: 11px; }
+
+    .q-row-premium { padding: 14px 16px; gap: 12px; }
+    .q-badge-premium { width: 32px; height: 32px; font-size: 13px; }
+    .q-body-premium p { font-size: 14px; margin-bottom: 8px; }
+
+    .cta-container-exact { padding: 0 16px 60px !important; }
+    .cta-inner-exact { padding: 40px 20px !important; text-align: center; }
+    .cta-inner-exact .col-lg-4 { margin-top: 24px; }
   }
+  
+  *, *::before, *::after { box-sizing: border-box; }
 </style>
 @endpush
 
@@ -234,8 +264,8 @@
 <!-- HERO -->
 <section class="hero-premium">
   <div class="badge-premium"><span class="badge-dot-premium"></span> বাংলাদেশের সবচেয়ে বড় ডিজিটাল প্রশ্ন ব্যাংক</div>
-  <h1 style="font-family: 'Noto Serif Bengali', serif; font-size: clamp(34px, 5vw, 62px); font-weight: 900; line-height: 1.2; margin-bottom: 18px; color:#fff">সকল পরীক্ষার <span class="hl" style="background: linear-gradient(90deg, var(--accent-gold), var(--accent-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">সেরা প্রস্তুতি</span><br>এক জায়গায়</h1>
-  <p style="max-width: 580px; font-size: 17px; color: var(--text-light); line-height: 1.75; margin: 0 auto 36px;">চাকরি, ব্যাংক, ভর্তি ও বোর্ড পরীক্ষার জন্য লক্ষাধিক প্রশ্ন, মডেল টেস্ট ও বিস্তারিত সমাধান — সম্পূর্ণ বাংলায়।<br><strong style="color:#f5c518">প্রত্যয় একাডেমি</strong> — আপনার সাফল্যের সঙ্গী।</p>
+  <h1 style="font-family: 'Noto Serif Bengali', serif; font-size: clamp(28px, 6vw, 62px); font-weight: 900; line-height: 1.2; margin-bottom: 18px; color:#fff">সকল পরীক্ষার <span class="hl" style="background: linear-gradient(90deg, var(--accent-gold), var(--accent-orange)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">সেরা প্রস্তুতি</span><br>এক জায়গায়</h1>
+  <p style="max-width: 580px; font-size: clamp(14px, 4vw, 17px); color: var(--text-light); line-height: 1.75; margin: 0 auto 36px;">চাকরি, ব্যাংক, ভর্তি ও বোর্ড পরীক্ষার জন্য লক্ষাধিক প্রশ্ন, মডেল টেস্ট ও বিস্তারিত সমাধান — সম্পূর্ণ বাংলায়।<br><strong style="color:#f5c518">প্রত্যয় একাডেমি</strong> — আপনার সাফল্যের সঙ্গী।</p>
   
   <div class="hero-btns-premium" style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 56px;">
     <a href="{{ route('register') }}" class="btn-primary" style="background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange)); color: #07091e; font-family: 'Hind Siliguri', sans-serif; font-size: 16px; font-weight: 700; padding: 13px 30px; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 22px rgba(245,197,24,0.35); text-decoration: none;">🎯 বিনামূল্যে শুরু করুন</a>
@@ -496,8 +526,8 @@
 </section>
 
 <!-- CTA -->
-<div class="container mb-5" style="padding: 0 52px 80px;">
-  <div class="p-5 rounded-4 position-relative overflow-hidden" style="background: linear-gradient(135deg, #111c5e 0%, #0d1b5c 50%, #0a3660 100%); border: 1px solid rgba(0,180,216,0.18); padding: 56px 60px !important;">
+<div class="container mb-5 cta-container-exact" style="padding: 0 52px 80px;">
+  <div class="p-5 rounded-4 position-relative overflow-hidden cta-inner-exact" style="background: linear-gradient(135deg, #111c5e 0%, #0d1b5c 50%, #0a3660 100%); border: 1px solid rgba(0,180,216,0.18);">
     <div class="row align-items-center position-relative" style="z-index: 2;">
         <div class="col-lg-8">
             <h2 class="fw-bold mb-2 text-white" style="font-family: 'Noto Serif Bengali', serif; font-size: 34px; font-weight: 900;">আজই শুরু করুন — সম্পূর্ণ বিনামূল্যে!</h2>

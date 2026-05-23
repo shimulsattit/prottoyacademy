@@ -140,6 +140,16 @@
     /* Override edu-vibe styles if they interfere */
     .edu-breadcrumb-area { display: none !important; }
     .login-register-page-wrapper { background: transparent !important; padding: 0 !important; }
+
+    @media (max-width: 576px) {
+        .login-wrapper { padding: 80px 16px 40px; }
+        .glass-login-card { padding: 40px 24px; border-radius: 20px; }
+        .login-title { font-size: 1.8rem; }
+        .login-subtitle { font-size: 1rem; margin-bottom: 30px; }
+        .input-group-custom { margin-bottom: 20px; }
+        .input-group-custom input { padding: 12px 16px; font-size: 15px; }
+        .btn-login { padding: 12px; font-size: 16px; }
+    }
 </style>
 @endpush
 

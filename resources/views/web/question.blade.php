@@ -57,6 +57,18 @@
         border-bottom: 2px solid var(--accent-gold) !important;
     }
 
+    @media (max-width: 768px) {
+        .nav-tabs-premium {
+            flex-wrap: nowrap;
+            overflow-x: auto;
+            padding-bottom: 5px;
+            -webkit-overflow-scrolling: touch;
+        }
+        .nav-tabs-premium::-webkit-scrollbar { height: 4px; }
+        .nav-tabs-premium::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 10px; }
+        .nav-tabs-premium .nav-link { white-space: nowrap; padding: 10px 16px; font-size: 14px; }
+    }
+
     /* QUESTION CARDS */
     .q-card-premium {
         background: rgba(255,255,255,0.05) !important;
@@ -122,8 +134,17 @@
     }
 
     @media (max-width: 768px) {
+        .section-premium { padding: 100px 16px 40px; }
         .opt-grid { grid-template-columns: 1fr; }
-        .exam-header-premium { padding: 30px 20px; }
+        .exam-header-premium { padding: 30px 20px; margin-bottom: 30px; }
+        .exam-title-premium { font-size: 20px; }
+        .header-actions { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 20px; }
+        .header-actions .btn-premium { width: 100%; justify-content: center; border-radius: 12px; }
+        .header-actions .btn-gold { order: 1; padding: 14px; font-size: 16px; background: linear-gradient(135deg, #f5c518, #ff8a00); }
+        .header-actions .btn-outline { width: calc(50% - 5px); order: 2; padding: 12px 5px; font-size: 11px; }
+        .q-card-premium { padding: 20px; }
+        .q-text-premium { font-size: 16px; margin-bottom: 18px; }
+        .premium-breadcrumb { padding: 10px 16px; margin-bottom: 24px; font-size: 13px; }
     }
 </style>
 @endpush
@@ -163,7 +184,7 @@
             <button onclick="downloadPDF()" class="btn-premium btn-outline">
                 📄 পিডিএফ ডাউনলোড <i class="ri-file-pdf-line"></i>
             </button>
-            <button class="btn-premium btn-outline">
+            <button onclick="sharePage()" class="btn-premium btn-outline">
                 🔗 শেয়ার করুন <i class="ri-share-line"></i>
             </button>
         </div>
@@ -433,6 +454,31 @@
             $('#pdf-progress-overlay').removeClass('show');
             toastr.success('পিডিএফ তৈরি সম্পন্ন হয়েছে!');
         }, 3000);
+    }
+
+    async function sharePage() {
+        const shareData = {
+            title: '{{ $model->name }} - প্রত্যয় একাডেমি',
+            text: 'প্রত্যয় একাডেমিতে এই প্রশ্নপত্রটি দেখুন।',
+            url: window.location.href
+        };
+
+        if (navigator.share) {
+            try {
+                await navigator.share(shareData);
+            } catch (err) {
+                console.log('Error sharing:', err);
+            }
+        } else {
+            // Fallback: Copy to clipboard
+            const el = document.createElement('textarea');
+            el.value = window.location.href;
+            document.body.appendChild(el);
+            el.select();
+            document.execCommand('copy');
+            document.body.removeChild(el);
+            toastr.info('লিঙ্কটি কপি করা হয়েছে!');
+        }
     }
 </script>
 @endpush

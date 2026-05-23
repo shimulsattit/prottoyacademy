@@ -12,6 +12,7 @@
         background: rgba(255,255,255,0.03);
         border: 1px solid rgba(255,255,255,0.08);
         border-radius: 12px; padding: 12px 24px; margin-bottom: 10px; display: flex; align-items: center; gap: 10px;
+        flex-wrap: wrap;
     }
     .premium-breadcrumb a { color: var(--text-light); text-decoration: none; font-size: 14px; transition: color .2s; }
     .premium-breadcrumb a:hover { color: var(--accent-gold); }
@@ -20,7 +21,7 @@
 
     /* TITLE */
     .page-header-premium { margin-bottom: 20px; }
-    .page-title-premium { font-family: 'Noto Serif Bengali', serif; font-size: 36px; font-weight: 800; color: #fff; margin-bottom: 12px; }
+    .page-title-premium { font-family: 'Noto Serif Bengali', serif; font-size: clamp(24px, 5vw, 36px); font-weight: 800; color: #fff; margin-bottom: 12px; }
     .page-subtitle-premium { color: var(--text-light); font-size: 16px; opacity: 0.8; }
 
     /* SEARCH BOX */
@@ -99,7 +100,17 @@
 
     /* MOBILE RESPONSIVE */
     @media (max-width: 991px) { .pz-grid { grid-template-columns: repeat(2, 1fr); } }
-    @media (max-width: 768px) { .pz-grid { grid-template-columns: 1fr; } .page-title-premium { font-size: 28px; } }
+    @media (max-width: 768px) { 
+        .section-premium { padding: 90px 16px 40px; }
+        .pz-grid { grid-template-columns: 1fr; } 
+        .page-title-premium { font-size: 20px; line-height: 1.3; margin-bottom: 15px; padding: 0 10px; } 
+        .pz-title { font-size: 16px !important; }
+        .pz-search-container { margin-top: 25px; padding: 0 15px; }
+        .pz-premium-search input { font-size: 15px; padding: 12px 10px; }
+        .pz-actions { flex-direction: row; gap: 10px; }
+        .pz-btn-mini { flex: 1; justify-content: center; padding: 10px 5px !important; font-size: 13px !important; }
+        .premium-breadcrumb { padding: 10px 16px; margin-bottom: 20px; font-size: 13px; }
+    }
 </style>
 @endpush
 

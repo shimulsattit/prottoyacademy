@@ -59,6 +59,8 @@
     flex-direction: column; gap: 4px;
     transform: translateY(-10px); opacity: 0;
     transition: transform .25s ease, opacity .25s ease;
+    max-height: calc(100vh - 68px);
+    overflow-y: auto;
   }
   .mobile-menu.open { display: flex; transform: translateY(0); opacity: 1; }
   .mobile-menu a { color: var(--text-light); text-decoration: none; font-size: 16px; font-weight: 500; padding: 13px 16px; border-radius: 10px; display: block; transition: background .2s, color .2s; }
@@ -69,6 +71,11 @@
     nav { padding: 12px 18px; }
     .nav-links { display: none; }
     .hamburger { display: flex; }
+  }
+  @media (max-width: 480px) {
+    .logo-text { font-size: 16px; }
+    .logo-icon { width: 38px; height: 38px; font-size: 19px; }
+    .logo-sub { font-size: 8px; letter-spacing: 1px; }
   }
 </style>
 

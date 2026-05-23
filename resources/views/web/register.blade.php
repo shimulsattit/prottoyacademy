@@ -117,6 +117,16 @@
     /* Override EDU-VIBE */
     .edu-breadcrumb-area { display: none !important; }
     .login-register-page-wrapper { background: transparent !important; padding: 0 !important; }
+
+    @media (max-width: 576px) {
+        .register-wrapper { padding: 80px 16px 40px; }
+        .glass-register-card { padding: 35px 24px; border-radius: 20px; }
+        .register-title { font-size: 1.8rem; }
+        .register-subtitle { font-size: 1rem; margin-bottom: 25px; }
+        .input-group-custom { margin-bottom: 15px; }
+        .input-group-custom input { padding: 12px 16px; font-size: 14px; }
+        .btn-register { padding: 12px; font-size: 16px; }
+    }
 </style>
 @endpush
 
