@@ -7,7 +7,7 @@
 
         <title>{{ isset($title) ? $title : 'Prottoy Academy' }}</title>
 
-        <meta name="robots" content="noindex, follow" />
+        <meta name="robots" content="index, follow" />
 
 		<meta name="csrf-token" content="{{ csrf_token() }}">
 		<link rel="shortcut icon" href="{{ asset(get_settings('system_favicon') ?? 'portal-resource/images/favicon.ico') }}" />
