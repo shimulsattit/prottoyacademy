@@ -146,6 +146,84 @@
         .q-text-premium { font-size: 16px; margin-bottom: 18px; }
         .premium-breadcrumb { padding: 10px 16px; margin-bottom: 24px; font-size: 13px; }
     }
+
+    /* PDF GENERATION STYLES */
+    .pdf-page {
+        background: #ffffff !important;
+        color: #000000 !important;
+        font-family: 'Hind Siliguri', 'Inter', sans-serif !important;
+        padding: 20px !important;
+        box-sizing: border-box !important;
+    }
+    .pdf-header {
+        border-bottom: 2px solid #1B4F72 !important;
+        padding-bottom: 12px !important;
+        margin-bottom: 20px !important;
+        text-align: center !important;
+    }
+    .pdf-header h1 {
+        font-size: 24px !important;
+        font-weight: 700 !important;
+        color: #1B4F72 !important;
+        margin-bottom: 6px !important;
+    }
+    .pdf-header p {
+        font-size: 11px !important;
+        color: #555555 !important;
+        margin: 0 !important;
+    }
+    .pdf-columns {
+        column-count: 2 !important;
+        column-gap: 20px !important;
+        column-rule: 1px dashed #cccccc !important;
+    }
+    .pdf-category-title {
+        font-size: 14px !important;
+        font-weight: 700 !important;
+        color: #1B4F72 !important;
+        border-bottom: 1px solid #1B4F72 !important;
+        padding-bottom: 4px !important;
+        margin-top: 15px !important;
+        margin-bottom: 10px !important;
+        break-inside: avoid !important;
+    }
+    .pdf-passage {
+        background: #f8fafc !important;
+        border: 1px solid #e2e8f0 !important;
+        border-radius: 6px !important;
+        padding: 8px 12px !important;
+        margin-bottom: 12px !important;
+        font-size: 10px !important;
+        color: #334155 !important;
+        break-inside: avoid !important;
+    }
+    .pdf-question {
+        margin-bottom: 14px !important;
+        break-inside: avoid !important;
+        font-size: 11px !important;
+        line-height: 1.5 !important;
+    }
+    .pdf-question-text {
+        font-weight: 600 !important;
+        color: #0f172a !important;
+        margin-bottom: 6px !important;
+    }
+    .pdf-options {
+        display: grid !important;
+        grid-template-columns: repeat(2, 1fr) !important;
+        gap: 4px !important;
+        margin-bottom: 4px !important;
+    }
+    .pdf-option {
+        font-size: 10px !important;
+        color: #334155 !important;
+        padding: 2px 4px !important;
+    }
+    .pdf-option.correct {
+        color: #16a34a !important;
+        font-weight: 700 !important;
+        text-decoration: underline !important;
+    }
 </style>
 @endpush
 
@@ -446,14 +524,53 @@
 
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
     function downloadPDF() {
         $('#pdf-progress-overlay').addClass('show');
-        // Actual PDF generation logic would go here
-        setTimeout(() => {
+        
+        // Find which tab is active to print only its content or all content
+        const activeTab = $('.nav-tabs-premium .nav-link.active');
+        let elementId = 'pdf-content-all';
+        
+        if (activeTab.length > 0) {
+            const activeTabTarget = activeTab.attr('data-bs-target');
+            if (activeTabTarget && activeTabTarget !== '#all-pane') {
+                const catId = activeTabTarget.replace('#cat-pane-', '');
+                elementId = 'pdf-content-' + catId;
+            }
+        }
+        
+        const element = document.getElementById(elementId);
+        if (!element) {
             $('#pdf-progress-overlay').removeClass('show');
-            toastr.success('পিডিএফ তৈরি সম্পন্ন হয়েছে!');
-        }, 3000);
+            toastr.error('পিডিএফ কন্টেন্ট পাওয়া যায়নি!');
+            return;
+        }
+        
+        // Temporarily show the hidden element for html2pdf to render
+        const originalStyle = element.style.display;
+        element.style.display = 'block';
+        
+        const opt = {
+            margin:       [10, 10, 15, 10], // top, left, bottom, right
+            filename:     '{{ $model->name }}.pdf',
+            image:        { type: 'jpeg', quality: 0.98 },
+            html2canvas:  { scale: 2, useCORS: true, logging: false },
+            jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        // Use html2pdf to generate and save the PDF
+        html2pdf().set(opt).from(element).save().then(() => {
+            element.style.display = originalStyle;
+            $('#pdf-progress-overlay').removeClass('show');
+            toastr.success('পিডিএফ ডাউনলোড সম্পন্ন হয়েছে!');
+        }).catch(err => {
+            console.error('PDF Generation Error:', err);
+            element.style.display = originalStyle;
+            $('#pdf-progress-overlay').removeClass('show');
+            toastr.error('পিডিএফ ডাউনলোড করতে ব্যর্থ হয়েছে!');
+        });
     }
 
     async function sharePage() {
