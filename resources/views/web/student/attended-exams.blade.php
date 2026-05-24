@@ -5,217 +5,270 @@
 @endpush
 
 @push('style')
-    <style>
-        .exam-summary-card{
-            border-radius:10px;
-            overflow:hidden;
-        }
+<style>
+    :root {
+        --dark-bg: #07091e;
+        --card-bg: rgba(255, 255, 255, 0.03);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --accent-gold: #f5c518;
+        --text-white: #ffffff;
+        --text-gray: rgba(255, 255, 255, 0.6);
+    }
 
-        .exam-summary-card .card-header{
-            background:#0d6efd;
-            color:white;
-            font-weight:600;
-        }
+    body {
+        background-color: var(--dark-bg) !important;
+        color: var(--text-white) !important;
+        font-family: 'Inter', 'Noto Sans Bengali', sans-serif;
+    }
+    
+    .header-area, .footer-area {
+        display: none !important;
+    }
+    
+    .dashboard-wrapper {
+        display: block;
+        min-height: 100vh;
+        background: var(--dark-bg);
+    }
+    
+    .dashboard-content-area {
+        margin-left: 260px; /* Account for fixed sidebar */
+        padding: 40px;
+        min-height: 100vh;
+    }
 
-        .exam-summary-table th{
-            width:45%;
-            background:#f8f9fa;
-            font-weight:600;
-        }
+    /* GLASS CARDS */
+    .glass-card {
+        background: var(--card-bg);
+        backdrop-filter: blur(15px);
+        -webkit-backdrop-filter: blur(15px);
+        border: 1px solid var(--glass-border);
+        border-radius: 24px;
+        padding: 30px;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        text-decoration: none;
+        display: block;
+        margin-bottom: 25px;
+    }
+    
+    .glass-card .card-header {
+        background: transparent !important;
+        border-bottom: 1px solid var(--glass-border) !important;
+        padding-bottom: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .glass-card .card-title {
+        color: #fff;
+        font-weight: 700;
+        font-size: 1.3rem;
+        margin-bottom: 0;
+    }
 
-        .exam-summary-table td{
-            font-weight:500;
-        }
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 35px;
+    }
 
-        .exam-summary-table tr:hover{
-            background:#f5f8ff;
-        }
+    .section-header h4 {
+        font-weight: 800;
+        font-size: 1.8rem;
+        background: linear-gradient(135deg, #fff, #a5a5a5);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
 
-        .exam-summary-table .percent{
-            color:#6c757d;
-            font-size:14px;
-        }
+    /* Table styling inside Glass Card */
+    .exam-summary-table {
+        color: #fff !important;
+    }
 
-        .badge{
-            font-size:13px;
-            padding:6px 10px;
+    .exam-summary-table th {
+        background: rgba(255, 255, 255, 0.02) !important;
+        color: var(--accent-gold) !important;
+        font-weight: 600;
+        border-color: var(--glass-border) !important;
+        padding: 15px 20px !important;
+    }
+
+    .exam-summary-table td {
+        font-weight: 500;
+        border-color: var(--glass-border) !important;
+        color: #fff !important;
+        padding: 15px 20px !important;
+        background: transparent !important;
+    }
+
+    .exam-summary-table tr:hover {
+        background: rgba(255, 255, 255, 0.02) !important;
+    }
+
+    .badge {
+        font-size: 13px;
+        padding: 6px 10px;
+    }
+
+    @media (max-width: 991px) {
+        .dashboard-content-area { margin-left: 0; padding: 30px 20px; }
+        .mobile-header {
+            display: flex !important;
+            background: rgba(7, 9, 30, 0.95);
+            backdrop-filter: blur(15px);
+            padding: 15px 25px;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--glass-border);
+            position: sticky;
+            top: 0;
+            z-index: 1002;
         }
-    </style>
+    }
+
+    .mobile-header { display: none; }
+    .menu-toggle { background: none; border: none; color: #fff; font-size: 26px; cursor: pointer; }
+</style>
 @endpush
 
 @section('content')
-    <div class="edu-breadcrumb-area breadcrumb-style-1 ptb--60 ptb_md--40 ptb_sm--40 bg-image">
-        <div class="container eduvibe-animated-shape">
-            <div class="row">
-                <div class="col-lg-12">
-                    <div class="breadcrumb-inner text-start">
-                        <div class="page-title">
-                            <h3 class="title">My Attended Exams</h3>
-                        </div>
-                        <nav class="edu-breadcrumb-nav">
-                            <ol class="edu-breadcrumb d-flex justify-content-start liststyle">
-                                <li class="breadcrumb-item">
-                                    <a href="{{ route('home') }}">
-                                        Home
-                                    </a>
-                                </li>
-                                <li class="separator">
-                                    <i class="ri-arrow-drop-right-line"></i>
-                                </li>
-                                <li class="breadcrumb-item active" aria-current="page">
-                                    My Attended Exams
-                                </li>
-                            </ol>
-                        </nav>
-                    </div>
-                </div>
-            </div>
+<div class="mobile-header">
+    <h5 class="fw-bold mb-0" style="color: var(--accent-gold);">Prottoy</h5>
+    <button class="menu-toggle" id="mobile-sidebar-toggle">
+        <i class="ri-menu-5-line"></i>
+    </button>
+</div>
 
-            <div class="shape-dot-wrapper shape-wrapper d-xl-block d-none">
-                <div class="shape-dot-wrapper shape-wrapper d-xl-block d-none">
-                    <div class="shape-image shape-image-1">
-                        <img src="{{ asset('assets/images/shapes/shape-11-07.png') }}" alt="Breadcrumb Shape Thumb One" />
+<div class="dashboard-wrapper">
+    @include('web.student.partials.sidebar')
+
+    <!-- Main Content -->
+    <div class="dashboard-content-area">
+        <div class="section-header">
+            <h4>মডেল টেস্ট রিপোর্ট</h4>
+        </div>
+
+        @php
+            $passPercent = $totalExams ? round(($passed/$totalExams)*100,2) : 0;
+            $answerPercent = $totalQuestions ? round(($totalAnswers/$totalQuestions)*100,2) : 0;
+            $rightPercent = $totalQuestions ? round(($rightAnswers/$totalQuestions)*100,2) : 0;
+            $wrongPercent = $totalQuestions ? round(($wrongAnswers/$totalQuestions)*100,2) : 0;
+            $noAnsPercent = $totalQuestions ? round(($noAnswers/$totalQuestions)*100,2) : 0;
+            $obtainPercent = $totalMarks ? round(($obtainMarks/$totalMarks)*100,2) : 0;
+            $negativePercent = $totalMarks ? round(($negativeMarks/$totalMarks)*100,2) : 0;
+        @endphp
+
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="glass-card shadow-sm p-0 overflow-hidden" style="border-radius: 24px;">
+                    <div class="card-header px-4 py-4" style="border-bottom: 1px solid var(--glass-border);">
+                        <h5 class="mb-0 fw-bold" style="color: #fff;">My Exams Summary</h5>
                     </div>
-                    <div class="shape-image shape-image-2">
-                        <img src="{{ asset('assets/images/shapes/shape-01-02.png') }}" alt="Breadcrumb Shape Thumb Two" />
-                    </div>
-                    <div class="shape-image shape-image-3">
-                        <img src="{{ asset('assets/images/shapes/shape-03.png') }}" alt="Breadcrumb Shape Thumb Three" />
-                    </div>
-                    <div class="shape-image shape-image-4">
-                        <img src="{{ asset('assets/images/shapes/shape-13-12.png') }}" alt="Breadcrumb Shape Thumb Four" />
-                    </div>
-                    <div class="shape-image shape-image-5">
-                        <img src="{{ asset('assets/images/shapes/shape-36.png') }}" alt="Breadcrumb Shape Thumb Five" />
-                    </div>
-                    <div class="shape-image shape-image-6">
-                        <img src="{{ asset('assets/images/shapes/shape-05-07.png') }}" alt="Breadcrumb Shape Thumb Six" />
+
+                    <div class="table-responsive">
+                        <table class="table mb-0 exam-summary-table">
+                            <tbody>
+                                <tr>
+                                    <th>Exams</th>
+                                    <td>{{ $totalExams }}</td>
+                                </tr>
+
+                                <tr>
+                                    <th>Passed</th>
+                                    <td>
+                                        <span class="badge bg-success" style="background: rgba(34, 197, 94, 0.15) !important; color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2);">
+                                            {{ $passed }} ({{ $passPercent }}%)
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Failed</th>
+                                    <td>
+                                        <span class="badge bg-danger" style="background: rgba(239, 68, 68, 0.15) !important; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.2);">
+                                            {{ $failed }} ({{ 100-$passPercent }}%)
+                                        </span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Total Questions</th>
+                                    <td>{{ $totalQuestions }}</td>
+                                </tr>
+
+                                <tr>
+                                    <th>Answers</th>
+                                    <td>
+                                        {{ $totalAnswers }}
+                                        <span style="color: var(--text-gray); font-size: 14px;">({{ $answerPercent }}%)</span>
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th style="color: #22c55e !important;">Right Answers</th>
+                                    <td class="text-success fw-semibold" style="color: #22c55e !important;">
+                                        {{ $rightAnswers }} ({{ $rightPercent }}%)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th style="color: #ef4444 !important;">Wrong Answers</th>
+                                    <td class="text-danger fw-semibold" style="color: #ef4444 !important;">
+                                        {{ $wrongAnswers }} ({{ $wrongPercent }}%)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>No Answer</th>
+                                    <td style="color: var(--text-gray) !important;">
+                                        {{ $noAnswers }} ({{ $noAnsPercent }}%)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th>Total Marks</th>
+                                    <td>{{ $totalMarks }}</td>
+                                </tr>
+
+                                <tr>
+                                    <th style="color: var(--accent-gold) !important;">Obtained Marks</th>
+                                    <td class="fw-bold" style="color: var(--accent-gold) !important;">
+                                        {{ $obtainMarks }} ({{ $obtainPercent }}%)
+                                    </td>
+                                </tr>
+
+                                <tr>
+                                    <th style="color: #f97316 !important;">Negative Marks</th>
+                                    <td style="color: #f97316 !important;">
+                                        {{ $negativeMarks }} ({{ $negativePercent }}%)
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-
-    <div class="edu-elements-area edu-section-gap bg-color-white">
-        <div class="container">
-            <div class="row g-5">
-                <div class="col-lg-3">
-                    @include('web.student.partials.sidebar')
-                </div>
-                <div class="col-lg-9">
-                    <!-- Main content area -->
-                    <div class="dashboard-content">
-                        @php
-                            $passPercent = $totalExams ? round(($passed/$totalExams)*100,2) : 0;
-                            $answerPercent = $totalQuestions ? round(($totalAnswers/$totalQuestions)*100,2) : 0;
-                            $rightPercent = $totalQuestions ? round(($rightAnswers/$totalQuestions)*100,2) : 0;
-                            $wrongPercent = $totalQuestions ? round(($wrongAnswers/$totalQuestions)*100,2) : 0;
-                            $noAnsPercent = $totalQuestions ? round(($noAnswers/$totalQuestions)*100,2) : 0;
-                            $obtainPercent = $totalMarks ? round(($obtainMarks/$totalMarks)*100,2) : 0;
-                            $negativePercent = $totalMarks ? round(($negativeMarks/$totalMarks)*100,2) : 0;
-                        @endphp
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-12">
-                            <div class="card exam-summary-card shadow-sm">
-                                <div class="card-header">
-                                    <h5 class="mb-0">My Exams Summary</h5>
-                                </div>
-
-                                <div class="card-body p-0">
-                                    <table class="table table-bordered table-striped mb-0 exam-summary-table">
-                                        <tbody>
-
-                                            <tr>
-                                                <th>Exams</th>
-                                                <td>{{ $totalExams }}</td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Passed</th>
-                                                <td>
-                                                    <span class="badge bg-success">
-                                                        {{ $passed }} ({{ $passPercent }}%)
-                                                    </span>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Failed</th>
-                                                <td>
-                                                    <span class="badge bg-danger">
-                                                        {{ $failed }} ({{ 100-$passPercent }}%)
-                                                    </span>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Total Questions</th>
-                                                <td>{{ $totalQuestions }}</td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Answers</th>
-                                                <td>
-                                                    {{ $totalAnswers }}
-                                                    <span class="percent">({{ $answerPercent }}%)</span>
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Right Answers</th>
-                                                <td class="text-success fw-semibold">
-                                                    {{ $rightAnswers }} ({{ $rightPercent }}%)
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Wrong Answers</th>
-                                                <td class="text-danger fw-semibold">
-                                                    {{ $wrongAnswers }} ({{ $wrongPercent }}%)
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>No Answer</th>
-                                                <td class="text-muted">
-                                                    {{ $noAnswers }} ({{ $noAnsPercent }}%)
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Total Marks</th>
-                                                <td>{{ $totalMarks }}</td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Obtained Marks</th>
-                                                <td class="text-primary fw-bold">
-                                                    {{ $obtainMarks }} ({{ $obtainPercent }}%)
-                                                </td>
-                                            </tr>
-
-                                            <tr>
-                                                <th>Negative Marks</th>
-                                                <td class="text-warning">
-                                                    {{ $negativeMarks }} ({{ $negativePercent }}%)
-                                                </td>
-                                            </tr>
-
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
+</div>
 @endsection
 
 @push('scripts')
+    <script>
+        $(document).ready(function() {
+            $('#mobile-sidebar-toggle').on('click', function() {
+                $('.student-sidebar').toggleClass('active');
+                $(this).find('i').toggleClass('ri-menu-5-line ri-close-line');
+            });
 
+            $(document).on('click', function(e) {
+                if ($(window).width() <= 991) {
+                    if (!$(e.target).closest('.student-sidebar').length && !$(e.target).closest('#mobile-sidebar-toggle').length) {
+                        $('.student-sidebar').removeClass('active');
+                        $('#mobile-sidebar-toggle').find('i').removeClass('ri-close-line').addClass('ri-menu-5-line');
+                    }
+                }
+            });
+        });
+    </script>
 @endpush
