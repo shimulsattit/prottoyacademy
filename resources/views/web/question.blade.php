@@ -215,14 +215,41 @@
         margin-bottom: 4px !important;
     }
     .pdf-option {
+        display: flex !important;
+        align-items: center !important;
+        gap: 6px !important;
         font-size: 10px !important;
         color: #334155 !important;
         padding: 2px 4px !important;
     }
+    .pdf-option-badge {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        width: 16px !important;
+        height: 16px !important;
+        border: 1px solid #1B4F72 !important;
+        border-radius: 50% !important;
+        font-size: 9px !important;
+        font-weight: 600 !important;
+        color: #1B4F72 !important;
+        line-height: 1 !important;
+        flex-shrink: 0 !important;
+    }
+    .pdf-option-text {
+        font-size: 10px !important;
+    }
     .pdf-option.correct {
+        text-decoration: none !important;
+    }
+    .pdf-option.correct .pdf-option-badge {
+        background-color: #16a34a !important;
+        border-color: #16a34a !important;
+        color: #ffffff !important;
+    }
+    .pdf-option.correct .pdf-option-text {
         color: #16a34a !important;
         font-weight: 700 !important;
-        text-decoration: underline !important;
     }
 </style>
 @endpush
@@ -454,7 +481,8 @@
                                     @foreach ($q['options'] as $i => $opt)
                                         @if ($opt)
                                             <div class="pdf-option {{ ($i+1)==$correct ? 'correct' : '' }}">
-                                                {{ $labels[$i] }}) {!! strip_tags($opt) !!}
+                                                <span class="pdf-option-badge">{{ $labels[$i] }}</span>
+                                                <span class="pdf-option-text">{!! strip_tags($opt) !!}</span>
                                             </div>
                                         @endif
                                     @endforeach
@@ -502,7 +530,8 @@
                                         @foreach ($q['options'] as $i => $opt)
                                             @if ($opt)
                                                 <div class="pdf-option {{ ($i+1)==$correct ? 'correct' : '' }}">
-                                                    {{ $labels[$i] }}) {!! strip_tags($opt) !!}
+                                                    <span class="pdf-option-badge">{{ $labels[$i] }}</span>
+                                                    <span class="pdf-option-text">{!! strip_tags($opt) !!}</span>
                                                 </div>
                                             @endif
                                         @endforeach
