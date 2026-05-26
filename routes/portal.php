@@ -16,6 +16,8 @@ use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\SettingController;
 use App\Http\Controllers\Admin\TestimonialController;
 use Illuminate\Support\Facades\Request;
+use App\Http\Controllers\Admin\PdfQuestionController;
+
 
 // if (Request::is('portal*')) {
 //     $x = rand(1, 10);
@@ -107,6 +109,20 @@ Route::resource('home-carousel', HomeCarouselController::class);
 Route::resource('featured-categories', FeaturedCategoryController::class);
 Route::resource('featured-banners', FeaturedCategoryBannerController::class);
 Route::resource('testimonial', TestimonialController::class);
+
+// PDF → AI Question Generator
+Route::prefix('pdf-questions')->name('admin.pdf.')->group(function () {
+    Route::get('/',                           [PdfQuestionController::class, 'index'])->name('index');
+    Route::get('/create',                     [PdfQuestionController::class, 'create'])->name('create');
+    Route::post('/store',                     [PdfQuestionController::class, 'store'])->name('store');
+    Route::get('/{pdf}',                      [PdfQuestionController::class, 'show'])->name('show');
+    Route::post('/{pdf}/extract',             [PdfQuestionController::class, 'extractText'])->name('extract');
+    Route::post('/{pdf}/generate',            [PdfQuestionController::class, 'generate'])->name('generate');
+    Route::get('/{pdf}/preview',              [PdfQuestionController::class, 'preview'])->name('preview');
+    Route::post('/{pdf}/save-questions',      [PdfQuestionController::class, 'saveQuestions'])->name('save');
+    Route::delete('/{pdf}',                   [PdfQuestionController::class, 'destroy'])->name('destroy');
+});
+
 
 // Blog Category
 Route::prefix('blog-category')->name('blog-category.')->group(function () {
