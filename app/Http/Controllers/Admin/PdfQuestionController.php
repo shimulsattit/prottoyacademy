@@ -77,24 +77,34 @@ class PdfQuestionController extends Controller
                 throw new \Exception('PDF ফাইল পাওয়া যায়নি।');
             }
 
-            // Extract text using smalot/pdfparser
+            // Extract text page-by-page using smalot/pdfparser
             $parser      = new \Smalot\PdfParser\Parser();
             $parsedPdf   = $parser->parseFile($fullPath);
-            $text        = $parsedPdf->getText();
+            $pages       = $parsedPdf->getPages();
+            
+            $pagesText = [];
+            foreach ($pages as $index => $page) {
+                $pagesText[] = [
+                    'page' => $index + 1,
+                    'text' => trim($page->getText())
+                ];
+            }
 
-            if (empty(trim($text))) {
+            if (empty($pagesText)) {
                 throw new \Exception('PDF থেকে টেক্সট বের করা যায়নি। PDF টি image-based হতে পারে।');
             }
 
             $pdf->update([
-                'extracted_text' => $text,
+                'extracted_text' => json_encode($pagesText, JSON_UNESCAPED_UNICODE),
                 'status'         => 'pending',
             ]);
 
+            $totalChars = collect($pagesText)->sum(function($p) { return strlen($p['text']); });
+
             return response()->json([
                 'success' => true,
-                'message' => 'টেক্সট সফলভাবে বের হয়েছে! ' . strlen($text) . ' অক্ষর পাওয়া গেছে।',
-                'preview' => Str::limit($text, 300),
+                'message' => 'টেক্সট সফলভাবে বের হয়েছে! ' . count($pagesText) . 'টি পেজ ও ' . number_format($totalChars) . ' অক্ষর পাওয়া গেছে।',
+                'pages'   => $pagesText,
             ]);
 
         } catch (\Exception $e) {
@@ -106,8 +116,9 @@ class PdfQuestionController extends Controller
     public function generate(Request $request, PdfUpload $pdf)
     {
         $request->validate([
-            'mcq_count'   => 'required|integer|min:5|max:50',
-            'short_count' => 'required|integer|min:0|max:20',
+            'page'        => 'required|integer|min:1',
+            'mcq_count'   => 'required|integer|min:0|max:50',
+            'short_count' => 'required|integer|min:0|max:50',
             'language'    => 'required|in:bangla,english',
         ]);
 
@@ -116,11 +127,27 @@ class PdfQuestionController extends Controller
                 return response()->json(['success' => false, 'message' => 'আগে টেক্সট এক্সট্রাক্ট করুন।'], 400);
             }
 
+            $pagesText = json_decode($pdf->extracted_text, true);
+            if (!is_array($pagesText)) {
+                // Fallback if old format
+                $pagesText = [['page' => 1, 'text' => $pdf->extracted_text]];
+            }
+
+            $pageIndex = array_search($request->page, array_column($pagesText, 'page'));
+            if ($pageIndex === false) {
+                return response()->json(['success' => false, 'message' => 'পৃষ্ঠা নম্বর পাওয়া যায়নি।'], 400);
+            }
+
+            $pageText = $pagesText[$pageIndex]['text'];
+            if (empty(trim($pageText))) {
+                return response()->json(['success' => false, 'message' => 'এই পৃষ্ঠাটি সম্পূর্ণ খালি বা টেক্সটবিহীন।'], 400);
+            }
+
             $pdf->update(['status' => 'processing']);
 
             $gemini   = new GeminiService();
             $questions = $gemini->generateQuestions(
-                $pdf->extracted_text,
+                $pageText,
                 $request->language,
                 (int) $request->mcq_count,
                 (int) $request->short_count
@@ -130,17 +157,23 @@ class PdfQuestionController extends Controller
                 throw new \Exception('Gemini থেকে কোনো প্রশ্ন তৈরি হয়নি। আবার চেষ্টা করুন।');
             }
 
+            // Append or replace questions for this specific page
+            $generated = $pdf->generated_questions ?? [];
+            if (!is_array($generated)) {
+                $generated = [];
+            }
+            $generated[$request->page] = $questions;
+
             $pdf->update([
-                'generated_questions' => $questions,
-                'questions_generated' => count($questions),
+                'generated_questions' => $generated,
+                'questions_generated' => collect($generated)->flatten(1)->count(),
                 'status'              => 'done',
             ]);
 
             return response()->json([
                 'success'   => true,
                 'message'   => count($questions) . 'টি প্রশ্ন তৈরি হয়েছে!',
-                'count'     => count($questions),
-                'redirect'  => route('portal.pdf.preview', $pdf->id),
+                'questions' => $questions,
             ]);
 
         } catch (\Exception $e) {
@@ -152,9 +185,7 @@ class PdfQuestionController extends Controller
 
     public function preview(PdfUpload $pdf)
     {
-        $pdf->load('category');
-        $questions = $pdf->generated_questions ?? [];
-        return view('portal.pdf-questions.preview', compact('pdf', 'questions'));
+        return redirect()->route('portal.pdf.show', $pdf->id);
     }
 
     public function saveQuestions(Request $request, PdfUpload $pdf)
@@ -163,6 +194,7 @@ class PdfQuestionController extends Controller
             'questions'   => 'required|array|min:1',
             'questions.*.question' => 'required|string',
             'questions.*.type'     => 'required|in:mcq,short',
+            'page'                 => 'required|integer',
         ]);
 
         $adminId    = Auth::guard('admin')->id();
@@ -205,9 +237,19 @@ class PdfQuestionController extends Controller
             }
         }
 
-        $pdf->update(['questions_saved' => $pdf->questions_saved + $saved]);
+        // Clean up or clear generated questions for this specific page after successful save
+        $generated = $pdf->generated_questions ?? [];
+        if (isset($generated[$request->page])) {
+            unset($generated[$request->page]);
+        }
 
-        return redirect()->route('portal.pdf.index')
+        $pdf->update([
+            'generated_questions' => $generated,
+            'questions_generated' => collect($generated)->flatten(1)->count(),
+            'questions_saved'     => $pdf->questions_saved + $saved
+        ]);
+
+        return redirect()->route('portal.pdf.show', $pdf->id)
             ->with('success', "{$saved}টি প্রশ্ন সফলভাবে Question Bank এ সেভ হয়েছে!");
     }
 
