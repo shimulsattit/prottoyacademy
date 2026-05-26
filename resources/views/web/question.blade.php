@@ -281,11 +281,11 @@
         <div style="position: absolute; top: -50px; right: -50px; font-size: 180px; opacity: 0.03; pointer-events: none;">📝</div>
         <h1 class="exam-title-premium">{{ $model->name }}</h1>
         <div class="header-actions">
-            <a href="{{ $isStudent ? route('exam.show', $model->slug) : 'javascript:void(0)' }}" 
-               onclick="{{ !$isStudent ? "toastr.error('পরীক্ষা দিতে প্রথমে লগইন করুন')" : "" }}"
+            <button type="button" id="open-exam-modal-btn"
+               onclick="{{ !$isStudent ? "toastr.error('পরীক্ষা দিতে লগইন করুন')" : "openExamSetupModal()" }}"
                class="btn-premium btn-gold">
-                🚀 পরীক্ষা দিন <i class="ri-edit-line"></i>
-            </a>
+                🖊 পরীক্ষা দাও <i class="ri-edit-line"></i>
+            </button>
             <button onclick="downloadPDF()" class="btn-premium btn-outline">
                 📄 পিডিএফ ডাউনলোড <i class="ri-file-pdf-line"></i>
             </button>
@@ -551,6 +551,201 @@
 
 @endsection
 
+{{-- ======================= EXAM SETUP MODAL ======================= --}}
+<div class="modal fade" id="examSetupModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content" style="background: #0f1129; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;">
+            <div class="modal-body p-4">
+                <div class="text-center mb-4">
+                    <div style="width:64px; height:64px; background:rgba(245,197,24,0.1); border:2px solid rgba(245,197,24,0.3); border-radius:50%; display:inline-flex; align-items:center; justify-content:center; margin-bottom:16px;">
+                        <i class="ri-settings-4-line" style="font-size:28px; color:#f5c518;"></i>
+                    </div>
+                    <h4 class="fw-bold text-white mb-1">পরীক্ষার সেটআপ</h4>
+                    <p class="text-white-50 small">{{ $model->name }}</p>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold mb-2">বিষয় নির্বাচন</label>
+                    <select class="form-select rounded-3 p-3" id="setup-subject" style="background: rgba(15,17,41,0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="all">সকল বিষয় (মিশ্রিত)</option>
+                        @foreach($categories as $cat)
+                            <option value="{{ $cat['id'] }}">{{ $cat['name'] }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold mb-2">প্রশ্ন সংখ্যা / প্রশ্ন সীমা</label>
+                    <select class="form-select rounded-3 p-3" id="setup-limit" style="background: rgba(15,17,41,0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="all">সম্পূর্ণ (সকল প্রশ্ন)</option>
+                        <option value="10">১০ টি প্রশ্ন (১০ মিনিট)</option>
+                        <option value="20">২০ টি প্রশ্ন (২০ মিনিট)</option>
+                        <option value="30">৩০ টি প্রশ্ন (৩০ মিনিট)</option>
+                        <option value="50">৫০ টি প্রশ্ন (৫০ মিনিট)</option>
+                        <option value="100">১০০ টি প্রশ্ন (১০০ মিনিট)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold mb-2">পরীক্ষার সময় (মিনিট) <span class="text-warning">— ম্যানুয়ালী দিন</span></label>
+                    <input type="number" class="form-control rounded-3 p-3" id="setup-duration" value="30" min="1" max="300" placeholder="যেমন: ৩০" style="background: rgba(15,17,41,0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                    <small class="text-white-50">প্রতিটি প্রশ্নের জন্য ১ মিনিট হিসেবে দেওয়া আছে, পরিবর্তন করুন</small>
+                </div>
+
+                <div class="mb-3">
+                    <label class="form-label text-white-50 small fw-bold mb-2">নেগেটিভ মার্কিং</label>
+                    <select class="form-select rounded-3 p-3" id="setup-negative-mark" style="background: rgba(15,17,41,0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="0.25">০.২৫ মার্কস (প্রতিটি ভুলে কাটা যাবে)</option>
+                        <option value="0.50">০.৫০ মার্কস (প্রতিটি ভুলে কাটা যাবে)</option>
+                        <option value="0.00">কোনো নেগেটিভ মার্ক নেই</option>
+                    </select>
+                </div>
+
+                <div class="mb-4">
+                    <label class="form-label text-white-50 small fw-bold mb-2">পাস মার্ক (শতকরা হিসেবে) <span class="text-warning">— ম্যানুয়ালী দিন</span></label>
+                    <div class="input-group">
+                        <input type="number" class="form-control rounded-start-3 p-3" id="setup-pass-mark" value="40" min="0" max="100" placeholder="যেমন: ৪০" style="background: rgba(15,17,41,0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <span style="background: rgba(245,197,24,0.15); border: 1px solid rgba(255,255,255,0.1); border-left:none; padding: 0 16px; display:flex; align-items:center; color:#f5c518; font-weight:700; border-radius:0 12px 12px 0;">%</span>
+                    </div>
+                    <small class="text-white-50">প্রশ্নের মোট মার্কের কত শতাংশ পেলে পাস</small>
+                </div>
+
+                <div class="d-flex gap-3 justify-content-center">
+                    <button type="button" class="btn btn-outline-light px-4 rounded-pill fw-bold" data-bs-dismiss="modal">বাতিল করুন</button>
+                    <button type="button" class="btn fw-bold px-4 rounded-pill" id="confirm-start-exam-btn" style="background: linear-gradient(135deg, #f5c518, #ff8a00); color: #07091e; border: none;">পরীক্ষা শুরু করুন <i class="ri-arrow-right-line"></i></button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{-- ======================= EXAM FULL-SCREEN OVERLAY ======================= --}}
+<div id="exam-overlay" style="display:none; position:fixed; inset:0; background:#07091e; z-index:9999; overflow-y:auto; font-family:'Inter','Noto Sans Bengali',sans-serif;">
+
+    {{-- TOP BAR --}}
+    <div id="exam-topbar" style="position:sticky; top:0; z-index:100; background:rgba(7,9,30,0.95); backdrop-filter:blur(20px); border-bottom:1px solid rgba(255,255,255,0.08); padding:14px 24px; display:flex; align-items:center; justify-content:space-between;">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <span style="font-weight:800; color:#f5c518; font-size:18px;">{{ $model->name }}</span>
+            <span id="exam-subject-tag" style="background:rgba(255,255,255,0.06); color:rgba(255,255,255,0.5); padding:4px 14px; border-radius:50px; font-size:12px; border:1px solid rgba(255,255,255,0.08);"></span>
+        </div>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <div style="text-align:center;">
+                <div style="font-size:10px; color:rgba(255,255,255,0.4); text-transform:uppercase; letter-spacing:0.5px;">অবশিষ্ট সময়</div>
+                <div id="exam-timer" style="font-size:22px; font-weight:800; color:#f5c518; font-variant-numeric:tabular-nums;">00:00</div>
+            </div>
+        </div>
+    </div>
+
+    {{-- PROGRESS BAR --}}
+    <div style="height:4px; background:rgba(255,255,255,0.05);">
+        <div id="exam-progress-bar" style="height:100%; width:0%; background:linear-gradient(90deg,#f5c518,#22c55e); transition:width 0.4s ease;"></div>
+    </div>
+
+    {{-- CONTENT --}}
+    <div style="max-width:860px; margin:0 auto; padding:32px 20px 160px;">
+        <div id="exam-page-info" style="color:rgba(255,255,255,0.3); font-size:13px; margin-bottom:20px;"></div>
+        <div id="exam-questions-area"></div>
+
+        {{-- PAGINATION --}}
+        <div style="display:flex; gap:12px; margin-top:24px;">
+            <button id="exam-prev-btn" class="btn btn-outline-light rounded-pill px-4" style="display:none;"><i class="ri-arrow-left-line"></i> আগের পাতা</button>
+            <button id="exam-next-btn" class="btn btn-outline-secondary rounded-pill px-4" style="display:none;">পরের পাতা <i class="ri-arrow-right-line"></i></button>
+        </div>
+    </div>
+
+    {{-- BOTTOM SUBMIT BAR --}}
+    <div id="exam-bottom-bar" style="position:fixed; bottom:20px; left:50%; transform:translateX(-50%); width:90%; max-width:800px; background:rgba(255,255,255,0.07); backdrop-filter:blur(20px); border:1px solid rgba(255,255,255,0.1); border-radius:100px; padding:0 28px; height:68px; display:flex; align-items:center; justify-content:space-between; z-index:200; box-shadow:0 10px 40px rgba(0,0,0,0.5);">
+        <div style="display:flex; align-items:center; gap:20px; font-weight:700; font-size:16px; color:#fff;">
+            <span><i class="ri-time-line" style="color:#f5c518;"></i> <span id="bar-timer">00:00</span></span>
+            <span style="color:rgba(255,255,255,0.3);">|</span>
+            <span><i class="ri-check-line" style="color:#22c55e;"></i> <span id="bar-progress">0/0</span></span>
+        </div>
+        <button id="exam-submit-btn" style="background:linear-gradient(135deg,#ef4444,#dc2626); color:#fff; border:none; padding:10px 32px; border-radius:50px; font-weight:800; font-size:15px; cursor:pointer; box-shadow:0 4px 15px rgba(239,68,68,0.35); transition:all 0.3s;" onmouseover="this.style.transform='translateY(-2px) scale(1.05)'" onmouseout="this.style.transform='none'">
+            পরীক্ষা জমা দিন
+        </button>
+    </div>
+</div>
+
+{{-- ======================= RESULT REPORT CARD MODAL ======================= --}}
+<div class="modal fade" id="examResultModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg">
+        <div class="modal-content" style="background:#0f1129; border:1px solid rgba(255,255,255,0.1); border-radius:28px;">
+            <div class="modal-body p-5">
+
+                {{-- PASS/FAIL BANNER --}}
+                <div id="result-banner" class="text-center mb-4" style="padding:20px; border-radius:16px; border:2px solid rgba(255,255,255,0.1);">
+                    <div id="result-icon" style="font-size:56px; margin-bottom:8px;"></div>
+                    <h3 id="result-headline" class="fw-bold mb-1" style="font-size:26px;"></h3>
+                    <p id="result-subtext" class="mb-0" style="color:rgba(255,255,255,0.6);"></p>
+                </div>
+
+                {{-- SCORE CIRCLE + STATS GRID --}}
+                <div class="row g-3 align-items-center mb-4">
+                    <div class="col-md-4 text-center">
+                        <div id="result-score-circle" style="width:140px; height:140px; border-radius:50%; border:5px solid #22c55e; display:flex; flex-direction:column; align-items:center; justify-content:center; background:rgba(34,197,94,0.08); margin:0 auto;">
+                            <small style="color:rgba(255,255,255,0.5); font-size:11px; text-transform:uppercase; letter-spacing:0.5px;">প্রাপ্ত নম্বর</small>
+                            <strong id="res-marks" style="font-size:36px; color:#22c55e; line-height:1.1;">—</strong>
+                            <small id="res-total-marks" style="color:rgba(255,255,255,0.4); font-size:12px;">/ 0</small>
+                        </div>
+                    </div>
+                    <div class="col-md-8">
+                        <div class="row g-2">
+                            <div class="col-6">
+                                <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.25); border-radius:14px; padding:16px; text-align:center;">
+                                    <small style="color:rgba(255,255,255,0.5); display:block; font-size:11px;">সঠিক উত্তর</small>
+                                    <strong id="res-right" style="font-size:28px; color:#22c55e;">—</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="background:rgba(239,68,68,0.1); border:1px solid rgba(239,68,68,0.25); border-radius:14px; padding:16px; text-align:center;">
+                                    <small style="color:rgba(255,255,255,0.5); display:block; font-size:11px;">ভুল উত্তর</small>
+                                    <strong id="res-wrong" style="font-size:28px; color:#ef4444;">—</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:14px; padding:16px; text-align:center;">
+                                    <small style="color:rgba(255,255,255,0.5); display:block; font-size:11px;">উত্তর দেননি</small>
+                                    <strong id="res-unanswered" style="font-size:28px; color:rgba(255,255,255,0.6);">—</strong>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div style="background:rgba(245,197,24,0.08); border:1px solid rgba(245,197,24,0.2); border-radius:14px; padding:16px; text-align:center;">
+                                    <small style="color:rgba(255,255,255,0.5); display:block; font-size:11px;">নেগেটিভ মার্ক</small>
+                                    <strong id="res-negative" style="font-size:28px; color:#f5c518;">—</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {{-- PERCENTAGE BAR --}}
+                <div style="background:rgba(255,255,255,0.04); border-radius:12px; padding:16px 20px; margin-bottom:24px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                        <span style="color:rgba(255,255,255,0.6); font-size:13px;">সাফল্যের হার</span>
+                        <span id="res-percent-text" style="color:#f5c518; font-weight:700; font-size:15px;">0%</span>
+                    </div>
+                    <div style="height:10px; background:rgba(255,255,255,0.08); border-radius:100px; overflow:hidden;">
+                        <div id="res-percent-bar" style="height:100%; width:0%; background:linear-gradient(90deg,#ef4444,#f5c518,#22c55e); border-radius:100px; transition:width 1s ease;"></div>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-top:8px;">
+                        <span style="font-size:11px; color:rgba(255,255,255,0.3);">পাস মার্ক: <span id="res-pass-mark-label"></span></span>
+                        <span style="font-size:11px; color:rgba(255,255,255,0.3);">মোট প্রশ্ন: <span id="res-total">—</span></span>
+                    </div>
+                </div>
+
+                {{-- ACTIONS --}}
+                <div class="d-flex gap-3 justify-content-center flex-wrap">
+                    <a href="{{ route('student.exams') }}" class="btn btn-success px-5 rounded-pill fw-bold">আমার পরীক্ষাসমূহ</a>
+                    <button onclick="location.reload()" class="btn btn-outline-light px-5 rounded-pill fw-bold">আবার পরীক্ষা দিন</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
 @push('scripts')
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
@@ -604,8 +799,8 @@
 
     async function sharePage() {
         const shareData = {
-            title: '{{ $model->name }} - প্রত্যয় একাডেমি',
-            text: 'প্রত্যয় একাডেমিতে এই প্রশ্নপত্রটি দেখুন।',
+            title: '{{ $model->name }} - প্রত্যয় একাডেমী',
+            text: 'প্রত্যয় একাডেমীতে এই পরীক্ষাটি দেখুন',
             url: window.location.href
         };
 
@@ -627,4 +822,269 @@
         }
     }
 </script>
+
+<script>
+    // ======== EXAM ENGINE ========
+    let examAllQuestions = [];
+    let examCurrentPage = 0;
+    const examQPerPage = 20;
+    let examAnswers = {};
+    let examTimerInterval;
+    let examTimeLeft = 0;
+    let examResultModal;
+    let examSetupModal;
+    let examSelectedNeg = 0.25;
+    let examSelectedPassPct = 40; // percentage
+    let examSelectedDuration = 30;
+    let examTotalQ = 0;
+
+    $(document).ready(function() {
+        examSetupModal = new bootstrap.Modal(document.getElementById('examSetupModal'));
+        examResultModal = new bootstrap.Modal(document.getElementById('examResultModal'));
+
+        $.ajaxSetup({ headers: { 'X-CSRF-TOKEN': '{{ csrf_token() }}' } });
+    });
+
+    function openExamSetupModal() {
+        examSetupModal.show();
+    }
+
+    // When question limit changes, auto-suggest duration
+    $('#setup-limit').on('change', function() {
+        const val = $(this).val();
+        if (val !== 'all') {
+            $('#setup-duration').val(parseInt(val));
+        }
+    });
+
+    $('#confirm-start-exam-btn').on('click', function() {
+        const btn = $(this);
+        btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> লোড হচ্ছে...');
+
+        const subjectId = $('#setup-subject').val();
+        const limit = $('#setup-limit').val();
+        examSelectedNeg = parseFloat($('#setup-negative-mark').val()) || 0;
+        examSelectedDuration = parseInt($('#setup-duration').val()) || 30;
+        examSelectedPassPct = parseFloat($('#setup-pass-mark').val()) || 0;
+
+        if (examSelectedDuration < 1) examSelectedDuration = 30;
+        if (examSelectedPassPct < 0) examSelectedPassPct = 0;
+        if (examSelectedPassPct > 100) examSelectedPassPct = 100;
+
+        $.ajax({
+            url: "{{ route('exam.start', $model->id) }}",
+            method: 'POST',
+            data: { subject_id: subjectId, limit: limit },
+            dataType: 'json',
+            success: function(data) {
+                if (data && data.questions && data.questions.length > 0) {
+                    examAllQuestions = data.questions;
+                    examTotalQ = examAllQuestions.length;
+                    examAnswers = {};
+                    examCurrentPage = 0;
+                    examSetupModal.hide();
+                    startExamOverlay();
+                    btn.prop('disabled', false).html('পরীক্ষা শুরু করুন <i class="ri-arrow-right-line"></i>');
+                } else {
+                    toastr.warning('যথেষ্ট প্রশ্ন পাওয়া যায়নি। বিষয় বা প্রশ্ন সীমা পরিবর্তন করুন।');
+                    btn.prop('disabled', false).html('পরীক্ষা শুরু করুন <i class="ri-arrow-right-line"></i>');
+                }
+            },
+            error: function(xhr) {
+                if (xhr.status === 401 || (xhr.responseText && xhr.responseText.includes('login'))) {
+                    examSetupModal.hide();
+                    Swal.fire({
+                        title: 'লগইন প্রয়োজন',
+                        text: 'পরীক্ষা দিতে আপনার অ্যাকাউন্টে লগইন করুন।',
+                        icon: 'info',
+                        showCancelButton: true,
+                        confirmButtonText: 'লগইন করুন',
+                        cancelButtonText: 'পরে করব',
+                        background: '#07091e', color: '#fff',
+                        confirmButtonColor: '#22c55e', cancelButtonColor: '#ef4444',
+                    }).then(r => { if (r.isConfirmed) window.location.href = "{{ route('login') }}"; });
+                } else {
+                    toastr.error('সার্ভার ত্রুটি। পৃষ্ঠা রিলোড করে আবার চেষ্টা করুন।');
+                }
+                btn.prop('disabled', false).html('পরীক্ষা শুরু করুন <i class="ri-arrow-right-line"></i>');
+            }
+        });
+    });
+
+    function startExamOverlay() {
+        $('#exam-overlay').show();
+        $('body').css('overflow', 'hidden');
+        examTimeLeft = examSelectedDuration * 60;
+        updateExamSubjectTag();
+        examRenderPage(0);
+        examStartTimer();
+    }
+
+    function updateExamSubjectTag() {
+        const subjVal = $('#setup-subject').val();
+        const subjText = subjVal === 'all' ? 'সকল বিষয়' : $('#setup-subject option:selected').text();
+        $('#exam-subject-tag').text(subjText + ' — ' + examTotalQ + 'টি প্রশ্ন');
+    }
+
+    function examStartTimer() {
+        examTimerInterval = setInterval(() => {
+            if (examTimeLeft <= 0) {
+                clearInterval(examTimerInterval);
+                submitExam();
+                return;
+            }
+            examTimeLeft--;
+            const mins = Math.floor(examTimeLeft / 60).toString().padStart(2, '0');
+            const secs = (examTimeLeft % 60).toString().padStart(2, '0');
+            const display = `${mins}:${secs}`;
+            $('#exam-timer').text(display);
+            $('#bar-timer').text(display);
+
+            // Flash red when < 1 min left
+            if (examTimeLeft < 60) {
+                $('#exam-timer, #bar-timer').css('color', '#ef4444');
+            }
+        }, 1000);
+    }
+
+    function examRenderPage(pageIdx) {
+        const start = pageIdx * examQPerPage;
+        const end = Math.min(start + examQPerPage, examAllQuestions.length);
+        const pageQs = examAllQuestions.slice(start, end);
+        const labels = ['ক', 'খ', 'গ', 'ঘ', 'ঙ'];
+        const vals = ['a', 'b', 'c', 'd', 'e'];
+
+        let html = '';
+        pageQs.forEach((q, i) => {
+            const num = start + i + 1;
+            let opts = '';
+            q.options.forEach((opt, j) => {
+                if (!opt) return;
+                const val = vals[j];
+                const checked = examAnswers[q.id] === val;
+                const disabled = examAnswers[q.id] !== undefined ? 'disabled' : '';
+                const checkedStyle = checked ? 'background:rgba(245,197,24,0.15); border-color:rgba(245,197,24,0.5);' : '';
+                const circleStyle = checked ? 'background:#f5c518; border-color:#f5c518; color:#07091e;' : '';
+                opts += `
+                <label class="exam-opt ${disabled}" style="display:flex; align-items:center; gap:14px; padding:14px 18px; border-radius:14px; border:1px solid rgba(255,255,255,0.08); background:rgba(255,255,255,0.03); margin-bottom:10px; cursor:pointer; transition:all 0.2s; ${checkedStyle}">
+                    <input type="radio" name="eq_${q.id}" value="${val}" ${checked ? 'checked' : ''} style="display:none;" onchange="examSaveAnswer(${q.id}, '${val}', this)">
+                    <div style="width:32px; height:32px; border-radius:50%; border:2px solid rgba(255,255,255,0.15); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; flex-shrink:0; transition:all 0.2s; ${circleStyle}">${labels[j]}</div>
+                    <div style="color:#efefef; font-size:15px; font-weight:500;">${opt}</div>
+                </label>`;
+            });
+            html += `
+            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:20px; padding:28px; margin-bottom:20px;">
+                <div style="font-size:18px; font-weight:600; color:#fff; margin-bottom:22px; display:flex; gap:14px; line-height:1.6;">
+                    <span style="color:#f5c518; min-width:32px;">${num}.</span>
+                    <div>${q.question}</div>
+                </div>
+                ${opts}
+            </div>`;
+        });
+
+        $('#exam-questions-area').hide().html(html).fadeIn(300);
+        const totalPages = Math.ceil(examAllQuestions.length / examQPerPage);
+        const answered = Object.keys(examAnswers).length;
+        $('#exam-page-info').text(`পাতা ${pageIdx + 1} (মোট ${totalPages} পাতার মধ্যে)`);
+        $('#bar-progress').text(`${answered}/${examAllQuestions.length}`);
+        const pct = (answered / examAllQuestions.length) * 100;
+        $('#exam-progress-bar').css('width', pct + '%');
+
+        $('#exam-prev-btn').toggle(pageIdx > 0);
+        $('#exam-next-btn').toggle(pageIdx < totalPages - 1);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    window.examSaveAnswer = function(qId, val, el) {
+        if (examAnswers[qId] !== undefined) return;
+        examAnswers[qId] = val;
+        examRenderPage(examCurrentPage);
+    };
+
+    $('#exam-next-btn').on('click', () => {
+        const total = Math.ceil(examAllQuestions.length / examQPerPage);
+        if (examCurrentPage < total - 1) { examCurrentPage++; examRenderPage(examCurrentPage); }
+    });
+    $('#exam-prev-btn').on('click', () => {
+        if (examCurrentPage > 0) { examCurrentPage--; examRenderPage(examCurrentPage); }
+    });
+
+    $('#exam-submit-btn').on('click', () => {
+        Swal.fire({
+            title: 'পরীক্ষা জমা দেবেন?',
+            text: 'একবার জমা দিলে আর পরিবর্তন করা যাবে না।',
+            icon: 'question',
+            showCancelButton: true,
+            background: '#07091e', color: '#fff',
+            confirmButtonColor: '#22c55e',
+            cancelButtonText: 'না',
+            confirmButtonText: 'হ্যাঁ, জমা দিন'
+        }).then(r => { if (r.isConfirmed) submitExam(); });
+    });
+
+    function submitExam() {
+        clearInterval(examTimerInterval);
+        const btn = document.getElementById('exam-submit-btn');
+        if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner-border spinner-border-sm"></span>'; }
+
+        const questionIds = examAllQuestions.map(q => q.id);
+        // Pass mark as absolute number: percentage of total questions
+        const passMarkAbsolute = (examSelectedPassPct / 100) * examTotalQ;
+
+        $.post("{{ route('exam.submit', $model->id) }}",
+            { answers: examAnswers, question_ids: questionIds, negative_mark: examSelectedNeg, pass_mark: passMarkAbsolute },
+            function(data) {
+                showResultCard(data.attempt);
+                $('#exam-overlay').hide();
+                $('body').css('overflow', '');
+            }).fail(function() {
+            toastr.error('জমা দিতে সমস্যা হয়েছে। আবার চেষ্টা করুন।');
+            if (btn) { btn.disabled = false; btn.innerHTML = 'পরীক্ষা জমা দিন'; }
+        });
+    }
+
+    function showResultCard(attempt) {
+        const totalQ   = attempt.total_questions || examTotalQ;
+        const right    = attempt.right_answers || 0;
+        const wrong    = attempt.wrong_answers || 0;
+        const noAns    = attempt.no_answers   || (totalQ - right - wrong);
+        const obtained = parseFloat(attempt.marks_obtained || 0).toFixed(2);
+        const negMark  = parseFloat(attempt.negative_marks || 0).toFixed(2);
+        const pct      = totalQ > 0 ? ((right / totalQ) * 100).toFixed(1) : 0;
+        const passed   = attempt.passed;
+        const passMarkAbs = ((examSelectedPassPct / 100) * totalQ).toFixed(1);
+
+        $('#res-marks').text(obtained);
+        $('#res-total-marks').text('/ ' + totalQ);
+        $('#res-right').text(right);
+        $('#res-wrong').text(wrong);
+        $('#res-unanswered').text(noAns);
+        $('#res-negative').text(negMark);
+        $('#res-total').text(totalQ);
+        $('#res-percent-text').text(pct + '%');
+        $('#res-percent-bar').css('width', Math.min(pct, 100) + '%');
+        $('#res-pass-mark-label').text(examSelectedPassPct + '% (' + passMarkAbs + ' নম্বর)');
+
+        if (passed) {
+            $('#result-banner').css({ background: 'rgba(34,197,94,0.08)', borderColor: 'rgba(34,197,94,0.3)' });
+            $('#result-icon').html('🎉');
+            $('#result-headline').text('অভিনন্দন! আপনি পাস করেছেন').css('color', '#22c55e');
+            $('#result-subtext').text('চমৎকার পারফরম্যান্স! আপনি ' + pct + '% নম্বর পেয়েছেন।');
+            $('#result-score-circle').css('borderColor', '#22c55e').css('background', 'rgba(34,197,94,0.08)');
+            $('#res-marks').css('color', '#22c55e');
+        } else {
+            $('#result-banner').css({ background: 'rgba(239,68,68,0.08)', borderColor: 'rgba(239,68,68,0.3)' });
+            $('#result-icon').html('😔');
+            $('#result-headline').text('দুঃখিত! আপনি পাস করেননি').css('color', '#ef4444');
+            $('#result-subtext').text('আপনি ' + pct + '% পেয়েছেন। পাস মার্ক ছিল ' + examSelectedPassPct + '%।');
+            $('#result-score-circle').css('borderColor', '#ef4444').css('background', 'rgba(239,68,68,0.08)');
+            $('#res-marks').css('color', '#ef4444');
+        }
+
+        examResultModal.show();
+    }
+</script>
+
+
+
 @endpush
