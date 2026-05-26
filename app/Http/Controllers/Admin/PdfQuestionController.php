@@ -138,7 +138,7 @@ class PdfQuestionController extends Controller
             }
 
         } catch (\Exception $e) {
-            $pdf->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
+            $pdf->update(['status' => 'failed', 'error_message' => Str::limit($e->getMessage(), 250)]);
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
     }
@@ -207,7 +207,7 @@ class PdfQuestionController extends Controller
             ]);
 
         } catch (\Exception $e) {
-            $pdf->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
+            $pdf->update(['status' => 'failed', 'error_message' => Str::limit($e->getMessage(), 250)]);
             Log::error('Question Generation Error: ' . $e->getMessage());
             return response()->json(['success' => false, 'message' => $e->getMessage()], 500);
         }
