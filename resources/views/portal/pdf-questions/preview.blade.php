@@ -15,7 +15,7 @@
                     </div>
                 </div>
                 <div class="d-flex gap-2">
-                    <a href="{{ route('admin.pdf.show', $pdf->id) }}" class="btn btn-sm btn-light">
+                    <a href="{{ route('portal.pdf.show', $pdf->id) }}" class="btn btn-sm btn-light">
                         <i class="bi bi-arrow-left me-1"></i> পেছনে
                     </a>
                 </div>
@@ -37,7 +37,7 @@
                         <div class="card-body text-center py-10">
                             <i class="bi bi-inbox fs-1 text-muted d-block mb-3"></i>
                             <h5 class="text-muted">কোনো প্রশ্ন পাওয়া যায়নি।</h5>
-                            <a href="{{ route('admin.pdf.show', $pdf->id) }}" class="btn btn-primary mt-3">
+                            <a href="{{ route('portal.pdf.show', $pdf->id) }}" class="btn btn-primary mt-3">
                                 আবার Generate করুন
                             </a>
                         </div>
@@ -71,7 +71,7 @@
                 </div>
 
                 {{-- Questions List --}}
-                <form action="{{ route('admin.pdf.save', $pdf->id) }}" method="POST" id="save-form">
+                <form action="{{ route('portal.pdf.save', $pdf->id) }}" method="POST" id="save-form">
                     @csrf
                     <div id="questions-container">
                         @foreach($questions as $index => $q)
@@ -167,7 +167,7 @@
 
                     {{-- Bottom Save Button --}}
                     <div class="d-flex gap-3 justify-content-end pb-8">
-                        <a href="{{ route('admin.pdf.index') }}" class="btn btn-light btn-lg">বাতিল</a>
+                        <a href="{{ route('portal.pdf.index') }}" class="btn btn-light btn-lg">বাতিল</a>
                         <button type="button" class="btn btn-success btn-lg fw-bold" onclick="submitQuestions()">
                             <i class="bi bi-floppy me-2"></i> নির্বাচিত প্রশ্ন Question Bank এ সেভ করুন
                         </button>

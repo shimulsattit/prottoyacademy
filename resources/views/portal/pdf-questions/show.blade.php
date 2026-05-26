@@ -10,7 +10,7 @@
                         🤖 AI প্রশ্ন তৈরি করুন
                     </h1>
                 </div>
-                <a href="{{ route('admin.pdf.index') }}" class="btn btn-sm btn-light">
+                <a href="{{ route('portal.pdf.index') }}" class="btn btn-sm btn-light">
                     <i class="bi bi-arrow-left me-1"></i> পেছনে যান
                 </a>
             </div>
@@ -46,7 +46,7 @@
                                 @endif
 
                                 @if($pdf->generated_questions)
-                                    <a href="{{ route('admin.pdf.preview', $pdf->id) }}" class="btn btn-success w-100 mt-3">
+                                    <a href="{{ route('portal.pdf.preview', $pdf->id) }}" class="btn btn-success w-100 mt-3">
                                         <i class="bi bi-list-check me-2"></i> প্রশ্নগুলো দেখুন ও সেভ করুন
                                     </a>
                                 @endif

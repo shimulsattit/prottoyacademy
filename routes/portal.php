@@ -111,7 +111,7 @@ Route::resource('featured-banners', FeaturedCategoryBannerController::class);
 Route::resource('testimonial', TestimonialController::class);
 
 // PDF → AI Question Generator
-Route::prefix('pdf-questions')->name('admin.pdf.')->group(function () {
+Route::prefix('pdf-questions')->name('pdf.')->group(function () {
     Route::get('/',                           [PdfQuestionController::class, 'index'])->name('index');
     Route::get('/create',                     [PdfQuestionController::class, 'create'])->name('create');
     Route::post('/store',                     [PdfQuestionController::class, 'store'])->name('store');

@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
- Boyd
 use App\Http\Controllers\Controller;
 use App\Models\Student;
 use Illuminate\Http\Request;

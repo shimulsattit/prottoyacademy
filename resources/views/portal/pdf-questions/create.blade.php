@@ -16,7 +16,7 @@
                         </li>
                         <li class="breadcrumb-item"><span class="bullet bg-gray-500 w-5px h-2px"></span></li>
                         <li class="breadcrumb-item text-muted">
-                            <a href="{{ route('admin.pdf.index') }}" class="text-muted text-hover-primary">PDF প্রশ্ন</a>
+                            <a href="{{ route('portal.pdf.index') }}" class="text-muted text-hover-primary">PDF প্রশ্ন</a>
                         </li>
                         <li class="breadcrumb-item"><span class="bullet bg-gray-500 w-5px h-2px"></span></li>
                         <li class="breadcrumb-item text-muted">আপলোড</li>
@@ -41,7 +41,7 @@
                                 <h3 class="card-title fw-bold">PDF তথ্য দিন</h3>
                             </div>
                             <div class="card-body">
-                                <form action="{{ route('admin.pdf.store') }}" method="POST" enctype="multipart/form-data">
+                                <form action="{{ route('portal.pdf.store') }}" method="POST" enctype="multipart/form-data">
                                     @csrf
 
                                     <div class="mb-5">
@@ -95,7 +95,7 @@
                                         <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
                                             <i class="bi bi-upload me-2"></i> PDF আপলোড করুন
                                         </button>
-                                        <a href="{{ route('admin.pdf.index') }}" class="btn btn-light btn-lg">বাতিল</a>
+                                        <a href="{{ route('portal.pdf.index') }}" class="btn btn-light btn-lg">বাতিল</a>
                                     </div>
                                 </form>
                             </div>

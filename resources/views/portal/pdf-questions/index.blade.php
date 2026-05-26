@@ -20,7 +20,7 @@
                     </ul>
                 </div>
                 <div class="d-flex align-items-center gap-2">
-                    <a href="{{ route('admin.pdf.create') }}" class="btn btn-sm fw-bold btn-primary">
+                    <a href="{{ route('portal.pdf.create') }}" class="btn btn-sm fw-bold btn-primary">
                         <i class="bi bi-plus-lg"></i> নতুন PDF আপলোড
                     </a>
                 </div>
@@ -118,15 +118,15 @@
                                             </td>
                                             <td class="text-muted small">{{ $pdf->created_at->format('d M, Y') }}</td>
                                             <td class="text-end">
-                                                <a href="{{ route('admin.pdf.show', $pdf->id) }}" class="btn btn-sm btn-light-primary me-1" title="বিস্তারিত">
+                                                <a href="{{ route('portal.pdf.show', $pdf->id) }}" class="btn btn-sm btn-light-primary me-1" title="বিস্তারিত">
                                                     <i class="bi bi-eye"></i>
                                                 </a>
                                                 @if($pdf->generated_questions)
-                                                    <a href="{{ route('admin.pdf.preview', $pdf->id) }}" class="btn btn-sm btn-light-success me-1" title="Preview">
+                                                    <a href="{{ route('portal.pdf.preview', $pdf->id) }}" class="btn btn-sm btn-light-success me-1" title="Preview">
                                                         <i class="bi bi-list-check"></i>
                                                     </a>
                                                 @endif
-                                                <form action="{{ route('admin.pdf.destroy', $pdf->id) }}" method="POST" class="d-inline"
+                                                <form action="{{ route('portal.pdf.destroy', $pdf->id) }}" method="POST" class="d-inline"
                                                       onsubmit="return confirm('মুছে ফেলবেন?')">
                                                     @csrf @method('DELETE')
                                                     <button class="btn btn-sm btn-light-danger" title="মুছুন">
@@ -140,7 +140,7 @@
                                             <td colspan="8" class="text-center py-5 text-muted">
                                                 <i class="bi bi-file-earmark-pdf fs-1 d-block mb-2"></i>
                                                 কোনো PDF আপলোড করা হয়নি।
-                                                <a href="{{ route('admin.pdf.create') }}">এখনই করুন</a>
+                                                <a href="{{ route('portal.pdf.create') }}">এখনই করুন</a>
                                             </td>
                                         </tr>
                                     @endforelse

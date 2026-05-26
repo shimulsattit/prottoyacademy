@@ -106,7 +106,7 @@
 
                     {{-- PDF → AI Question Generator --}}
                     <div class="menu-item">
-                        <a class="menu-link {{ Request::is('portal/pdf-questions*') ? 'active' : '' }}" href="{{ route('admin.pdf.index') }}">
+                        <a class="menu-link {{ Request::is('portal/pdf-questions*') ? 'active' : '' }}" href="{{ route('portal.pdf.index') }}">
                             <span class="menu-icon">
                                 <i class="bi bi-stars" style="font-size:15px;"></i>
                             </span>

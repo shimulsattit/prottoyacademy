@@ -51,7 +51,7 @@ class PdfQuestionController extends Controller
                 'status'        => 'pending',
             ]);
 
-            return redirect()->route('admin.pdf.show', $pdf->id)
+            return redirect()->route('portal.pdf.show', $pdf->id)
                 ->with('success', 'PDF আপলোড সফল হয়েছে! এখন টেক্সট এক্সট্রাক্ট করুন।');
 
         } catch (\Exception $e) {
@@ -140,7 +140,7 @@ class PdfQuestionController extends Controller
                 'success'   => true,
                 'message'   => count($questions) . 'টি প্রশ্ন তৈরি হয়েছে!',
                 'count'     => count($questions),
-                'redirect'  => route('admin.pdf.preview', $pdf->id),
+                'redirect'  => route('portal.pdf.preview', $pdf->id),
             ]);
 
         } catch (\Exception $e) {
@@ -207,7 +207,7 @@ class PdfQuestionController extends Controller
 
         $pdf->update(['questions_saved' => $pdf->questions_saved + $saved]);
 
-        return redirect()->route('admin.pdf.index')
+        return redirect()->route('portal.pdf.index')
             ->with('success', "{$saved}টি প্রশ্ন সফলভাবে Question Bank এ সেভ হয়েছে!");
     }
 
