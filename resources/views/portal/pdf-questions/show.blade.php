@@ -462,7 +462,12 @@
     function initDashboard() {
         document.getElementById('total-pages-badge').textContent = pages.length;
         renderPagesList();
-        setActivePage(1);
+        
+        // Auto-select the first page that has non-empty text!
+        let firstReadablePage = pages.find(p => p.text && p.text.trim().length > 0);
+        let startPage = firstReadablePage ? firstReadablePage.page : 1;
+        
+        setActivePage(startPage);
     }
 
     // Render Page Selectors list on Left Panel
@@ -472,15 +477,23 @@
 
         pages.forEach(p => {
             const hasQuestions = generatedQuestions && generatedQuestions[p.page] && generatedQuestions[p.page].length > 0;
-            const badgeHtml = hasQuestions 
-                ? `<span class="page-badge-status bg-light-success text-success"><i class="bi bi-stars"></i> AI (${generatedQuestions[p.page].length})</span>`
-                : `<span class="page-badge-status bg-light text-muted">ফাঁকা</span>`;
+            const hasText = p.text && p.text.trim().length > 0;
+            
+            let badgeHtml = '';
+            if (hasQuestions) {
+                badgeHtml = `<span class="page-badge-status bg-light-success text-success"><i class="bi bi-stars"></i> AI (${generatedQuestions[p.page].length})</span>`;
+            } else if (hasText) {
+                badgeHtml = `<span class="page-badge-status bg-light-info text-info"><i class="bi bi-file-text-fill"></i> টেক্সট আছে</span>`;
+            } else {
+                badgeHtml = `<span class="page-badge-status bg-light text-muted"><i class="bi bi-image"></i> স্ক্যান/খালি</span>`;
+            }
 
             const btn = document.createElement('button');
             btn.type = 'button';
             btn.className = `page-item-btn ${p.page === activePage ? 'active' : ''}`;
             btn.id = `page-btn-${p.page}`;
             btn.onclick = () => setActivePage(p.page);
+            btn.style.opacity = hasText ? '1' : '0.65'; // Dim empty pages slightly for hierarchy
             btn.innerHTML = `
                 <span>📄 পৃষ্ঠা ${toBanglaNumber(p.page)}</span>
                 ${badgeHtml}
@@ -509,7 +522,32 @@
         // Load content
         const pageData = pages.find(p => p.page === activePage);
         const textContainer = document.getElementById('active-page-text');
-        textContainer.textContent = pageData && pageData.text ? pageData.text : 'এই পৃষ্ঠায় কোনো টেক্সট পাওয়া যায়নি।';
+        
+        if (pageData && pageData.text && pageData.text.trim().length > 0) {
+            // Restore clean layout for normal text pages
+            textContainer.innerHTML = escapeHtml(pageData.text);
+            textContainer.style.background = '#f8fafc';
+            textContainer.style.color = '#334155';
+            textContainer.style.border = '1px solid #e2e8f0';
+            textContainer.style.padding = '24px';
+        } else {
+            // Render gorgeous dashboard alert for scanned/empty pages
+            textContainer.innerHTML = `
+                <div class="alert alert-dismissible bg-light-warning d-flex flex-column flex-sm-row p-5 mb-0" style="border: 1px dashed #ffc700;">
+                    <i class="bi bi-exclamation-triangle-fill fs-2x text-warning me-4 mb-5 mb-sm-0"></i>
+                    <div class="d-flex flex-column pe-0 pe-sm-10 text-start">
+                        <h5 class="mb-1 fw-bold text-warning" style="font-family:'Hind Siliguri', sans-serif;">এই পৃষ্ঠায় কোনো ডিজিটাল টেক্সট পাওয়া যায়নি</h5>
+                        <p class="mb-0 text-muted small" style="line-height:1.6;">
+                            পৃষ্ঠাটি সম্ভবত একটি স্ক্যান করা ছবি অথবা এতে কোনো সিলেক্টযোগ্য টেক্সট নেই। 
+                            অনুগ্রহ করে বাম পাশের ড্যাশবোর্ড থেকে সবুজ রঙের <strong class="text-info"><i class="bi bi-file-text-fill"></i> টেক্সট আছে</strong> ব্যাজ চিহ্নিত পৃষ্ঠাগুলো সিলেক্ট করুন।
+                        </p>
+                    </div>
+                </div>
+            `;
+            textContainer.style.background = 'rgba(255, 199, 0, 0.02)';
+            textContainer.style.border = 'none';
+            textContainer.style.padding = '0';
+        }
 
         // Load Questions for Page
         loadQuestionsForActivePage();
