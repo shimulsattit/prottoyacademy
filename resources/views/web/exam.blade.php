@@ -335,7 +335,24 @@
                     
                     <div class="mt-5 d-flex justify-content-between exam-pagination-wrapper">
                          <button class="btn btn-outline-light px-4 rounded-pill fw-bold" id="prev-btn" disabled>পূর্ববর্তী পেজ</button>
-                         <button class="btn btn-success px-4 rounded-pill fw-bold" id="next-btn" style="background: #22c55e; border:none;">পরবর্তী �<!-- Exam Setup Modal -->
+                         <button class="btn btn-success px-4 rounded-pill fw-bold" id="next-btn" style="background: #22c55e; border:none;">পরবর্তী পেজ</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Fixed Bottom Bar -->
+<div class="fixed-bottom-bar" id="fixed-bottom-bar" style="display: none;">
+    <div class="bottom-info">
+        <div><i class="ri-timer-line"></i> <span id="time-left">০০:০০</span></div>
+        <div class="d-none d-sm-block"><i class="ri-list-check"></i> <span id="progress-text">০/০</span></div>
+    </div>
+    <button class="btn-submit-fixed" id="submit-btn-fixed">সাবমিট</button>
+</div>
+
+<!-- Exam Setup Modal -->
 <div class="modal fade" id="examSetupModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-md">
         <div class="modal-content border-0">
@@ -367,31 +384,29 @@
 
                 <div class="mb-3 text-start">
                     <label class="form-label text-white-50 small fw-bold mb-2">পরীক্ষার সময় (মিনিট)</label>
-                    <input type="number" class="form-control bg-dark text-white border-secondary rounded-3 p-3" id="setup-duration" value="{{ $totalQuestions }}" min="1" placeholder="পরীক্ষার সময় মিনিট লিখুন" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                    <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-duration" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="auto">স্বয়ংক্রিয় (১ মিনিট প্রতি প্রশ্ন)</option>
+                        <option value="5">৫ মিনিট</option>
+                        <option value="10">১০ মিনিট</option>
+                        <option value="15">১৫ মিনিট</option>
+                        <option value="20">২০ মিনিট</option>
+                        <option value="30">৩০ মিনিট</option>
+                        <option value="45">৪৫ মিনিট</option>
+                        <option value="60">৬০ মিনিট</option>
+                    </select>
                 </div>
 
                 <div class="mb-3 text-start">
-                    <label class="form-label text-white-50 small fw-bold mb-2">নেগেティブ মার্কিং</label>
+                    <label class="form-label text-white-50 small fw-bold mb-2">নেগেটিভ মার্কিং</label>
                     <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-negative-mark" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
                         <option value="0.25">০.২৫ নম্বর (প্রতি ভুল উত্তরের জন্য)</option>
                         <option value="0.50">০.৫০ নম্বর (প্রতি ভুল উত্তরের জন্য)</option>
-                        <option value="0.00">কোনো নেগেティブ মার্ক নেই</option>
+                        <option value="0.00">কোনো নেগেটিভ মার্ক নেই</option>
                     </select>
                 </div>
 
                 <div class="mb-4 text-start">
-                    <label class="form-label text-white-50 small fw-bold mb-2">পাস মার্ক (নম্বর হিসেবে)</label>
-                    <input type="number" class="form-control bg-dark text-white border-secondary rounded-3 p-3" id="setup-pass-mark" value="{{ round($totalQuestions * 0.40) }}" min="0" placeholder="পাস মার্ক লিখুন" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
-                </div>
-
-                <div class="d-flex gap-3 justify-content-center mt-4">
-                    <a href="javascript:history.back()" class="btn btn-outline-light px-4 rounded-pill fw-bold">বন্ধ করুন</a>
-                    <button type="button" class="btn btn-success px-4 rounded-pill fw-bold" id="confirm-start-exam-btn" style="background: linear-gradient(135deg, #22c55e, #16a34a); border:none;">চূড়ান্ত পরীক্ষা শুরু করুন</button>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>শতকরা হিসেবে)</label>
+                    <label class="form-label text-white-50 small fw-bold mb-2">পাস মার্ক (শতকরা হিসেবে)</label>
                     <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-pass-mark" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
                         <option value="0.40">৪০% নম্বর (ডিফল্ট পাস মার্ক)</option>
                         <option value="0.33">৩৩% নম্বর</option>
@@ -476,9 +491,6 @@
         resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
         examSetupModal = new bootstrap.Modal(document.getElementById('examSetupModal'));
         
-        // Auto-open setup modal immediately on page load
-        examSetupModal.show();
-        
         // CSRF Token Setup for AJAX
         $.ajaxSetup({
             headers: {
@@ -498,13 +510,9 @@
         const subjectId = $('#setup-subject').val();
         const limit = $('#setup-limit').val();
         selectedNegativeMark = parseFloat($('#setup-negative-mark').val()) || 0.25;
+        selectedDuration = $('#setup-duration').val() || 'auto';
         
-        // Read manual input duration (minutes)
-        const durationVal = parseInt($('#setup-duration').val());
-        selectedDuration = isNaN(durationVal) ? allQuestions.length : durationVal;
-        
-        // Read manual input pass mark (absolute number)
-        selectedPassMark = parseFloat($('#setup-pass-mark').val()) || 0.00;
+        const passMarkPercent = parseFloat($('#setup-pass-mark').val()) || 0.00;
 
         $.ajax({
             url: "{{ route('exam.start', $jobCategory->id) }}",
@@ -530,7 +538,10 @@
                     $('#setup-banner').find('.setup-card').eq(0).find('strong').text(getBnNum(allQuestions.length));
                     $('#setup-banner').find('.setup-card').eq(1).find('strong').text(getBnNum(allQuestions.length));
                     
-                    let finalDurationMins = selectedDuration;
+                    let finalDurationMins = allQuestions.length; // default: 1 min per question
+                    if (selectedDuration !== 'auto') {
+                        finalDurationMins = parseInt(selectedDuration);
+                    }
                     $('#setup-banner').find('.setup-card').eq(2).find('strong').text(getBnNum(finalDurationMins));
                     $('#setup-banner').show();
                     
@@ -538,6 +549,7 @@
                     $('#fixed-bottom-bar').fadeIn();
                     
                     timeLeft = finalDurationMins * 60;
+                    selectedPassMark = passMarkPercent * allQuestions.length; 
 
                     startTimer();
                     renderPage(0);
