@@ -1,4 +1,4 @@
-@extends('layouts.admin', ['title' => 'PDF আপলোড করুন'])
+@extends('layouts.admin', ['title' => 'PDF বা ইমেজ আপলোড করুন'])
 
 @section('content')
 <div class="app-main flex-column flex-row-fluid" id="app_main">
@@ -8,7 +8,7 @@
             <div id="app_toolbar_container" class="app-container container-xxl d-flex flex-stack">
                 <div class="page-title d-flex flex-column justify-content-center flex-wrap me-3">
                     <h1 class="page-heading d-flex text-gray-900 fw-bold fs-3 flex-column justify-content-center my-0">
-                        📄 নতুন PDF আপলোড
+                        📄 নতুন PDF বা ইমেজ আপলোড
                     </h1>
                     <ul class="breadcrumb breadcrumb-separatorless fw-semibold fs-7 my-0 pt-1">
                         <li class="breadcrumb-item text-muted">
@@ -16,7 +16,7 @@
                         </li>
                         <li class="breadcrumb-item"><span class="bullet bg-gray-500 w-5px h-2px"></span></li>
                         <li class="breadcrumb-item text-muted">
-                            <a href="{{ route('portal.pdf.index') }}" class="text-muted text-hover-primary">PDF প্রশ্ন</a>
+                            <a href="{{ route('portal.pdf.index') }}" class="text-muted text-hover-primary">ফাইল প্রশ্ন</a>
                         </li>
                         <li class="breadcrumb-item"><span class="bullet bg-gray-500 w-5px h-2px"></span></li>
                         <li class="breadcrumb-item text-muted">আপলোড</li>
@@ -67,17 +67,17 @@
                                     </div>
 
                                     <div class="mb-7">
-                                        <label class="form-label fw-semibold required">PDF ফাইল বেছে নিন</label>
+                                        <label class="form-label fw-semibold required">PDF / ইমেজ ফাইল বেছে নিন</label>
                                         <div id="drop-zone" class="border-2 border-dashed rounded-3 p-8 text-center"
                                              style="border-color: #009ef7; background: #f8f9fa; cursor: pointer; transition: all 0.3s;">
                                             <div id="drop-content">
                                                 <i class="bi bi-cloud-upload fs-1 text-primary mb-3 d-block"></i>
-                                                <p class="fw-semibold text-gray-700 mb-1">PDF ফাইল এখানে ড্র্যাগ করুন</p>
+                                                <p class="fw-semibold text-gray-700 mb-1">PDF অথবা ইমেজ ফাইল এখানে ড্র্যাগ করুন</p>
                                                 <p class="text-muted small mb-3">অথবা</p>
                                                 <label class="btn btn-primary btn-sm" for="pdf_file_input">
                                                     <i class="bi bi-folder2-open me-1"></i> ফাইল বেছে নিন
                                                 </label>
-                                                <p class="text-muted small mt-2">সর্বোচ্চ ২০ MB • শুধুমাত্র PDF</p>
+                                                <p class="text-muted small mt-2">সর্বোচ্চ ২০ MB • PDF অথবা ইমেজ (JPG, PNG, WebP)</p>
                                             </div>
                                             <div id="file-preview" class="d-none">
                                                 <i class="bi bi-file-earmark-pdf fs-1 text-danger mb-2 d-block"></i>
@@ -88,12 +88,12 @@
                                                 </button>
                                             </div>
                                         </div>
-                                        <input type="file" name="pdf_file" id="pdf_file_input" accept=".pdf" class="d-none" required>
+                                        <input type="file" name="pdf_file" id="pdf_file_input" accept=".pdf, image/*" class="d-none" required>
                                     </div>
 
                                     <div class="d-flex gap-3">
                                         <button type="submit" class="btn btn-primary btn-lg" id="submit-btn">
-                                            <i class="bi bi-upload me-2"></i> PDF আপলোড করুন
+                                            <i class="bi bi-upload me-2"></i> ফাইল আপলোড করুন
                                         </button>
                                         <a href="{{ route('portal.pdf.index') }}" class="btn btn-light btn-lg">বাতিল</a>
                                     </div>
@@ -110,8 +110,8 @@
                                         <div class="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
                                             <span class="fw-bold text-primary">১</span>
                                         </div>
-                                        <div class="fw-semibold small">PDF আপলোড করুন</div>
-                                        <div class="text-muted" style="font-size:12px;">যেকোনো text-based PDF</div>
+                                        <div class="fw-semibold small">ফাইল আপলোড করুন</div>
+                                        <div class="text-muted" style="font-size:12px;">যেকোনো PDF অথবা পৃষ্ঠা ইমেজ</div>
                                     </div>
                                     <div class="col-md-4 text-center">
                                         <div class="rounded-circle bg-warning bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3" style="width:56px;height:56px;">
@@ -172,13 +172,13 @@ dropZone.addEventListener('drop', e => {
     e.preventDefault();
     dropZone.style.background = '#f8f9fa';
     const file = e.dataTransfer.files[0];
-    if (file && file.type === 'application/pdf') {
+    if (file && (file.type === 'application/pdf' || file.type.startsWith('image/'))) {
         const dt = new DataTransfer();
         dt.items.add(file);
         fileInput.files = dt.files;
         showFile(file);
     } else {
-        alert('শুধুমাত্র PDF ফাইল গ্রহণযোগ্য।');
+        alert('শুধুমাত্র PDF অথবা ইমেজ ফাইল গ্রহণযোগ্য।');
     }
 });
 

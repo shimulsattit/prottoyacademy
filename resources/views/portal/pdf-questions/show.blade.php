@@ -288,6 +288,17 @@
                             <div class="viewer-content">
                                 {{-- Tab A: Extracted Text --}}
                                 <div id="tab-text-content">
+                                    @php
+                                        $isImage = in_array(strtolower(pathinfo($pdf->file_path, PATHINFO_EXTENSION)), ['jpg', 'jpeg', 'png', 'webp']);
+                                    @endphp
+                                    
+                                    @if($isImage)
+                                        <div class="text-center mb-6 bg-light p-4 rounded border">
+                                            <img src="{{ asset('storage/' . $pdf->file_path) }}" class="img-fluid rounded shadow-sm" style="max-height: 400px; object-fit: contain; border: 1px solid #e2e8f0;">
+                                            <div class="form-text mt-2"><i class="bi bi-image me-1"></i> আপলোড করা মূল ছবি</div>
+                                        </div>
+                                    @endif
+
                                     <div class="text-reader" id="active-page-text">
                                         টেক্সট লোড হচ্ছে...
                                     </div>

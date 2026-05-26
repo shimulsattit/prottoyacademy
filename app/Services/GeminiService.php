@@ -155,4 +155,46 @@ PROMPT;
 
         return $chunks ?: [$text];
     }
+
+    /**
+     * Perform high-accuracy OCR on an image file using Gemini Vision
+     */
+    public function extractTextFromImage(string $imagePath, string $mimeType): string
+    {
+        if (!file_exists($imagePath)) {
+            throw new \Exception('ইমেজ ফাইলটি পাওয়া যায়নি।');
+        }
+
+        $imageData = base64_encode(file_get_contents($imagePath));
+
+        $prompt = "Please extract all text from this image exactly as written. "
+                . "Support Bengali and English text. Output ONLY the clean extracted text. "
+                . "Do not write any markdown code blocks, intro, or outro text.";
+
+        $response = Http::timeout(60)->post($this->apiUrl . '?key=' . $this->apiKey, [
+            'contents' => [
+                [
+                    'parts' => [
+                        ['text' => $prompt],
+                        [
+                            'inlineData' => [
+                                'mimeType' => $mimeType,
+                                'data' => $imageData
+                            ]
+                        ]
+                    ]
+                ]
+            ],
+            'generationConfig' => [
+                'temperature' => 0.1,
+            ]
+        ]);
+
+        if (!$response->successful()) {
+            throw new \Exception('Gemini Vision OCR Error: ' . $response->status() . ' ' . $response->body());
+        }
+
+        $data = $response->json();
+        return trim($data['candidates'][0]['content']['parts'][0]['text'] ?? '');
+    }
 }

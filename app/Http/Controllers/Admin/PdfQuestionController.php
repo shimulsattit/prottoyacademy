@@ -34,7 +34,7 @@ class PdfQuestionController extends Controller
         $request->validate([
             'title'       => 'required|string|max:255',
             'category_id' => 'required|exists:categories,id',
-            'pdf_file'    => 'required|file|mimes:pdf|max:20480', // 20MB max
+            'pdf_file'    => 'required|file|mimes:pdf,jpg,jpeg,png,webp|max:20480', // 20MB max
         ]);
 
         try {
@@ -52,11 +52,11 @@ class PdfQuestionController extends Controller
             ]);
 
             return redirect()->route('portal.pdf.show', $pdf->id)
-                ->with('success', 'PDF আপলোড সফল হয়েছে! এখন টেক্সট এক্সট্রাক্ট করুন।');
+                ->with('success', 'ফাইল আপলোড সফল হয়েছে! এখন টেক্সট এক্সট্রাক্ট করুন।');
 
         } catch (\Exception $e) {
-            Log::error('PDF Upload Error: ' . $e->getMessage());
-            return back()->with('error', 'PDF আপলোড ব্যর্থ হয়েছে: ' . $e->getMessage());
+            Log::error('File Upload Error: ' . $e->getMessage());
+            return back()->with('error', 'ফাইল আপলোড ব্যর্থ হয়েছে: ' . $e->getMessage());
         }
     }
 
@@ -74,38 +74,68 @@ class PdfQuestionController extends Controller
             $fullPath = Storage::disk('public')->path($pdf->file_path);
 
             if (!file_exists($fullPath)) {
-                throw new \Exception('PDF ফাইল পাওয়া যায়নি।');
+                throw new \Exception('ফাইল পাওয়া যায়নি।');
             }
 
-            // Extract text page-by-page using smalot/pdfparser
-            $parser      = new \Smalot\PdfParser\Parser();
-            $parsedPdf   = $parser->parseFile($fullPath);
-            $pages       = $parsedPdf->getPages();
-            
-            $pagesText = [];
-            foreach ($pages as $index => $page) {
-                $pagesText[] = [
-                    'page' => $index + 1,
-                    'text' => trim($page->getText())
+            $mimeType = Storage::disk('public')->mimeType($pdf->file_path);
+
+            if (str_contains($mimeType, 'image/')) {
+                // OCR Image via Gemini API
+                $gemini = new GeminiService();
+                $text   = $gemini->extractTextFromImage($fullPath, $mimeType);
+
+                if (empty(trim($text))) {
+                    throw new \Exception('ছবি থেকে কোনো লেখা উদ্ধার করা যায়নি। ছবি পরিবর্তন করুন।');
+                }
+
+                $pagesText = [
+                    [
+                        'page' => 1,
+                        'text' => $text
+                    ]
                 ];
+
+                $pdf->update([
+                    'extracted_text' => json_encode($pagesText, JSON_UNESCAPED_UNICODE),
+                    'status'         => 'pending',
+                ]);
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'ছবি থেকে টেক্সট সফলভাবে বের করা হয়েছে!',
+                    'pages'   => $pagesText,
+                ]);
+            } else {
+                // Extract text page-by-page using smalot/pdfparser for PDFs
+                $parser      = new \Smalot\PdfParser\Parser();
+                $parsedPdf   = $parser->parseFile($fullPath);
+                $pages       = $parsedPdf->getPages();
+                
+                $pagesText = [];
+                foreach ($pages as $index => $page) {
+                    $pagesText[] = [
+                        'page' => $index + 1,
+                        'text' => trim($page->getText())
+                    ];
+                }
+
+                if (empty($pagesText)) {
+                    throw new \Exception('PDF থেকে টেক্সট বের করা যায়নি। PDF টি image-based হতে পারে।');
+                }
+
+                $pdf->update([
+                    'extracted_text' => json_encode($pagesText, JSON_UNESCAPED_UNICODE),
+                    'status'         => 'pending',
+                ]);
+
+                $totalChars = collect($pagesText)->sum(function($p) { return strlen($p['text']); });
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'টেক্সট সফলভাবে বের হয়েছে! ' . count($pagesText) . 'টি পেজ ও ' . number_format($totalChars) . ' অক্ষর পাওয়া গেছে।',
+                    'pages'   => $pagesText,
+                ]);
             }
-
-            if (empty($pagesText)) {
-                throw new \Exception('PDF থেকে টেক্সট বের করা যায়নি। PDF টি image-based হতে পারে।');
-            }
-
-            $pdf->update([
-                'extracted_text' => json_encode($pagesText, JSON_UNESCAPED_UNICODE),
-                'status'         => 'pending',
-            ]);
-
-            $totalChars = collect($pagesText)->sum(function($p) { return strlen($p['text']); });
-
-            return response()->json([
-                'success' => true,
-                'message' => 'টেক্সট সফলভাবে বের হয়েছে! ' . count($pagesText) . 'টি পেজ ও ' . number_format($totalChars) . ' অক্ষর পাওয়া গেছে।',
-                'pages'   => $pagesText,
-            ]);
 
         } catch (\Exception $e) {
             $pdf->update(['status' => 'failed', 'error_message' => $e->getMessage()]);
@@ -257,6 +287,6 @@ class PdfQuestionController extends Controller
     {
         Storage::disk('public')->delete($pdf->file_path);
         $pdf->delete();
-        return back()->with('success', 'PDF মুছে ফেলা হয়েছে।');
+        return back()->with('success', 'মুছে ফেলা হয়েছে।');
     }
 }
