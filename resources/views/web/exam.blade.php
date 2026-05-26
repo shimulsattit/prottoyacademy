@@ -407,6 +407,7 @@
     let resultModal;
 
     $(document).ready(function() {
+        $('#resultModal').appendTo('body');
         resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
         
         // CSRF Token Setup for AJAX
