@@ -102,7 +102,17 @@
                                 <span class="menu-title">Import</span>
                             </a>
                         </div>
-                    @endif 
+                    @endif
+
+                    {{-- PDF → AI Question Generator --}}
+                    <div class="menu-item">
+                        <a class="menu-link {{ Request::is('portal/pdf-questions*') ? 'active' : '' }}" href="{{ route('admin.pdf.index') }}">
+                            <span class="menu-icon">
+                                <i class="bi bi-stars" style="font-size:15px;"></i>
+                            </span>
+                            <span class="menu-title">PDF → AI প্রশ্ন</span>
+                        </a>
+                    </div>
 
                     @if(Auth::guard('admin')->user()->hasPermissionTo('passage.view'))
                         <div class="menu-item">
