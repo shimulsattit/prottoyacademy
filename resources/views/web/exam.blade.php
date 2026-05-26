@@ -273,7 +273,7 @@
                 <h2>{{ $jobCategory->name }}</h2>
                 <div class="subject-tags d-flex flex-wrap justify-content-center gap-2">
                     @foreach($subjects as $subject)
-                        <span class="subject-tag">{{ $subject }}</span>
+                        <span class="subject-tag">{{ is_string($subject) ? $subject : $subject->name }}</span>
                     @endforeach
                 </div>
             </div>
@@ -352,6 +352,81 @@
     <button class="btn-submit-fixed" id="submit-btn-fixed">সাবমিট</button>
 </div>
 
+<!-- Exam Setup Modal -->
+<div class="modal fade" id="examSetupModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-md">
+        <div class="modal-content border-0">
+            <div class="modal-body p-4 text-center">
+                <i class="ri-settings-4-line text-warning mb-3" style="font-size: 50px; display: block;"></i>
+                <h4 class="mb-4 text-white fw-bold">পরীক্ষা সেটিংস কাস্টমাইজ করুন</h4>
+                
+                <div class="mb-3 text-start">
+                    <label class="form-label text-white-50 small fw-bold mb-2">বিষয় নির্বাচন</label>
+                    <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-subject" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="all">সকল বিষয় (ডিফল্ট)</option>
+                        @foreach($subjects as $subj)
+                            <option value="{{ $subj->id }}">{{ $subj->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label class="form-label text-white-50 small fw-bold mb-2">প্রশ্ন সংখ্যা / মোট নম্বর</label>
+                    <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-limit" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="all">সর্বোচ্চ (সবগুলো প্রশ্ন)</option>
+                        <option value="10">১০ টি প্রশ্ন (১০ নম্বর)</option>
+                        <option value="20">২০ টি প্রশ্ন (২০ নম্বর)</option>
+                        <option value="30">৩০ টি প্রশ্ন (৩০ নম্বর)</option>
+                        <option value="50">৫০ টি প্রশ্ন (৫০ নম্বর)</option>
+                        <option value="100">১০০ টি প্রশ্ন (১০০ নম্বর)</option>
+                    </select>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label class="form-label text-white-50 small fw-bold mb-2">পরীক্ষার সময় (মিনিট)</label>
+                    <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-duration" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="auto">স্বয়ংক্রিয় (১ মিনিট প্রতি প্রশ্ন)</option>
+                        <option value="5">৫ মিনিট</option>
+                        <option value="10">১০ মিনিট</option>
+                        <option value="15">১৫ মিনিট</option>
+                        <option value="20">২০ মিনিট</option>
+                        <option value="30">৩০ মিনিট</option>
+                        <option value="45">৪৫ মিনিট</option>
+                        <option value="60">৬০ মিনিট</option>
+                    </select>
+                </div>
+
+                <div class="mb-3 text-start">
+                    <label class="form-label text-white-50 small fw-bold mb-2">নেগেটিভ মার্কিং</label>
+                    <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-negative-mark" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="0.25">০.২৫ নম্বর (প্রতি ভুল উত্তরের জন্য)</option>
+                        <option value="0.50">০.৫০ নম্বর (প্রতি ভুল উত্তরের জন্য)</option>
+                        <option value="0.00">কোনো নেগেটিভ মার্ক নেই</option>
+                    </select>
+                </div>
+
+                <div class="mb-4 text-start">
+                    <label class="form-label text-white-50 small fw-bold mb-2">পাস মার্ক (শতকরা হিসেবে)</label>
+                    <select class="form-select bg-dark text-white border-secondary rounded-3 p-3" id="setup-pass-mark" style="background: rgba(15, 17, 41, 0.95); border: 1px solid rgba(255,255,255,0.1); color: #fff;">
+                        <option value="0.40">৪০% নম্বর (ডিফল্ট পাস মার্ক)</option>
+                        <option value="0.33">৩৩% নম্বর</option>
+                        <option value="0.50">৫০% নম্বর</option>
+                        <option value="0.60">৬০% নম্বর</option>
+                        <option value="0.70">৭০% নম্বর</option>
+                        <option value="0.80">৮০% নম্বর</option>
+                        <option value="0.00">পাস মার্ক নেই (০ নম্বর)</option>
+                    </select>
+                </div>
+
+                <div class="d-flex gap-3 justify-content-center mt-4">
+                    <button type="button" class="btn btn-outline-light px-4 rounded-pill fw-bold" data-bs-dismiss="modal">বন্ধ করুন</button>
+                    <button type="button" class="btn btn-success px-4 rounded-pill fw-bold" id="confirm-start-exam-btn" style="background: linear-gradient(135deg, #22c55e, #16a34a); border:none;">চূড়ান্ত পরীক্ষা শুরু করুন</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Result Modal -->
 <div class="modal fade" id="resultModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-lg">
@@ -405,10 +480,16 @@
     let timerInterval;
     let timeLeft = 0;
     let resultModal;
+    let examSetupModal;
+    let selectedNegativeMark = 0.25;
+    let selectedPassMark = 0.00;
+    let selectedDuration = "auto";
 
     $(document).ready(function() {
         $('#resultModal').appendTo('body');
+        $('#examSetupModal').appendTo('body');
         resultModal = new bootstrap.Modal(document.getElementById('resultModal'));
+        examSetupModal = new bootstrap.Modal(document.getElementById('examSetupModal'));
         
         // CSRF Token Setup for AJAX
         $.ajaxSetup({
@@ -419,27 +500,62 @@
     });
 
     $('#start-exam-btn').on('click', function() {
+        examSetupModal.show();
+    });
+
+    $('#confirm-start-exam-btn').on('click', function() {
         const btn = $(this);
         btn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span> লোড হচ্ছে...');
         
+        const subjectId = $('#setup-subject').val();
+        const limit = $('#setup-limit').val();
+        selectedNegativeMark = parseFloat($('#setup-negative-mark').val()) || 0.25;
+        selectedDuration = $('#setup-duration').val() || 'auto';
+        
+        const passMarkPercent = parseFloat($('#setup-pass-mark').val()) || 0.00;
+
         $.ajax({
             url: "{{ route('exam.start', $jobCategory->id) }}",
             method: "POST",
+            data: {
+                subject_id: subjectId,
+                limit: limit
+            },
             dataType: "json", // Force JSON response
             success: function(data) {
                 if(data && data.questions && data.questions.length > 0) {
                     allQuestions = data.questions;
+                    
+                    examSetupModal.hide();
                     $('#start-screen').hide();
-                    $('#setup-banner').hide();
+                    
+                    // Update setup banner dynamically in the view
+                    const bnNumbers = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
+                    function getBnNum(num) {
+                        return num.toString().split('').map(d => bnNumbers[d] || d).join('');
+                    }
+
+                    $('#setup-banner').find('.setup-card').eq(0).find('strong').text(getBnNum(allQuestions.length));
+                    $('#setup-banner').find('.setup-card').eq(1).find('strong').text(getBnNum(allQuestions.length));
+                    
+                    let finalDurationMins = allQuestions.length; // default: 1 min per question
+                    if (selectedDuration !== 'auto') {
+                        finalDurationMins = parseInt(selectedDuration);
+                    }
+                    $('#setup-banner').find('.setup-card').eq(2).find('strong').text(getBnNum(finalDurationMins));
+                    $('#setup-banner').show();
+                    
                     $('#exam-screen').show();
                     $('#fixed-bottom-bar').fadeIn();
                     
-                    timeLeft = allQuestions.length * 60;
+                    timeLeft = finalDurationMins * 60;
+                    selectedPassMark = passMarkPercent * allQuestions.length; 
+
                     startTimer();
                     renderPage(0);
                 } else {
-                    toastr.warning('এই পরীক্ষার জন্য কোনো প্রশ্ন পাওয়া যায়নি।');
-                    btn.prop('disabled', false).text('পরীক্ষা শুরু করুন');
+                    toastr.warning('আপনার নির্বাচিত বিষয়ের জন্য কোনো প্রশ্ন পাওয়া যায়নি। অনুগ্রহ করে অন্য বিষয় সিলেক্ট করুন।');
+                    btn.prop('disabled', false).text('চূড়ান্ত পরীক্ষা শুরু করুন');
                 }
             },
             error: function(xhr) {
@@ -447,6 +563,7 @@
                 
                 // If it's a redirect to login (302) or 401 Unauthorized
                 if (xhr.status === 401 || xhr.status === 302 || xhr.responseText.includes('login')) {
+                    examSetupModal.hide();
                     Swal.fire({
                         title: 'লগইন প্রয়োজন',
                         text: "পরীক্ষা দিতে হলে আপনাকে অবশ্যই ছাত্র হিসেবে লগইন করতে হবে।",
@@ -466,7 +583,7 @@
                 } else {
                     toastr.error('সার্ভার থেকে সঠিক রেসপন্স পাওয়া যাচ্ছে না। অনুগ্রহ করে লগইন করে আবার চেষ্টা করুন।');
                 }
-                btn.prop('disabled', false).text('পরীক্ষা শুরু করুন');
+                btn.prop('disabled', false).text('চূড়ান্ত পরীক্ষা শুরু করুন');
             }
         });
     });
@@ -592,12 +709,28 @@
         const submitBtn = $('#submit-btn-fixed');
         submitBtn.prop('disabled', true).html('<span class="spinner-border spinner-border-sm"></span>');
         
-        $.post("{{ route('exam.submit', $jobCategory->id) }}", { answers: answers }, function(data) {
+        const questionIds = allQuestions.map(q => q.id);
+        
+        $.post("{{ route('exam.submit', $jobCategory->id) }}", { 
+            answers: answers,
+            question_ids: questionIds,
+            negative_mark: selectedNegativeMark,
+            pass_mark: selectedPassMark
+        }, function(data) {
             $('#res-total').text(data.attempt.total_questions);
             $('#res-right').text(data.attempt.right_answers);
             $('#res-wrong').text(data.attempt.wrong_answers);
             $('#res-marks').text(data.attempt.marks_obtained);
             
+            // Update modal header based on passing status
+            if (data.attempt.passed) {
+                $('#resultModal').find('h3').text('অভিনন্দন! আপনি পাস করেছেন।').removeClass('text-danger').addClass('text-success');
+                $('#resultModal').find('.score-circle').css('border-color', 'var(--accent-green)');
+            } else {
+                $('#resultModal').find('h3').text('দুঃখিত! আপনি পাস করতে পারেননি।').removeClass('text-success').addClass('text-danger');
+                $('#resultModal').find('.score-circle').css('border-color', 'var(--accent-red)');
+            }
+
             resultModal.show();
             submitBtn.prop('disabled', false).text('সাবমিট');
         }).fail(function() {

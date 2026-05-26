@@ -22,7 +22,9 @@ class StudentExamController extends Controller
         $totalQuestions = $activeQuestions->count();
         $totalMarks = $totalQuestions; 
         $duration = $totalQuestions; // 1 min per question
-        $subjects = $activeQuestions->pluck('category.name')->unique()->filter()->values();
+        
+        // Retrieve Category objects to access ID and Name for subject selection
+        $subjects = $activeQuestions->pluck('category')->unique('id')->filter()->values();
 
         return view('web.exam', compact('jobCategory', 'totalQuestions', 'totalMarks', 'duration', 'subjects'));
     }
@@ -41,10 +43,24 @@ class StudentExamController extends Controller
              return response()->json(['error'=>'not_found'], 404);
         }
 
-        $questions = \App\Models\Question::with('options')
+        $query = \App\Models\Question::with('options')
             ->where('job_category_id', $jobCategory->id)
-            ->where('status', 1)
-            ->get();
+            ->where('status', 1);
+
+        // Subject filter
+        if ($request->filled('subject_id') && $request->subject_id !== 'all') {
+            $query->where('category_id', $request->subject_id);
+        }
+
+        // Randomize questions for a dynamic practice experience
+        $query->inRandomOrder();
+
+        // Limit the number of questions
+        if ($request->filled('limit') && intval($request->limit) > 0) {
+            $query->limit(intval($request->limit));
+        }
+
+        $questions = $query->get();
 
         \Log::info("Exam Start Attempt: JobCategory ID: {$jobCategory->id}, Questions Found: " . $questions->count());
 
@@ -78,19 +94,30 @@ class StudentExamController extends Controller
         $jobCategory = JobCategory::with('questions')->findOrFail($jobCategoryId);
         $studentId = auth()->guard('student')->id();
 
+        // Retrieve the presented question IDs
+        $questionIds = $request->input('question_ids', []);
+        if (empty($questionIds)) {
+            $questionIds = $jobCategory->questions()->where('status', 1)->pluck('id')->toArray();
+        }
+
+        $totalQuestions = count($questionIds);
+
         $attempt = ExamAttempt::create([
             'job_category_id' => $jobCategory->id,
             'student_id' => $studentId,
-            'total_questions' => count($request->answers),
+            'total_questions' => $totalQuestions,
         ]);
 
         $right = $wrong = $noAns = 0;
         $marks = $negMarks = 0;
-        $negative_mark = 0.25; // fixed example
+        $negative_mark = floatval($request->input('negative_mark', 0.25));
 
-        foreach($request->answers as $qId => $opt){
-            $question = $jobCategory->questions->where('id',$qId)->first();
-            $isCorrect = $question && $question->correct_answer == $opt;
+        foreach($questionIds as $qId){
+            $question = $jobCategory->questions->where('id', $qId)->first();
+            if (!$question) continue;
+
+            $opt = isset($request->answers[$qId]) ? $request->answers[$qId] : null;
+            $isCorrect = ($opt !== null) && ($question->correct_answer == $opt);
 
             ExamAnswer::create([
                 'exam_attempt_id' => $attempt->id,
@@ -99,19 +126,31 @@ class StudentExamController extends Controller
                 'is_correct' => $isCorrect
             ]);
 
-            if($opt === null) $noAns++;
-            elseif($isCorrect) { $right++; $marks += 1; }
-            else { $wrong++; $negMarks += $negative_mark; }
+            if ($opt === null) {
+                $noAns++;
+            } elseif ($isCorrect) {
+                $right++;
+                $marks += 1;
+            } else {
+                $wrong++;
+                $negMarks += $negative_mark;
+            }
         }
 
+        $finalObtained = $marks - $negMarks;
+        
+        // Pass mark logic
+        $pass_mark = floatval($request->input('pass_mark', 0));
+        $isPassed = $finalObtained >= $pass_mark;
+
         $attempt->update([
-            'answered' => count($request->answers) - $noAns,
+            'answered' => $totalQuestions - $noAns,
             'right_answers' => $right,
             'wrong_answers' => $wrong,
             'no_answers' => $noAns,
-            'marks_obtained' => $marks,
+            'marks_obtained' => $finalObtained,
             'negative_marks' => $negMarks,
-            'passed' => $marks >= 0 // pass_mark logic here
+            'passed' => $isPassed
         ]);
 
         return response()->json(['success'=>true,'attempt'=>$attempt]);
