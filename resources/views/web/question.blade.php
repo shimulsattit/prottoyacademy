@@ -553,7 +553,7 @@
 
 {{-- ======================= EXAM SETUP MODAL ======================= --}}
 <div class="modal fade" id="examSetupModal" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-md">
+    <div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-md">
         <div class="modal-content" style="background: #0f1129; border: 1px solid rgba(255,255,255,0.1); border-radius: 24px;">
             <div class="modal-body p-4">
                 <div class="text-center mb-4">
