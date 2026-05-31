@@ -255,6 +255,12 @@ class WebsiteController extends Controller
             return redirect()->route('slug.handle', ['slug' => $normalizedSlug], 301);
         }
 
+        $slugVariants = [
+            $slug,
+            str_replace('-', ' ', $slug),
+            str_replace(' ', '-', $slug)
+        ];
+
         $models = ['Category', 'Blog', 'BlogCategory', 'BlogAuthor', 'BlogTag', 'Page', 'JobCategory'];
 
         if ($index >= count($models)) {
@@ -263,9 +269,9 @@ class WebsiteController extends Controller
 
         // Get the current model name
         $model = $models[$index];
-        if ($model == 'Category' && Category::where('slug', $slug)->where('status', 1)->exists()) {
+        if ($model == 'Category' && Category::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
 
-            $category = Category::where('slug', $slug)->first();
+            $category = Category::whereIn('slug', $slugVariants)->first();
 
             if ($category) {
                 $allJobCategories = JobCategory::with('questions')->where('categorY_id', $category->id)->where('status', 1)->get();
@@ -305,34 +311,34 @@ class WebsiteController extends Controller
                 }
 
                 $questions = Question::where('category_id', $category->id)
-                    ->where('status', 1)
-                    ->with(['options', 'category', 'job_category'])
-                    ->orderBy('id', 'desc')
-                    ->get()
-                    ->map(function ($q) {
-                        return [
-                            'id' => $q->id,
-                            'uuid' => $q->uuid,
-                            'type' => $q->question_type,
-                            'question' => html_entity_decode($q->question),
-                            'correct_answer' => html_entity_decode($q->correct_answer),
-                            'content' => html_entity_decode($q->content),
-                            'options' => [
-                                $q->options?->option_one ? html_entity_decode($q->options->option_one) : '',
-                                $q->options?->option_two ? html_entity_decode($q->options->option_two) : '',
-                                $q->options?->option_three ? html_entity_decode($q->options->option_three) : '',
-                                $q->options?->option_four ? html_entity_decode($q->options->option_four) : '',
-                                $q->options?->option_five ? html_entity_decode($q->options->option_five) : null,
-                            ],
-                            'category_name' => $q->category?->name,
-                            'category_slug' => $q->category?->slug,
-                            'exam_name' => $q->job_category?->name,
-                            'exam_slug' => $q->job_category?->slug,
-                            'job_category_name' => $q->job_category?->category?->name,
-                            'job_category_slug' => $q->job_category?->category?->slug,
-                        ];
-                    })
-                    ->values();
+                     ->where('status', 1)
+                     ->with(['options', 'category', 'job_category'])
+                     ->orderBy('id', 'desc')
+                     ->get()
+                     ->map(function ($q) {
+                         return [
+                             'id' => $q->id,
+                             'uuid' => $q->uuid,
+                             'type' => $q->question_type,
+                             'question' => html_entity_decode($q->question),
+                             'correct_answer' => html_entity_decode($q->correct_answer),
+                             'content' => html_entity_decode($q->content),
+                             'options' => [
+                                 $q->options?->option_one ? html_entity_decode($q->options->option_one) : '',
+                                 $q->options?->option_two ? html_entity_decode($q->options->option_two) : '',
+                                 $q->options?->option_three ? html_entity_decode($q->options->option_three) : '',
+                                 $q->options?->option_four ? html_entity_decode($q->options->option_four) : '',
+                                 $q->options?->option_five ? html_entity_decode($q->options->option_five) : null,
+                             ],
+                             'category_name' => $q->category?->name,
+                             'category_slug' => $q->category?->slug,
+                             'exam_name' => $q->job_category?->name,
+                             'exam_slug' => $q->job_category?->slug,
+                             'job_category_name' => $q->job_category?->category?->name,
+                             'job_category_slug' => $q->job_category?->category?->slug,
+                         ];
+                     })
+                     ->values();
 
                 return view('web.category-wise', [
                     'category'        => $category,
@@ -343,8 +349,8 @@ class WebsiteController extends Controller
             }
 
             return $this->fetcher($slug, $request, $index + 1);
-        } elseif ($model == 'Blog' && Blog::where('slug', $slug)->where('status', 1)->exists()) {
-            $blog = Blog::where('slug', $slug)->where('status', 1)->first();
+        } elseif ($model == 'Blog' && Blog::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
+            $blog = Blog::whereIn('slug', $slugVariants)->where('status', 1)->first();
 
             if ($blog) {
                 $tags = BlogTag::where('status', 1)->get();
@@ -360,8 +366,8 @@ class WebsiteController extends Controller
                 return $this->fetcher($slug, $request, $index + 1);
             }
 
-        } elseif ($model == 'BlogCategory' && BlogCategory::where('slug', $slug)->where('status', 1)->exists()) {
-            $category = BlogCategory::where('slug', $slug)->where('status', 1)->first();
+        } elseif ($model == 'BlogCategory' && BlogCategory::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
+            $category = BlogCategory::whereIn('slug', $slugVariants)->where('status', 1)->first();
             if ($category) {
 
                 $blogs = Blog::where('blog_category_id', $category->id)->where('status', 1)->paginate(15);
@@ -371,8 +377,8 @@ class WebsiteController extends Controller
                 return $this->fetcher($slug, $request, $index + 1);
             }
 
-        } elseif ($model == 'BlogAuthor' && BlogAuthor::where('slug', $slug)->where('status', 1)->exists()) {
-            $author = BlogAuthor::where('slug', $slug)->where('status', 1)->first();
+        } elseif ($model == 'BlogAuthor' && BlogAuthor::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
+            $author = BlogAuthor::whereIn('slug', $slugVariants)->where('status', 1)->first();
             if ($author) {
 
                 $blogs = Blog::where('blog_author_id', $author->id)->where('status', 1)->paginate(15);
@@ -382,15 +388,16 @@ class WebsiteController extends Controller
                 return $this->fetcher($slug, $request, $index + 1);
             }
 
-        } elseif ($model == 'Page' && Page::where('slug', $slug)->where('status', 1)->exists()) {
-            $model = Page::where('status', 1)->where('slug', $slug)->first();
+        } elseif ($model == 'Page' && Page::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
+            $model = Page::where('status', 1)->whereIn('slug', $slugVariants)->first();
             if($model) {
                 return view('web.page', compact('model'));
             } else {
                 return $this->fetcher($slug, $request, $index + 1);
             }
-        } elseif ($model == 'JobCategory' && JobCategory::where('slug', $slug)->where('status', 1)->exists()) {
-            $model = JobCategory::where('status', 1)->where('slug', $slug)->first();
+        } elseif ($model == 'JobCategory' && JobCategory::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
+            $model = JobCategory::where('status', 1)->whereIn('slug', $slugVariants)->first();
+
             if($model) {
 
                 $mainCategory = Category::find($model->category_id);

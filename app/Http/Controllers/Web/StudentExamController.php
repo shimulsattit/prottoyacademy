@@ -15,7 +15,12 @@ class StudentExamController extends Controller
     // Show JobCategory as Exam
     public function show($slug)
     {
-        $jobCategory = JobCategory::where('slug', $slug)->firstOrFail();
+        $slugVariants = [
+            $slug,
+            str_replace('-', ' ', $slug),
+            str_replace(' ', '-', $slug)
+        ];
+        $jobCategory = JobCategory::whereIn('slug', $slugVariants)->firstOrFail();
         
         $activeQuestions = $jobCategory->questions()->where('status', 1)->with('category')->get();
         
@@ -36,12 +41,18 @@ class StudentExamController extends Controller
             return response()->json(['error'=>'login_required'], 401);
         }
 
+        $slugVariants = [
+            $id,
+            str_replace('-', ' ', $id),
+            str_replace(' ', '-', $id)
+        ];
         // Try to find JobCategory by ID or Slug just in case
-        $jobCategory = JobCategory::where('id', $id)->orWhere('slug', $id)->first();
+        $jobCategory = JobCategory::where('id', $id)->orWhereIn('slug', $slugVariants)->first();
         
         if (!$jobCategory) {
              return response()->json(['error'=>'not_found'], 404);
         }
+
 
         $query = \App\Models\Question::with('options')
             ->where('job_category_id', $jobCategory->id)
