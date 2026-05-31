@@ -95,6 +95,44 @@
                                     <input type="text" name="system_youtube_url" id="system_youtube_url" class="form-control" value="{{ get_settings('system_youtube_url') }}">
                                 </div>
 
+                                <!-- ============================================================== -->
+                                <!-- SEO, Google Analytics & Custom Scripts Integration -->
+                                <!-- ============================================================== -->
+                                <div class="col-md-12 my-4">
+                                    <div class="separator separator-dashed my-5"></div>
+                                    <h3 class="text-gray-900 fw-bold mb-5">
+                                        <i class="fas fa-search-plus text-primary me-2"></i> SEO, Analytics & Custom Scripts
+                                    </h3>
+                                </div>
+
+                                <!-- google_analytics_id -->
+                                <div class="col-md-6 mb-4 form-group">
+                                    <label for="google_analytics_id" class="fw-semibold text-gray-700 mb-1">Google Analytics Measurement ID (GA4)</label>
+                                    <input type="text" name="google_analytics_id" id="google_analytics_id" class="form-control" placeholder="e.g. G-XXXXXXXXXX" value="{{ get_settings('google_analytics_id') }}">
+                                    <span class="fs-7 text-muted">আপনার Google Analytics 4 (GA4) এর Measurement ID টি এখানে দিন (যেমন: G-XXXXXXXXXX)।</span>
+                                </div>
+
+                                <!-- google_search_console_id -->
+                                <div class="col-md-6 mb-4 form-group">
+                                    <label for="google_search_console_id" class="fw-semibold text-gray-700 mb-1">Google Search Console Verification Token</label>
+                                    <input type="text" name="google_search_console_id" id="google_search_console_id" class="form-control" placeholder="e.g. google-site-verification token" value="{{ get_settings('google_search_console_id') }}">
+                                    <span class="fs-7 text-muted">Google Search Console এর HTML tag ভেরিফিকেশনের <code>content</code> মানটি এখানে দিন।</span>
+                                </div>
+
+                                <!-- custom_header_scripts -->
+                                <div class="col-md-12 mb-4 form-group">
+                                    <label for="custom_header_scripts" class="fw-semibold text-gray-700 mb-1">Custom Header Scripts (&lt;head&gt;)</label>
+                                    <textarea name="custom_header_scripts" id="custom_header_scripts" cols="30" rows="4" class="form-control font-monospace bg-dark text-success" placeholder="<!-- Insert code here, e.g., Meta Pixel, custom stylesheets -->">{{ get_settings('custom_header_scripts') }}</textarea>
+                                    <span class="fs-7 text-muted">এই কোডটি ওয়েবসাইটের <code>&lt;head&gt;</code> ট্যাগ শেষ হওয়ার ঠিক আগে যুক্ত হবে।</span>
+                                </div>
+
+                                <!-- custom_footer_scripts -->
+                                <div class="col-md-12 mb-5 form-group">
+                                    <label for="custom_footer_scripts" class="fw-semibold text-gray-700 mb-1">Custom Footer Scripts (&lt;/body&gt;)</label>
+                                    <textarea name="custom_footer_scripts" id="custom_footer_scripts" cols="30" rows="4" class="form-control font-monospace bg-dark text-success" placeholder="<!-- Insert code here, e.g., Live Chat widgets, custom JS -->">{{ get_settings('custom_footer_scripts') }}</textarea>
+                                    <span class="fs-7 text-muted">এই কোডটি ওয়েবসাইটের <code>&lt;/body&gt;</code> ট্যাগ শেষ হওয়ার ঠিক ওপরে যুক্ত হবে।</span>
+                                </div>
+
                                 @if (Auth::guard('admin')->user()->hasPermissionTo('settings.update'))
                                     <div class="col-md-4 mb-3 mx-auto">
                                         <button type="submit" class="btn btn-sm btn-block btn-primary" id="submit">

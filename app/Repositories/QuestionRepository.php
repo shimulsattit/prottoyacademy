@@ -75,7 +75,7 @@ class QuestionRepository implements QuestionRepositoryInterface
                     $model = new Question();
                     $model->admin_id = auth()->guard('admin')->user()->id;
                     $model->category_id = $request->category_id[count($request->category_id) - 1];
-                    $model->job_category_id = $request->job_category_id;
+                    $model->job_category_id = isset($question['job_category_id']) ? $question['job_category_id'] : $request->job_category_id;
                     $model->year_id = $request->year_id;
                     $model->exam_id = $request->exam_id;
                     $model->passage_id = $request->passage_id;

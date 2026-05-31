@@ -23,6 +23,7 @@
                        required 
                        value="{{ old("questions.$counter.question", $row[0]) }}">
                 <input type="hidden" name="questions[{{ $counter }}][description]" value="">
+                <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[3] ?? '' }}">
             </div>
 
             <div class="col-md-12 form-group mb-3">

@@ -60,7 +60,14 @@ class QuestionController extends Controller
             return redirect()->route('portal.dashboard');
         }
 
-        $job_categories = $this->jobCategoryService->all()->where('category_id', $category->id);
+        $childCategories = $this->getAllChildCategoriesWithName($category->id);
+        $categoryIds = collect($childCategories)->pluck('id')->push($category->id);
+        if ($category->parent_id) {
+            $categoryIds->push($category->parent_id);
+        }
+        $categoryIds = $categoryIds->unique()->toArray();
+
+        $job_categories = $this->jobCategoryService->all()->whereIn('category_id', $categoryIds);
         $years = $this->yearService->all()->select('id', 'name');
 
         return view('portal.question.category_wise', compact('category', 'job_categories', 'years'));

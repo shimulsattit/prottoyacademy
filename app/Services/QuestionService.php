@@ -123,6 +123,35 @@ class QuestionService {
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray();
 
+        // Dynamically parse and resolve Job Category column for each row
+        foreach ($rows as $key => &$row) {
+            if ($key === 0 || empty($row[0])) continue;
+
+            $jobCategoryName = isset($row[$request->question_type == 'mcq' ? 7 : 2]) ? trim($row[$request->question_type == 'mcq' ? 7 : 2]) : '';
+            $jobCategoryId = null;
+
+            if (!empty($jobCategoryName)) {
+                $catId = is_array($request->category_id) ? $request->category_id[count($request->category_id) - 1] : $request->category_id;
+                $jobCategory = \App\Models\JobCategory::where('category_id', $catId)
+                    ->where('name', 'LIKE', '%' . $jobCategoryName . '%')
+                    ->first();
+                if (!$jobCategory) {
+                    $jobCategory = \App\Models\JobCategory::create([
+                        'admin_id' => auth()->guard('admin')->id(),
+                        'category_id' => $catId,
+                        'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                        'name' => $jobCategoryName,
+                        'slug' => \Illuminate\Support\Str::slug($jobCategoryName),
+                        'status' => 1
+                    ]);
+                }
+                $jobCategoryId = $jobCategory->id;
+            }
+            // Append the resolved ID to the row array at specific index
+            $row[$request->question_type == 'mcq' ? 8 : 3] = $jobCategoryId;
+        }
+        unset($row);
+
         $questions = 0;
         $content = '';
 

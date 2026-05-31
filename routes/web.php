@@ -61,4 +61,6 @@ Route::middleware(['isStudent'])->group(function () {
 
 Route::get('exam/{slug}', [StudentExamController::class, 'show'])->name('exam.show');
 
+Route::get('sitemap.xml', [App\Http\Controllers\Web\SitemapController::class, 'index'])->name('sitemap');
+
 Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle');

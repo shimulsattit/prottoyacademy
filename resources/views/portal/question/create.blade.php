@@ -1,4 +1,18 @@
 @extends('layouts.admin', ['title' => 'Create New Question'])
+@@php
+    $preSelectedCategory = null;
+    $categoryBreadcrumb = collect([]);
+    if (request()->has('category_id')) {
+        $preSelectedCategory = \App\Models\Category::find(request('category_id'));
+        if ($preSelectedCategory) {
+            $categoryBreadcrumb = $preSelectedCategory->breadcrumb();
+        }
+    }
+    $preSelectedJobCategory = null;
+    if (request()->has('job_category_id')) {
+        $preSelectedJobCategory = \App\Models\JobCategory::find(request('job_category_id'));
+    }
+@endphp
 @push('style')
     <link rel="stylesheet" href="{{ asset('portal-resource/css/dropify.min.css') }}">
 @endpush
@@ -42,10 +56,34 @@
 
                                 <div class="col-md-12 form-group mb-3">
                                     <label for="category_id">Category <span class="text-danger">*</span></label>
-                                    <select name="category_id[]" id="category_id" class="form-control category_id007 select"></select>
+                                    <select name="category_id[]" id="category_id" class="form-control category_id007 select">
+                                        @if($categoryBreadcrumb->count() > 0)
+                                            <option value="{{ $categoryBreadcrumb->first()->id }}" selected>{{ $categoryBreadcrumb->first()->name }}</option>
+                                        @endif
+                                    </select>
                                 </div>
 
-                                <div class="Sub_Categories row"></div>
+                                <div class="Sub_Categories row">
+                                    @if($categoryBreadcrumb->count() > 1)
+                                        @foreach($categoryBreadcrumb as $index => $cat)
+                                            @if($index > 0)
+                                                @php
+                                                    $siblings = \App\Models\Category::where('parent_id', $categoryBreadcrumb[$index - 1]->id)->where('status', 1)->get();
+                                                @endphp
+                                                <div class="subcategory-group mb-3">
+                                                    <select name="category_id[]" class="form-control select mb-2" required data-level="{{ $index }}">
+                                                        <option value="" disabled>--Select Sub Category--</option>
+                                                        @foreach($siblings as $sibling)
+                                                            <option value="{{ $sibling->id }}" {{ $sibling->id == $cat->id ? 'selected' : '' }}>
+                                                                {{ str_repeat('-', $index) }} {{ $sibling->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                </div>
 
                                 <div class="col-md-6 form-group mb-3">
                                     <label for="question_type">Question Type <span class="text-danger">*</span></label>
@@ -71,9 +109,13 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-4 form-group mb-3">
+                                <div class="col-md-6 form-group mb-3">
                                     <label for="job_category_id">Job Category</label>
-                                    <select name="job_category_id" id="job_category_id" class="form-control" data-parsley-errors-container="#job_category_id_error"></select>
+                                    <select name="job_category_id" id="job_category_id" class="form-control" data-parsley-errors-container="#job_category_id_error">
+                                        @if($preSelectedJobCategory)
+                                            <option value="{{ $preSelectedJobCategory->id }}" selected>{{ $preSelectedJobCategory->name }}</option>
+                                        @endif
+                                    </select>
                                     <span id="job_category_id_error"></span>
                                 </div>
 
@@ -493,8 +535,37 @@
             }
         });
 
-        let categoryIdArray = [];
-        let categoryIdString = '';
+        let categoryIdArray = {!! $categoryBreadcrumb->count() > 0 ? json_encode($categoryBreadcrumb->pluck('id')->toArray()) : '[]' !!};
+        let categoryIdString = categoryIdArray.join(',');
+
+        @if($preSelectedCategory && $categoryBreadcrumb->count() === 1)
+            // Trigger change event to load subcategories automatically on load ONLY if it is a root category!
+            $('#category_id').trigger('change');
+        @endif
+
+        // Initialize existing subcategory select boxes (pre-rendered via Blade)
+        $('.Sub_Categories select').each(function () {
+            $(this).select2();
+            
+            // Bind change event
+            $(this).change(function () {
+                const selectedSubCategoryId = $(this).val();
+                const currentLevel = parseInt($(this).attr('data-level'));
+
+                // Remove all subcategory selects below this level
+                $('.Sub_Categories select').each(function () {
+                    const level = parseInt($(this).attr('data-level'));
+                    if (level > currentLevel) {
+                        $(this).closest('.subcategory-group').remove();
+                    }
+                });
+
+                // Fetch next level if selected
+                if (selectedSubCategoryId) {
+                    fetchSubCategories(selectedSubCategoryId, currentLevel + 1, $(this));
+                }
+            });
+        });
 
         // Main category change event
         $('#category_id').change(function () {

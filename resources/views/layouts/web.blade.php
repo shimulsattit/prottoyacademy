@@ -14,6 +14,29 @@
 
         @stack('meta')
 
+        <!-- Google Search Console Verification -->
+        @if(get_settings('google_search_console_id'))
+            <meta name="google-site-verification" content="{{ get_settings('google_search_console_id') }}" />
+        @endif
+
+        <!-- Google Analytics (GA4) -->
+        @if(get_settings('google_analytics_id'))
+            <!-- Global site tag (gtag.js) - Google Analytics -->
+            <script async src="https://www.googletagmanager.com/gtag/js?id={{ get_settings('google_analytics_id') }}"></script>
+            <script>
+                window.dataLayer = window.dataLayer || [];
+                function gtag(){dataLayer.push(arguments);}
+                gtag('js', new Date());
+
+                gtag('config', '{{ get_settings('google_analytics_id') }}');
+            </script>
+        @endif
+
+        <!-- Custom Header Scripts -->
+        @if(get_settings('custom_header_scripts'))
+            {!! get_settings('custom_header_scripts') !!}
+        @endif
+
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Hind+Siliguri:wght@300;400;500;600;700&family=Noto+Serif+Bengali:wght@400;600;700;900&display=swap" rel="stylesheet">
@@ -121,6 +144,11 @@
                 }
             });
         </script>
+        <!-- Custom Footer/Body Scripts -->
+        @if(get_settings('custom_footer_scripts'))
+            {!! get_settings('custom_footer_scripts') !!}
+        @endif
+
         @stack('scripts')
     </body>
 </html>

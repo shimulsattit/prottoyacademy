@@ -1,4 +1,4 @@
-@extends('layouts.portal-premium', ['title' => 'ড্যাশবোর্ড'])
+@extends('layouts.admin', ['title' => 'ড্যাশবোর্ড'])
 
 @push('style')
 <style>
