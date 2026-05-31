@@ -91,6 +91,12 @@
         border-radius: 10px; padding: 14px 18px;
         font-size: 15px; color: #cbd5e1;
         transition: all .2s; cursor: pointer;
+        display: flex;
+        align-items: center;
+    }
+    .opt-box p {
+        margin: 0 !important;
+        display: inline !important;
     }
     .opt-box:hover { background: rgba(255,255,255,0.08); border-color: rgba(255,255,255,0.2); color: #fff; }
     .opt-correct {
