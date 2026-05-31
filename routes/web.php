@@ -67,22 +67,36 @@ Route::get('/clear-cache', function() {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
     
     $out = "Cache cleared successfully!<br><br>";
-    $slug = "পিএসসি-ও-অন্যান্য-পরীক্ষা";
-    $cat = \App\Models\Category::where('slug', $slug)->first();
-    if ($cat) {
-        $out .= "Category 27 exists! Name: {$cat->name}, Slug: {$cat->slug}, Status: {$cat->status}<br>";
+    
+    $slug1 = "পিএসসি-ও-অন্যান্য-পরীক্ষা";
+    $cat1 = \App\Models\Category::where('slug', $slug1)->first();
+    if ($cat1) {
+        $out .= "Category 27 exists by hyphenated slug! Name: {$cat1->name}, Slug: {$cat1->slug}<br>";
     } else {
-        $out .= "Category 27 NOT found in DB by exact slug '{$slug}'!<br>";
-        // Find by name
-        $catName = \App\Models\Category::where('name', 'like', '%পিএসসি%')->first();
-        if ($catName) {
-            $out .= "Found category by Name LIKE '%পিএসসি%': Name: {$catName->name}, Slug: {$catName->slug}, Status: {$catName->status}<br>";
-        } else {
-            $out .= "No category found by Name LIKE '%পিএসসি%'!<br>";
+        $out .= "Category 27 NOT found by hyphenated slug '{$slug1}'!<br>";
+        $cat1_any = \App\Models\Category::where('name', 'like', '%পিএসসি%')->get();
+        foreach ($cat1_any as $c) {
+            $out .= " - Found in DB: ID: {$c->id}, Name: '{$c->name}', Slug: '{$c->slug}', Status: {$c->status}<br>";
         }
     }
+    
+    $out .= "<br>";
+    
+    $slug2 = "প্রাথমিক-সহকারী-শিক্ষক-নিয়োগ-পরীক্ষা";
+    $cat2 = \App\Models\Category::where('slug', $slug2)->first();
+    if ($cat2) {
+        $out .= "Category 23 exists by hyphenated slug! Name: {$cat2->name}, Slug: {$cat2->slug}<br>";
+    } else {
+        $out .= "Category 23 NOT found by hyphenated slug '{$slug2}'!<br>";
+        $cat2_any = \App\Models\Category::where('name', 'like', '%প্রাথমিক সহকারী%')->get();
+        foreach ($cat2_any as $c) {
+            $out .= " - Found in DB: ID: {$c->id}, Name: '{$c->name}', Slug: '{$c->slug}', Status: {$c->status}<br>";
+        }
+    }
+    
     return $out;
 });
+
 
 
 Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '.*');
