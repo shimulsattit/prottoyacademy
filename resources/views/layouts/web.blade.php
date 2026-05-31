@@ -105,6 +105,12 @@
                 --accent-orange: #ff6b35;
                 --text-light: #b8c4e8;
             }
+            
+            /* MathJax & MathML Color Inherit Fix */
+            mjx-container, math, .mjx-chtml, .MathJax, mjx-math {
+                color: inherit !important;
+                background-color: transparent !important;
+            }
             body {
                 background-color: #050714 !important;
                 color: #fff !important;
