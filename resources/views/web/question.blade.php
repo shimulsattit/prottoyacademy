@@ -104,6 +104,9 @@
         border-color: rgba(34,197,94,0.3) !important;
         color: #22c55e !important; font-weight: 600;
     }
+    .opt-correct p, .opt-correct span:not(.opt-label) {
+        color: #22c55e !important;
+    }
     .opt-label { font-weight: 800; color: var(--accent-gold); margin-right: 10px; }
 
     /* SIDEBAR */

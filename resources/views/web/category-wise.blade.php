@@ -111,6 +111,11 @@
         .pz-btn-mini { flex: 1; justify-content: center; padding: 10px 5px !important; font-size: 13px !important; }
         .premium-breadcrumb { padding: 10px 16px; margin-bottom: 20px; font-size: 13px; }
     }
+    
+    /* Correct option text color override */
+    .pz-correct-ans.revealed p, .pz-correct-ans.revealed span {
+        color: #28a745 !important;
+    }
 </style>
 @endpush
 
@@ -286,7 +291,7 @@
             const isRevealed = correctItem.classList.toggle('revealed');
             correctItem.style.background = isRevealed ? "rgba(40, 167, 69, 0.15)" : "rgba(255,255,255,0.04)";
             correctItem.style.borderColor = isRevealed ? "#28a745" : "rgba(255,255,255,0.08)";
-            correctItem.style.color = isRevealed ? "#fff" : "#ccc";
+            correctItem.style.color = isRevealed ? "#28a745" : "#ccc";
         }
     }
 
