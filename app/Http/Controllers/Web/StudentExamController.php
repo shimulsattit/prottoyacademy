@@ -69,16 +69,16 @@ class StudentExamController extends Controller
             'questions' => $questions->map(function($q){
                 return [
                     'id' => $q->id,
-                    'question' => $q->question,
+                    'question' => html_entity_decode($q->question),
                     'type' => $q->question_type,
                     'options' => $q->options ? [
-                        $q->options->option_one,
-                        $q->options->option_two,
-                        $q->options->option_three,
-                        $q->options->option_four,
-                        $q->options->option_five
+                        $q->options->option_one !== '' ? html_entity_decode($q->options->option_one) : '',
+                        $q->options->option_two !== '' ? html_entity_decode($q->options->option_two) : '',
+                        $q->options->option_three !== '' ? html_entity_decode($q->options->option_three) : '',
+                        $q->options->option_four !== '' ? html_entity_decode($q->options->option_four) : '',
+                        $q->options->option_five !== '' ? html_entity_decode($q->options->option_five) : ''
                     ] : [],
-                    'correct_answer' => $q->correct_answer
+                    'correct_answer' => html_entity_decode($q->correct_answer)
                 ];
             })
         ]);
