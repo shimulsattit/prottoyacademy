@@ -111,6 +111,17 @@
                 color: inherit !important;
                 background-color: transparent !important;
             }
+            
+            /* Global Question and Paragraph Text Color Override for Dark Theme */
+            .q-card-premium p, .q-card-premium span:not(.opt-label):not(.q-num),
+            .q-text-premium p, .q-text-premium span:not(.q-num),
+            .opt-box p, .opt-box span:not(.opt-label),
+            .pz-card p, .pz-card span:not(.pz-count-bn) {
+                color: inherit !important;
+            }
+            .q-text-premium p, .q-text-premium span:not(.q-num) {
+                color: #fff !important;
+            }
             body {
                 background-color: #050714 !important;
                 color: #fff !important;
