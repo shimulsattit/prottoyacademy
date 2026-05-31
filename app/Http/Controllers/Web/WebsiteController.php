@@ -247,6 +247,12 @@ class WebsiteController extends Controller
 
     public function fetcher($slug, Request $request, $index = 0)
     {
+        // Redirect if slug has spaces to the correct hyphenated SEO URL
+        if (str_contains($slug, ' ')) {
+            $normalizedSlug = preg_replace('/-+/', '-', str_replace(' ', '-', $slug));
+            return redirect()->route('slug.handle', ['slug' => $normalizedSlug], 301);
+        }
+
         $models = ['Category', 'Blog', 'BlogCategory', 'BlogAuthor', 'BlogTag', 'Page', 'JobCategory'];
 
         if ($index >= count($models)) {
