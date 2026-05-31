@@ -65,8 +65,25 @@ Route::get('sitemap.xml', [App\Http\Controllers\Web\SitemapController::class, 'i
 
 Route::get('/clear-cache', function() {
     \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-    return "Cache cleared successfully!";
+    
+    $out = "Cache cleared successfully!<br><br>";
+    $slug = "পিএসসি-ও-অন্যান্য-পরীক্ষা";
+    $cat = \App\Models\Category::where('slug', $slug)->first();
+    if ($cat) {
+        $out .= "Category 27 exists! Name: {$cat->name}, Slug: {$cat->slug}, Status: {$cat->status}<br>";
+    } else {
+        $out .= "Category 27 NOT found in DB by exact slug '{$slug}'!<br>";
+        // Find by name
+        $catName = \App\Models\Category::where('name', 'like', '%পিএসসি%')->first();
+        if ($catName) {
+            $out .= "Found category by Name LIKE '%পিএসসি%': Name: {$catName->name}, Slug: {$catName->slug}, Status: {$catName->status}<br>";
+        } else {
+            $out .= "No category found by Name LIKE '%পিএসসি%'!<br>";
+        }
+    }
+    return $out;
 });
+
 
 Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '.*');
 
