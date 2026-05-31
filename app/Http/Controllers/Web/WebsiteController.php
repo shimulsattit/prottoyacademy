@@ -260,7 +260,23 @@ class WebsiteController extends Controller
             $category = Category::where('slug', $slug)->first();
 
             if ($category) {
-                $jobCategories = JobCategory::with('questions')->where('categorY_id', $category->id)->where('status', 1)->latest()->paginate(100)->onEachSide(1);
+                $allJobCategories = JobCategory::with('questions')->where('categorY_id', $category->id)->where('status', 1)->get();
+                $sortedCategories = $allJobCategories->sortByDesc(function ($sExam) {
+                    if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
+                        $parts = explode('-', $matches[1]);
+                        if (count($parts) === 3) {
+                            return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                        }
+                    }
+                    return '0000-00-00';
+                });
+                
+                $currentPage = \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPage();
+                $perPage = 100;
+                $currentItems = $sortedCategories->slice(($currentPage - 1) * $perPage, $perPage)->values()->all();
+                $jobCategories = new \Illuminate\Pagination\LengthAwarePaginator($currentItems, $sortedCategories->count(), $perPage, $currentPage, [
+                    'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()
+                ]);
 
 
                 // Check if this category has child categories
