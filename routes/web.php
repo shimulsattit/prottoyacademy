@@ -90,7 +90,22 @@ Route::get('/clear-cache', function() {
         $out .= "Category 23 NOT found by hyphenated slug '{$slug2}'!<br>";
         $cat2_any = \App\Models\Category::where('name', 'like', '%প্রাথমিক সহকারী%')->get();
         foreach ($cat2_any as $c) {
-            $out .= " - Found in DB: ID: {$c->id}, Name: '{$c->name}', Slug: '{$c->slug}', Status: {$c->status}<br>";
+            $out .= " - Found in DB: ID: {$c->id}, Name: {$c->name}, Slug: {$c->slug}, Status: {$c->status}<br>";
+        }
+    }
+    
+    $out .= "<br>";
+    
+    $slug3 = "বাংলাদেশ-আনসার-ও-গ্রাম-প্রতিরক্ষা-বাহিনী-সাঁট-লিপিকার-কাম-কম্পিউটার-অপারেটর,সাঁট-মুদ্রাক্ষরিক-কাম-কম্পিউটার-অপারেটর,থানা/উপজেলা-প্রশিক্ষক,উপজেলা/থানা-মহিলা-প্রশিক্ষিকা,পেস্টিং-সহকারী,প্রুফ-রিডার,-অফিস-সহকারী-(31-05-2025)";
+    $jc = \App\Models\JobCategory::where('slug', $slug3)->first();
+    if ($jc) {
+        $out .= "JobCategory 141 exists by hyphenated slug! Name: {$jc->name}, Slug: {$jc->slug}<br>";
+    } else {
+        $out .= "JobCategory 141 NOT found by exact hyphenated slug!<br>";
+        // Find with variants or search by name
+        $jc_any = \App\Models\JobCategory::where('name', 'like', '%আনসার%')->get();
+        foreach ($jc_any as $j) {
+            $out .= " - Found in DB: ID: {$j->id}, Name: {$j->name}, Slug: {$j->slug}, Status: {$j->status}<br>";
         }
     }
     
@@ -100,4 +115,3 @@ Route::get('/clear-cache', function() {
 
 
 Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '.*');
-
