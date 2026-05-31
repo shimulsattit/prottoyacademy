@@ -5,7 +5,48 @@
         <meta http-equiv="x-ua-compatible" content="ie=edge">
 		<meta name="viewport" content="width=device-width, initial-scale=1" />
 
-        <title>{{ isset($title) ? $title : 'Prottoy Academy' }}</title>
+        @php
+            // Dynamic SEO Fallback Detector & Builder
+            $seoTitle = isset($title) ? $title : null;
+            $seoDescription = null;
+            $seoKeywords = null;
+
+            if (isset($blog)) {
+                $seoTitle = $blog->meta_title ?: ($blog->site_title ?: $blog->title);
+                $seoDescription = $blog->meta_description ?: Str::limit(strip_tags($blog->short_description), 160);
+                $seoKeywords = $blog->meta_keyword;
+            } elseif (isset($model)) {
+                $seoTitle = $model->meta_title ?: $model->title;
+                $seoDescription = $model->meta_description ?: (isset($model->content) ? Str::limit(strip_tags($model->content), 160) : null);
+                $seoKeywords = $model->meta_keyword ?? $model->meta_keywords ?? null;
+            } elseif (isset($category)) {
+                $seoTitle = $category->meta_title ?: ($category->site_title ?: $category->name);
+                $seoDescription = $category->meta_description ?: (isset($category->content) ? Str::limit(strip_tags($category->content), 160) : null);
+                $seoKeywords = $category->meta_keywords;
+            } elseif (isset($author)) {
+                $seoTitle = $author->site_title ?: $author->name;
+                $seoDescription = $author->bio ? Str::limit(strip_tags($author->bio), 160) : null;
+            }
+
+            // Global Homepage Fallback
+            if (request()->routeIs('home') || request()->path() === '/') {
+                $seoTitle = get_settings('home_site_title') ?: 'Prottoy Academy';
+                $seoDescription = get_settings('home_meta_description') ?: 'বাংলাদেশের সবচেয়ে বড় ডিজিটাল প্রশ্ন ব্যাংক';
+            }
+
+            $seoTitle = $seoTitle ?: get_settings('system_name') ?: 'Prottoy Academy';
+            $seoDescription = $seoDescription ?: get_settings('home_meta_description') ?: 'Prottoy Academy - বাংলাদেশের সবচেয়ে বড় ডিজিটাল প্রশ্ন ব্যাংক';
+        @endphp
+
+        <title>{{ $seoTitle }}</title>
+
+        <!-- Standard SEO Meta Tags -->
+        @if(!empty($seoDescription))
+            <meta name="description" content="{{ $seoDescription }}" />
+        @endif
+        @if(!empty($seoKeywords))
+            <meta name="keywords" content="{{ $seoKeywords }}" />
+        @endif
 
         <meta name="robots" content="index, follow" />
 
