@@ -21,4 +21,9 @@ class Passage extends Model
     {
         return $this->hasMany(Question::class, 'passage_id');
     }
+
+    public function getPassageAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
 }

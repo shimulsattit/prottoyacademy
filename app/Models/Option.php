@@ -23,4 +23,29 @@ class Option extends Model
     {
         return $this->belongsTo(Question::class);
     }
+
+    public function getOptionOneAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
+
+    public function getOptionTwoAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
+
+    public function getOptionThreeAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
+
+    public function getOptionFourAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
+
+    public function getOptionFiveAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
 }

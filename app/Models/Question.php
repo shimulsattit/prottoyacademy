@@ -83,4 +83,20 @@ class Question extends Model
         return $this->HasOne(Option::class);
     }
 
+    /**
+     * Accessor to dynamically replace absolute live storage URLs with relative paths.
+     */
+    public function getQuestionAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
+
+    /**
+     * Accessor to dynamically replace absolute live storage URLs with relative paths.
+     */
+    public function getContentAttribute($value)
+    {
+        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+    }
+
 }
