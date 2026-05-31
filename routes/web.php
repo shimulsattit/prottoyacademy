@@ -114,4 +114,5 @@ Route::get('/clear-cache', function() {
 
 
 
-Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '.*');
+Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '^(?!portal(?:$|/)).*$');
+
