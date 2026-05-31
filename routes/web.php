@@ -63,4 +63,4 @@ Route::get('exam/{slug}', [StudentExamController::class, 'show'])->name('exam.sh
 
 Route::get('sitemap.xml', [App\Http\Controllers\Web\SitemapController::class, 'index'])->name('sitemap');
 
-Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle');
+Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '.*');
