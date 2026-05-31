@@ -63,4 +63,10 @@ Route::get('exam/{slug}', [StudentExamController::class, 'show'])->name('exam.sh
 
 Route::get('sitemap.xml', [App\Http\Controllers\Web\SitemapController::class, 'index'])->name('sitemap');
 
+Route::get('/clear-cache', function() {
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    return "Cache cleared successfully!";
+});
+
 Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '.*');
+
