@@ -278,73 +278,13 @@
                         $('#category-content').html(categoryHtml);
                     }
 
-                    let contentHtml = '';
-                    const optionLabels = ['(a)', '(b)', '(c)', '(d)', '(e)'];
-                    let counter = 0;
 
-                    groupedQuestions.forEach((group) => {
-                        contentHtml += `<div style="background:#13146d;"><h5 class="mt-3 py-3 text-white text-center">${group.category_name}</h5></div>`;
+                    // Save response globally for rendering
+                    window.currentGroupedQuestions = groupedQuestions;
 
-                        group.groups.forEach((g) => {
-                            const hasPassage = g.passage_id !== null && g.passage_text !== null && g.passage_text.trim() !== "";
+                    // Show question type tabs if hidden
+                    $('#question-type-tabs').show();
 
-                            if (hasPassage) {
-                                contentHtml += `
-                                    <div class="passage-group my-4 p-3">
-                                        <div class="passage-header px-3 py-2 mb-3 rounded">
-                                            <h6 class="mb-1"><i class="fas fa-book-open"></i> ${g.passage_name}</h6>
-                                            <div class="text passage-text">${g.passage_text}</div>
-                                        </div>
-                                `;
-                            }
-
-                            // g.questions.forEach((q, index) => {
-                            //     const correctAnswer = parseInt(q.correct_answer || '0');
-
-                            //     contentHtml += `
-                            //         <div id="question_${q.id}" class="mt-3 pb-2 question-item ${hasPassage ? 'question-in-passage' : ''}">
-                            //             <div class="clearfix">
-                            //                 <strong class="float-start me-2">${++counter}.</strong>
-                            //                 <span class="question-html float-start" data-html='${q.question.replace(/'/g, "&apos;")}'></span>
-
-                            //                 <div class="float-end">
-                            //                     ${permissions.canUpdate ? `
-                            //                         <button id="content_management" data-url="/portal/question/${q.id}/short-edit" class="btn btn-sm btn-primary btn-icon">
-                            //                             <i class="fas fa-edit"></i>
-                            //                         </button>` : ''}
-                            //                     ${permissions.canDelete ? `
-                            //                         <button id="delete_item_custom" data-id="${q.id}" data-url="/portal/question/${q.uuid}" class="btn btn-sm btn-danger btn-icon">
-                            //                             <i class="fas fa-trash"></i>
-                            //                         </button>` : ''}
-                            //                 </div>
-                            //             </div>
-                            //     `;
-
-                            //     q.options.forEach((opt, optIndex) => {
-                            //         if (opt != null) {
-                            //             const isCorrect = (optIndex + 1) === correctAnswer;
-                            //             const textClass = isCorrect ? 'text-success fw-bold' : '';
-
-                            //             if (optIndex % 2 === 0) contentHtml += `<div class="row">`;
-
-                            //             contentHtml += `
-                            //                 <div class="col-md-6" id="question_option_${optIndex + 1}_${q.id}">
-                            //                     <p class="${textClass} mb-1 option-html" data-html='${opt.replace(/'/g, "&apos;")}'>
-                            //                         ${optionLabels[optIndex]}
-                            //                     </p>
-                            //                 </div>
-                            //             `;
-
-                            //             if (optIndex % 2 === 1 || optIndex === q.options.length - 1) contentHtml += `</div>`;
-                            //         }
-                            //     });
-
-                            //     contentHtml += `
-                            //         <div class="open-details text-muted" data-id="${q.id}" style="cursor:pointer;">Toggle Description</div>
-                            //         <div id="description_${q.id}" style="display:none; margin-top:10px;">
-                            //             <form class="description-form" data-id="${q.id}">
-                            //                 <textarea id="editor_${q.id}" name="content" class="form-control" rows="4">${q?.content || ''}</textarea>
-                            //                 <button type="submit" class="btn btn-sm btn-primary mt-2">Update</button>
                     // Render questions for active tab type
                     let activeType = $('#question-type-tabs .nav-link.active').data('type') || 'mcq';
                     renderQuestions(activeType);
@@ -619,6 +559,15 @@
 
                 loadQuestionsTab(categoryId, jobCategoryId, false);
                 $('#question-content').removeClass('question-loader');
+            });
+
+            $(document).on('click', '#question-type-tabs .nav-link', function (e) {
+                e.preventDefault();
+                $('#question-type-tabs .nav-link').removeClass('active');
+                $(this).addClass('active');
+
+                let filterType = $(this).data('type');
+                renderQuestions(filterType);
             });
 
             $(document).on('click', '#content_management', function (e) {
