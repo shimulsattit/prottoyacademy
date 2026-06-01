@@ -123,6 +123,33 @@ class QuestionService {
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray();
 
+        // Check if the target category is under Current Affairs
+        $catId = is_array($request->category_id) ? $request->category_id[count($request->category_id) - 1] : $request->category_id;
+        $category = \App\Models\Category::find($catId);
+        $isCurrentAffairs = false;
+        if ($category) {
+            $breadcrumbs = $category->breadcrumb();
+            $isCurrentAffairs = $breadcrumbs->contains('slug', 'current-affairs');
+        }
+
+        // Normalize Current Affairs short questions:
+        // Excel layout: A = Sub Sub Category, B = Question, C = Answer
+        // Convert to standard layout: A = Question, B = Answer, C = Sub Sub Category
+        if ($isCurrentAffairs && $request->question_type != 'mcq') {
+            foreach ($rows as $key => &$row) {
+                if ($key === 0) continue;
+                
+                $subSubCategory = isset($row[0]) ? trim($row[0]) : '';
+                $question = isset($row[1]) ? trim($row[1]) : '';
+                $answer = isset($row[2]) ? trim($row[2]) : '';
+                
+                $row[0] = $question;
+                $row[1] = $answer;
+                $row[2] = $subSubCategory;
+            }
+            unset($row);
+        }
+
         // Dynamically parse and resolve Job Category column for each row
         foreach ($rows as $key => &$row) {
             if ($key === 0 || empty($row[0])) continue;
