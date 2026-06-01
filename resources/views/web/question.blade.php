@@ -349,15 +349,21 @@
                                         <span class="q-num">{{ $toBn(++$counter) }}.</span>
                                         <div>{!! $q['question'] !!}</div>
                                     </div>
-                                    <div class="opt-grid">
-                                        @foreach ($q['options'] as $i => $opt)
-                                            @if($opt)
-                                                <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
-                                                    <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
-                                                </div>
-                                            @endif
-                                        @endforeach
-                                    </div>
+                                    @if ($q['type'] === 'mcq')
+                                        <div class="opt-grid">
+                                            @foreach ($q['options'] as $i => $opt)
+                                                @if($opt)
+                                                    <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
+                                                        <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
+                                    @else
+                                        <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #22c55e; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                                            <span style="color: var(--accent-gold); font-weight: 800;">উত্তর:</span> {!! $q['correct_answer'] !!}
+                                        </div>
+                                    @endif
 
                                     <!-- TAGS & ACTION -->
                                     <div style="margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
@@ -412,15 +418,21 @@
                                                 <span class="q-num">{{ $toBn(++$counter) }}.</span>
                                                 <div>{!! $q['question'] !!}</div>
                                             </div>
-                                            <div class="opt-grid">
-                                                @foreach ($q['options'] as $i => $opt)
-                                                    @if($opt)
-                                                        <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
-                                                            <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
-                                                        </div>
-                                                    @endif
-                                                @endforeach
-                                            </div>
+                                            @if ($q['type'] === 'mcq')
+                                                <div class="opt-grid">
+                                                    @foreach ($q['options'] as $i => $opt)
+                                                        @if($opt)
+                                                            <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
+                                                                <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
+                                                            </div>
+                                                        @endif
+                                                    @endforeach
+                                                </div>
+                                            @else
+                                                <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #22c55e; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                                                    <span style="color: var(--accent-gold); font-weight: 800;">উত্তর:</span> {!! $q['correct_answer'] !!}
+                                                </div>
+                                            @endif
                                         </div>
                                     @endforeach
                                 @endforeach

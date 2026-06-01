@@ -417,8 +417,10 @@ class WebsiteController extends Controller
                     ->pluck('category_id')
                     ->toArray();
 
-                // Now build category array with name only for valid ones
-                $categories = Category::whereIn('id', $validCategoryIds)
+                $childCategoryIds = collect($categories)->pluck('id')->toArray();
+
+                // Now build category array with name and slug for all child categories
+                $categories = Category::whereIn('id', $childCategoryIds)
                     ->get(['id', 'name', 'slug'])
                     ->map(function ($cat) {
                         return [
