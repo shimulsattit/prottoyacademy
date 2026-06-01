@@ -56,7 +56,14 @@ class QuestionController extends Controller
     public function categoryWiseQuestion($categoryId)
     {
         $category = $this->categoryService->find($categoryId);
-        if(!$category || ($category->parent_id != 9 && $category->parent_id != 64 && $category->parent_id != 337 && $category->parent_id != 312 && $category->parent_id != 783) ) {
+        if (!$category) {
+            return redirect()->route('portal.dashboard');
+        }
+
+        $allowedSlugs = ['job-solution', 'admission', 'bank', 'academy', 'current-affairs'];
+        $allowedParentIds = Category::whereIn('slug', $allowedSlugs)->pluck('id')->toArray();
+
+        if (!in_array($category->parent_id, $allowedParentIds)) {
             return redirect()->route('portal.dashboard');
         }
 

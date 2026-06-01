@@ -1,5 +1,5 @@
 @extends('layouts.admin', ['title' => 'Create New Question'])
-@@php
+@php
     $preSelectedCategory = null;
     $categoryBreadcrumb = collect([]);
     if (request()->has('category_id')) {

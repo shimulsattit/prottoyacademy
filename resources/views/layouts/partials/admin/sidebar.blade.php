@@ -77,11 +77,20 @@
 
         <!-- Category Wise Section -->
         @php
-            $jobSolutionCats = App\Models\Category::select('id', 'name')->where('parent_id', 9)->get();
-            $admissionCats = App\Models\Category::select('id', 'name')->where('parent_id', 64)->get();
-            $bankCats = App\Models\Category::select('id', 'name')->where('parent_id', 337)->get();
-            $academyCats = App\Models\Category::select('id', 'name')->where('parent_id', 783)->get();
-            $currentAffairsCats = App\Models\Category::select('id', 'name')->where('parent_id', 312)->get();
+            $jobSolutionParent = App\Models\Category::where('slug', 'job-solution')->first();
+            $jobSolutionCats = $jobSolutionParent ? App\Models\Category::select('id', 'name')->where('parent_id', $jobSolutionParent->id)->get() : collect([]);
+
+            $admissionParent = App\Models\Category::where('slug', 'admission')->first();
+            $admissionCats = $admissionParent ? App\Models\Category::select('id', 'name')->where('parent_id', $admissionParent->id)->get() : collect([]);
+
+            $bankParent = App\Models\Category::where('slug', 'bank')->first();
+            $bankCats = $bankParent ? App\Models\Category::select('id', 'name')->where('parent_id', $bankParent->id)->get() : collect([]);
+
+            $academyParent = App\Models\Category::where('slug', 'academy')->first();
+            $academyCats = $academyParent ? App\Models\Category::select('id', 'name')->where('parent_id', $academyParent->id)->get() : collect([]);
+
+            $currentAffairsParent = App\Models\Category::where('slug', 'current-affairs')->first();
+            $currentAffairsCats = $currentAffairsParent ? App\Models\Category::select('id', 'name')->where('parent_id', $currentAffairsParent->id)->get() : collect([]);
             
             $hasAnyCategoryWise = 
                 ($user->hasPermissionTo('job_solution.update') && $jobSolutionCats->count() > 0) ||

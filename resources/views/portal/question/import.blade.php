@@ -14,7 +14,8 @@
     }
     $isCurrentAffairs = false;
     if ($categoryBreadcrumb->count() > 0) {
-        $isCurrentAffairs = $categoryBreadcrumb->contains('id', 312);
+        $currentAffairsParent = \App\Models\Category::where('slug', 'current-affairs')->first();
+        $isCurrentAffairs = $currentAffairsParent ? $categoryBreadcrumb->contains('id', $currentAffairsParent->id) : false;
     }
 @endphp
 @push('style')
