@@ -602,10 +602,19 @@ class WebsiteController extends Controller
             
         // Filter by Classes
         if ($request->has('class_ids') && is_array($request->class_ids) && !empty($request->class_ids)) {
-            // Find all subcategories (chapters) under the selected class category IDs
+            // Find all subcategories (chapters/subjects) recursively under the selected class category IDs (up to 3 levels deep)
             $classCategoryIds = $request->class_ids;
-            $chapterIds = Category::whereIn('parent_id', $classCategoryIds)->pluck('id')->toArray();
-            $targetCategoryIds = array_unique(array_merge($classCategoryIds, $chapterIds));
+            $allCategoryIds = $classCategoryIds;
+            
+            $subLevel1 = Category::whereIn('parent_id', $classCategoryIds)->pluck('id')->toArray();
+            if (!empty($subLevel1)) {
+                $allCategoryIds = array_merge($allCategoryIds, $subLevel1);
+                $subLevel2 = Category::whereIn('parent_id', $subLevel1)->pluck('id')->toArray();
+                if (!empty($subLevel2)) {
+                    $allCategoryIds = array_merge($allCategoryIds, $subLevel2);
+                }
+            }
+            $targetCategoryIds = array_unique($allCategoryIds);
             
             $query->whereIn('category_id', $targetCategoryIds);
         }

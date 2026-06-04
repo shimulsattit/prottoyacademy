@@ -583,6 +583,20 @@
     let searchTimeout = null;
 
     document.addEventListener("DOMContentLoaded", function() {
+        // Enforce single-select (mutual exclusion) for Class checkboxes
+        const classCheckboxes = document.querySelectorAll("input[name='class_ids[]']");
+        classCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                if (this.checked) {
+                    classCheckboxes.forEach(otherCb => {
+                        if (otherCb !== this) {
+                            otherCb.checked = false;
+                        }
+                    });
+                }
+            });
+        });
+
         // Load initial questions
         applyFilters(1);
     });
