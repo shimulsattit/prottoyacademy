@@ -57,8 +57,33 @@
         border-bottom: 2px solid var(--accent-gold) !important;
     }
 
-    @media (max-width: 768px) {
-        .nav-tabs-premium {
+    /* TABS - hidden */
+    .nav-tabs-premium { display: none; }
+
+    /* PAGINATION */
+    .pz-pagination {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        margin-top: 40px;
+        flex-wrap: wrap;
+    }
+    .pz-page-btn {
+        min-width: 42px; height: 42px;
+        display: flex; align-items: center; justify-content: center;
+        border-radius: 10px;
+        background: rgba(255,255,255,0.05);
+        border: 1px solid rgba(255,255,255,0.1);
+        color: rgba(255,255,255,0.7);
+        font-weight: 600; font-size: 14px;
+        cursor: pointer; transition: all .2s;
+        padding: 0 14px;
+    }
+    .pz-page-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.3); }
+    .pz-page-btn.active { background: var(--accent-gold); border-color: var(--accent-gold); color: #07091e; }
+    .pz-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+    .pz-page-info { color: var(--text-light); font-size: 14px; padding: 0 8px; }
             flex-wrap: nowrap;
             overflow-x: auto;
             padding-bottom: 5px;
@@ -320,141 +345,110 @@
 
     <div class="row g-5">
         <div class="col-lg-8">
-            <!-- TABS -->
-            <ul class="nav nav-tabs nav-tabs-premium" id="examTabs" role="tablist">
-                <li class="nav-item">
-                    <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-pane" type="button">সব প্রশ্ন</button>
-                </li>
-                @foreach ($categories as $cat)
-                    <li class="nav-item">
-                        <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cat-pane-{{ $cat['id'] }}" type="button">{{ $cat['name'] }}</button>
-                    </li>
-                @endforeach
-            </ul>
 
-            <div class="tab-content">
-                <!-- ALL QUESTIONS PANE -->
-                <div class="tab-pane fade show active" id="all-pane">
-                    @php $counter = 0; @endphp
-                    @foreach ($final as $categoryBlock)
-                        <div style="margin: 40px 0 24px;">
-                            <h3 style="font-family: 'Noto Serif Bengali', serif; font-size: 22px; color: var(--accent-gold); display: flex; align-items: center; gap: 12px;">
-                                <span style="height: 2px; width: 30px; background: var(--accent-gold); opacity: 0.5;"></span>
-                                {{ $categoryBlock['category_name'] }}
-                            </h3>
+            {{-- FLAT PAGINATED QUESTION LIST --}}
+            @php
+                $allQuestions = [];
+                $globalCounter = 0;
+                foreach ($final as $categoryBlock) {
+                    foreach ($categoryBlock['groups'] as $group) {
+                        foreach ($group['questions'] as $q) {
+                            $q['_counter'] = ++$globalCounter;
+                            $q['_passage_text'] = $group['passage_text'] ?? '';
+                            $q['_passage_name'] = $group['passage_name'] ?? '';
+                            $allQuestions[] = $q;
+                        }
+                    }
+                }
+                $totalQuestions = count($allQuestions);
+                $perPage = 20;
+                $totalPages = max(1, ceil($totalQuestions / $perPage));
+                $labels = ['ক','খ','গ','ঘ','ঙ'];
+            @endphp
+
+            <div id="pz-q-count" style="color: var(--text-light); font-size:14px; margin-bottom:20px;">
+                মোট প্রশ্ন: <strong style="color:var(--accent-gold);">{{ $toBn($totalQuestions) }}</strong>
+            </div>
+
+            <div id="pz-questions-container">
+                @foreach ($allQuestions as $idx => $q)
+                    @php
+                        $correct = intval($q['correct_answer']);
+                        $uniqueId = 'exp_' . $q['id'];
+                        $pageNum = floor($idx / 20) + 1;
+                    @endphp
+                    <div class="q-card-premium pz-q-item" data-page="{{ $pageNum }}" style="{{ $pageNum > 1 ? 'display:none;' : '' }}">
+
+                        {{-- Passage box if exists --}}
+                        @if(!empty($q['_passage_text']) && ($idx == 0 || $allQuestions[$idx-1]['_passage_name'] != $q['_passage_name']))
+                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px 20px; margin-bottom:18px; font-size:14px; color:#ccc; line-height:1.7;">
+                                @if(!empty($q['_passage_name']))
+                                    <strong style="color:#fff; display:block; margin-bottom:8px;">📖 {{ $q['_passage_name'] }}</strong>
+                                @endif
+                                {!! $q['_passage_text'] !!}
+                            </div>
+                        @endif
+
+                        <div class="q-text-premium">
+                            <span class="q-num">{{ $toBn($q['_counter']) }}.</span>
+                            <div>{!! $q['question'] !!}</div>
                         </div>
 
-                        @foreach ($categoryBlock['groups'] as $group)
-                            @if (!empty($group['passage_text']))
-                                <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; margin-bottom: 24px; font-size: 15px; color: #ccc; line-height: 1.7;">
-                                    <strong style="color: #fff; margin-bottom: 8px; display: block;">📖 {{ $group['passage_name'] }}</strong>
-                                    {!! $group['passage_text'] !!}
-                                </div>
-                            @endif
-
-                            @foreach ($group['questions'] as $q)
-                                @php
-                                    $uniqueId = 'exp_' . $q['id'] . '_all';
-                                    $correct = intval($q['correct_answer']);
-                                    $labels = ['ক','খ','গ','ঘ','ঙ'];
-                                @endphp
-                                <div class="q-card-premium">
-                                    <div class="q-text-premium">
-                                        <span class="q-num">{{ $toBn(++$counter) }}.</span>
-                                        <div>{!! $q['question'] !!}</div>
-                                    </div>
-                                    @if ($q['type'] === 'mcq')
-                                        <div class="opt-grid">
-                                            @foreach ($q['options'] as $i => $opt)
-                                                @if($opt)
-                                                    <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
-                                                        <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
-                                                    </div>
-                                                @endif
-                                            @endforeach
-                                        </div>
-                                    @else
-                                        <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #22c55e; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
-                                            <span style="color: var(--accent-gold); font-weight: 800;">উত্তর:</span> {!! $q['correct_answer'] !!}
+                        @if ($q['type'] === 'mcq')
+                            <div class="opt-grid">
+                                @foreach ($q['options'] as $i => $opt)
+                                    @if($opt)
+                                        <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
+                                            <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
                                         </div>
                                     @endif
-
-                                    <!-- TAGS & ACTION -->
-                                    <div style="margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
-                                        <div style="display: flex; flex-wrap: wrap; gap: 8px;">
-                                            @if(!empty($q['job_category_name']))
-                                                <a href="{{ route('slug.handle', $q['job_category_slug']) }}" style="font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); text-decoration: none;">{{ $q['job_category_name'] }}</a>
-                                            @endif
-                                            @if(!empty($q['exam_name']))
-                                                <a href="{{ route('slug.handle', $q['exam_slug']) }}" style="font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); text-decoration: none;">{{ $q['exam_name'] }}</a>
-                                            @endif
-                                            @if(!empty($q['category_name']))
-                                                <a href="{{ route('slug.handle', $q['category_slug']) }}" style="font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); text-decoration: none;">{{ $q['category_name'] }}</a>
-                                            @endif
-                                        </div>
-
-                                        @if($q['content'])
-                                            <button class="btn-premium btn-outline" style="font-size: 12px; padding: 6px 20px; border-radius: 8px;" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $uniqueId }}">
-                                                💡 ব্যাখ্যা দেখুন
-                                            </button>
-                                        @endif
-                                    </div>
-
-                                    @if($q['content'])
-                                        <div class="collapse" id="{{ $uniqueId }}">
-                                            <div style="background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent-gold); padding: 20px; margin-top: 16px; color: #cbd5e1; font-size: 14px; line-height: 1.7; border-radius: 0 12px 12px 0;">
-                                                <strong style="color: var(--accent-gold); display: block; margin-bottom: 8px;">ব্যাখ্যা:</strong>
-                                                {!! $q['content'] !!}
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                            @endforeach
-                        @endforeach
-                    @endforeach
-                </div>
-
-                <!-- CATEGORY PANES -->
-                @foreach ($categories as $cat)
-                    <div class="tab-pane fade" id="cat-pane-{{ $cat['id'] }}">
-                        @php $counter = 0; @endphp
-                        @foreach ($final as $categoryBlock)
-                            @if($categoryBlock['category_id'] == $cat['id'])
-                                @foreach ($categoryBlock['groups'] as $group)
-                                    @foreach ($group['questions'] as $q)
-                                        @php
-                                            $uniqueId = 'exp_' . $q['id'] . '_' . $cat['id'];
-                                            $correct = intval($q['correct_answer']);
-                                            $labels = ['ক','খ','গ','ঘ','ঙ'];
-                                        @endphp
-                                        <div class="q-card-premium">
-                                            <div class="q-text-premium">
-                                                <span class="q-num">{{ $toBn(++$counter) }}.</span>
-                                                <div>{!! $q['question'] !!}</div>
-                                            </div>
-                                            @if ($q['type'] === 'mcq')
-                                                <div class="opt-grid">
-                                                    @foreach ($q['options'] as $i => $opt)
-                                                        @if($opt)
-                                                            <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
-                                                                <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
-                                                            </div>
-                                                        @endif
-                                                    @endforeach
-                                                </div>
-                                            @else
-                                                <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #22c55e; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
-                                                    <span style="color: var(--accent-gold); font-weight: 800;">উত্তর:</span> {!! $q['correct_answer'] !!}
-                                                </div>
-                                            @endif
-                                        </div>
-                                    @endforeach
                                 @endforeach
+                            </div>
+                        @else
+                            <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); border-radius:10px; padding:14px 18px; font-size:15px; color:#22c55e; font-weight:600; display:inline-flex; align-items:center; gap:8px;">
+                                <span style="color:var(--accent-gold); font-weight:800;">উত্তর:</span> {!! $q['correct_answer'] !!}
+                            </div>
+                        @endif
+
+                        {{-- Tags & Explanation --}}
+                        <div style="margin-top:20px; display:flex; flex-wrap:wrap; align-items:center; justify-content:space-between; gap:12px; padding-top:18px; border-top:1px solid rgba(255,255,255,0.06);">
+                            <div style="display:flex; flex-wrap:wrap; gap:8px;">
+                                @if(!empty($q['exam_name']))
+                                    <a href="{{ route('slug.handle', $q['exam_slug']) }}" style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.2); text-decoration:none;">{{ $q['exam_name'] }}</a>
+                                @endif
+                                @if(!empty($q['category_name']))
+                                    <a href="{{ route('slug.handle', $q['category_slug']) }}" style="font-size:11px; font-weight:600; padding:3px 10px; border-radius:100px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid rgba(59,130,246,0.2); text-decoration:none;">{{ $q['category_name'] }}</a>
+                                @endif
+                            </div>
+                            @if($q['content'])
+                                <button class="btn-premium btn-outline" style="font-size:12px; padding:6px 18px; border-radius:8px;" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $uniqueId }}">
+                                    💡 ব্যাখ্যা
+                                </button>
                             @endif
-                        @endforeach
+                        </div>
+
+                        @if($q['content'])
+                            <div class="collapse" id="{{ $uniqueId }}">
+                                <div style="background:rgba(255,255,255,0.03); border-left:3px solid var(--accent-gold); padding:18px 20px; margin-top:14px; color:#cbd5e1; font-size:14px; line-height:1.7; border-radius:0 12px 12px 0;">
+                                    <strong style="color:var(--accent-gold); display:block; margin-bottom:8px;">ব্যাখ্যা:</strong>
+                                    {!! $q['content'] !!}
+                                </div>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
+
+            {{-- PAGINATION --}}
+            @if($totalPages > 1)
+            <div class="pz-pagination" id="pz-pagination">
+                <button class="pz-page-btn" id="pz-prev" onclick="pzChangePage(pzCurrentPage - 1)">‹ আগে</button>
+                <div id="pz-page-numbers" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+                <button class="pz-page-btn" id="pz-next" onclick="pzChangePage(pzCurrentPage + 1)">পরে ›</button>
+                <span class="pz-page-info" id="pz-page-info"></span>
+            </div>
+            @endif
+
         </div>
 
         <!-- SIDEBAR -->
@@ -599,7 +593,75 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
+    // ── PAGINATION ──────────────────────────────────────────
+    const pzTotalPages = {{ $totalPages ?? 1 }};
+    let pzCurrentPage = 1;
+
+    function pzChangePage(page) {
+        if (page < 1 || page > pzTotalPages) return;
+        pzCurrentPage = page;
+
+        // Show/hide questions
+        document.querySelectorAll('.pz-q-item').forEach(el => {
+            el.style.display = (parseInt(el.dataset.page) === page) ? '' : 'none';
+        });
+
+        // Scroll to top of questions
+        const container = document.getElementById('pz-questions-container');
+        if (container) {
+            window.scrollTo({ top: container.getBoundingClientRect().top + window.scrollY - 120, behavior: 'smooth' });
+        }
+
+        // Update prev/next
+        const prevBtn = document.getElementById('pz-prev');
+        const nextBtn = document.getElementById('pz-next');
+        if (prevBtn) prevBtn.disabled = (page === 1);
+        if (nextBtn) nextBtn.disabled = (page === pzTotalPages);
+
+        // Update page info
+        const info = document.getElementById('pz-page-info');
+        if (info) info.textContent = page + ' / ' + pzTotalPages;
+
+        // Render page number buttons
+        pzRenderPageNumbers(page);
+    }
+
+    function pzRenderPageNumbers(current) {
+        const container = document.getElementById('pz-page-numbers');
+        if (!container) return;
+        container.innerHTML = '';
+
+        const range = [];
+        for (let i = 1; i <= pzTotalPages; i++) {
+            if (i === 1 || i === pzTotalPages || (i >= current - 2 && i <= current + 2)) {
+                range.push(i);
+            }
+        }
+
+        let last = 0;
+        range.forEach(p => {
+            if (last && p - last > 1) {
+                const dots = document.createElement('span');
+                dots.className = 'pz-page-info';
+                dots.textContent = '…';
+                container.appendChild(dots);
+            }
+            const btn = document.createElement('button');
+            btn.className = 'pz-page-btn' + (p === current ? ' active' : '');
+            btn.textContent = p;
+            btn.onclick = () => pzChangePage(p);
+            container.appendChild(btn);
+            last = p;
+        });
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+        if (pzTotalPages > 1) pzChangePage(1);
+    });
+    // ────────────────────────────────────────────────────────
+
     function downloadPDF() {
+
         $('#pdf-progress-overlay').addClass('show');
         
         // Find which tab is active to print only its content or all content
