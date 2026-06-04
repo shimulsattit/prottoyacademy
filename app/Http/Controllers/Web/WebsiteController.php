@@ -652,11 +652,11 @@ class WebsiteController extends Controller
                 'year_name' => $q->year?->name ? 'বোর্ড ' . $q->year->name : '',
                 'correct_answer' => $q->correct_answer,
                 'options' => $opt ? [
-                    'option_a' => $opt->option_a,
-                    'option_b' => $opt->option_b,
-                    'option_c' => $opt->option_c,
-                    'option_d' => $opt->option_d,
-                    'option_e' => $opt->option_e,
+                    'option_a' => html_entity_decode($opt->option_one),
+                    'option_b' => html_entity_decode($opt->option_two),
+                    'option_c' => html_entity_decode($opt->option_three),
+                    'option_d' => html_entity_decode($opt->option_four),
+                    'option_e' => html_entity_decode($opt->option_five),
                 ] : null,
                 'edit_url' => route('portal.question.edit', $q->id)
             ];
