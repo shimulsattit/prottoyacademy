@@ -595,10 +595,6 @@
     }
 
     function applyFilters(page = 1) {
-        // Show loader, hide list
-        document.getElementById('questions-container').style.display = 'none';
-        document.getElementById('academy-loader').style.display = 'block';
-
         // Gather Class IDs
         const classIds = [];
         document.querySelectorAll("input[name='class_ids[]']:checked").forEach(checkbox => {
@@ -622,6 +618,24 @@
         // Render Active Badges
         renderActiveBadges();
 
+        // If no filter tick marks are selected, display instruction message and do not load questions
+        if (classIds.length === 0 && subjectIds.length === 0 && types.length === 0) {
+            document.getElementById('academy-loader').style.display = 'none';
+            document.getElementById('questions-container').style.display = 'flex';
+            document.getElementById('questions-container').innerHTML = `
+                <div class="question-card-academy text-center py-5" style="border-style: dashed; width: 100%;">
+                    <p class="fs-5 text-muted mb-0">প্রশ্ন দেখতে অনুগ্রহ করে সাইডবার থেকে শ্রেণি, বিষয় বা প্রশ্নের ধরন সিলেক্ট করুন।</p>
+                </div>
+            `;
+            document.getElementById('pagination-container').innerHTML = '';
+            document.getElementById('stat-total').innerText = formatBanglaNumber(0);
+            return;
+        }
+
+        // Show loader, hide list
+        document.getElementById('questions-container').style.display = 'none';
+        document.getElementById('academy-loader').style.display = 'block';
+
         // AJAX Query
         const params = new URLSearchParams();
         classIds.forEach(id => params.append('class_ids[]', id));
@@ -641,7 +655,7 @@
                     document.getElementById('stat-total').innerText = formatBanglaNumber(data.pagination.total);
                 }
 
-                renderQuestionsList(data.questions);
+                renderQuestionsList(data.questions, data.pagination);
                 renderPagination(data.pagination);
             })
             .catch(err => {
@@ -650,7 +664,7 @@
             });
     }
 
-    function renderQuestionsList(questions) {
+    function renderQuestionsList(questions, pagination) {
         const container = document.getElementById('questions-container');
         container.innerHTML = '';
 
@@ -663,7 +677,16 @@
             return;
         }
 
-        questions.forEach(q => {
+        const currentPage = pagination ? pagination.current_page : 1;
+        const perPage = pagination ? pagination.per_page : 20;
+
+        questions.forEach((q, idx) => {
+            const serialNum = (currentPage - 1) * perPage + idx + 1;
+            const serialNumBn = formatBanglaNumber(serialNum);
+            
+            // Prepend serial number to question text
+            const displayQuestion = `<span style="font-weight: 700; color: var(--accent-gold); margin-right: 8px;">${serialNumBn}.</span>${q.question}`;
+
             let optionsHtml = '';
             if (q.question_type === 'mcq' && q.options) {
                 optionsHtml = `
@@ -688,8 +711,7 @@
             card.className = 'question-card-academy';
             card.innerHTML = `
                 <div class="q-header-academy">
-                    <span class="q-type-badge-academy ${q.question_type === 'cq' ? 'cq' : ''}">${q.question_type_name}</span>
-                    <div class="q-text-academy">${q.question}</div>
+                    <div class="q-text-academy">${displayQuestion}</div>
                     <div class="q-actions-academy">
                         <a href="${q.edit_url}" target="_blank" class="q-btn-action edit" title="এডিট করুন"><i class="ri-edit-line"></i></a>
                         <button class="q-btn-action" onclick="copyToClipboard(this, ${q.id})" title="কপি করুন"><i class="ri-file-copy-line"></i></button>
