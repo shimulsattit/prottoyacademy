@@ -585,6 +585,22 @@ class WebsiteController extends Controller
     {
         $academyId = 783;
         
+        // Enforce that class_ids, subject_ids, and types are all present and non-empty
+        if (!$request->has('class_ids') || !is_array($request->class_ids) || empty($request->class_ids) ||
+            !$request->has('subject_ids') || !is_array($request->subject_ids) || empty($request->subject_ids) ||
+            !$request->has('types') || !is_array($request->types) || empty($request->types)) {
+            
+            return response()->json([
+                'questions' => [],
+                'pagination' => [
+                    'total' => 0,
+                    'current_page' => 1,
+                    'last_page' => 1,
+                    'per_page' => 20,
+                ]
+            ]);
+        }
+        
         // Get all category IDs under Academy hierarchy
         $academyCategoryIds = [$academyId];
         $level1 = Category::where('parent_id', $academyId)->pluck('id')->toArray();

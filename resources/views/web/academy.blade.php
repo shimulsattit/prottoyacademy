@@ -489,7 +489,7 @@
                     <div class="filter-list-academy">
                         @foreach ($stats['classes'] as $cls)
                             <label class="filter-item-academy">
-                                <input type="checkbox" name="class_ids[]" value="{{ $cls['id'] }}" data-name="{{ $cls['name'] }}" onchange="applyFilters()">
+                                <input type="checkbox" name="class_ids[]" value="{{ $cls['id'] }}" data-name="{{ $cls['name'] }}">
                                 <span class="filter-label-academy">
                                     <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
                                     {{ $cls['name'] }}
@@ -506,7 +506,7 @@
                     <div class="filter-list-academy">
                         @foreach ($stats['subjects'] as $sub)
                             <label class="filter-item-academy">
-                                <input type="checkbox" name="subject_ids[]" value="{{ $sub['id'] }}" data-name="{{ $sub['name'] }}" onchange="applyFilters()">
+                                <input type="checkbox" name="subject_ids[]" value="{{ $sub['id'] }}" data-name="{{ $sub['name'] }}">
                                 <span class="filter-label-academy">
                                     <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
                                     {{ $sub['name'] }}
@@ -523,7 +523,7 @@
                     <div class="filter-list-academy">
                         @foreach ($stats['types'] as $type)
                             <label class="filter-item-academy">
-                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}" onchange="applyFilters()">
+                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}">
                                 <span class="filter-label-academy">
                                     <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
                                     {{ $type['name'] }}
@@ -594,6 +594,14 @@
                         }
                     });
                 }
+                applyFilters(1);
+            });
+        });
+
+        // Bind change events to subject and types checkboxes
+        document.querySelectorAll("input[name='subject_ids[]'], input[name='types[]']").forEach(cb => {
+            cb.addEventListener('change', function() {
+                applyFilters(1);
             });
         });
 
@@ -632,13 +640,19 @@
         // Render Active Badges
         renderActiveBadges();
 
-        // If no filter tick marks are selected, display instruction message and do not load questions
-        if (classIds.length === 0 && subjectIds.length === 0 && types.length === 0) {
+        // If selection is incomplete (must check at least one Class, one Subject, and one Type)
+        if (classIds.length === 0 || subjectIds.length === 0 || types.length === 0) {
             document.getElementById('academy-loader').style.display = 'none';
             document.getElementById('questions-container').style.display = 'flex';
+            
+            let missing = [];
+            if (classIds.length === 0) missing.push('শ্রেণি');
+            if (subjectIds.length === 0) missing.push('বিষয়');
+            if (types.length === 0) missing.push('প্রশ্নের ধরন');
+            
             document.getElementById('questions-container').innerHTML = `
                 <div class="question-card-academy text-center py-5" style="border-style: dashed; width: 100%;">
-                    <p class="fs-5 text-muted mb-0">প্রশ্ন দেখতে অনুগ্রহ করে সাইডবার থেকে শ্রেণি, বিষয় বা প্রশ্নের ধরন সিলেক্ট করুন।</p>
+                    <p class="fs-5 text-muted mb-0">প্রশ্ন দেখতে অনুগ্রহ করে সাইডবার থেকে <strong>${missing.join(', ')}</strong> সিলেক্ট করুন।</p>
                 </div>
             `;
             document.getElementById('pagination-container').innerHTML = '';
