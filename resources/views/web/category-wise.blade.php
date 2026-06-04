@@ -206,13 +206,6 @@
                 </h3>
             </div>
             <div class="pz-grid">
-                @php
-                    $childCategories = $childCategories->values();
-                    if($childCategories->count() > 3) {
-                        $lastThree = $childCategories->splice(-3);
-                        $childCategories = $lastThree->concat($childCategories);
-                    }
-                @endphp
                 @foreach ($childCategories as $child)
                     <a href="{{ route('slug.handle', $child->slug) }}" class="pz-card">
                         <div class="pz-glow" style="background:radial-gradient(circle, var(--accent-gold), transparent 70%)"></div>
@@ -229,48 +222,63 @@
         </div>
     @endif
 
-    {{-- SINGLE QUESTIONS LIST --}}
-    @if (count($questions) > 0)
+    {{-- QUESTIONS AS CARDS GRID - Only show when no job/child categories --}}
+    @if (count($questions) > 0 && count($jobCategories) == 0 && count($childCategories) == 0)
         <div class="mt-5 pz-questions-section">
             <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
                 <h3 class="page-title-premium mb-0" style="font-size: 24px;">প্রশ্নসমূহ</h3>
                 <button class="pz-btn-pdf" onclick="window.print()"><i class="ri-file-pdf-2-line"></i> PDF ডাউনলোড করুন</button>
             </div>
-            <div class="row g-4">
+            <div class="pz-grid">
                 @foreach ($questions as $index => $q)
-                    <div class="col-12">
-                        <div class="pz-card" style="cursor: default; padding: 24px;">
-                            <p style="font-size: 17px; font-weight: 600; line-height: 1.6; margin-bottom: 18px; color: #fff;">
-                                <span style="color: var(--accent-gold); margin-right: 8px;">{{ $toBn($index + 1) }}.</span> {!! $q['question'] !!}
-                            </p>
-                            <div class="row g-3 pz-options-grid" id="options-{{ $q['id'] }}">
-                                @foreach ($q['options'] as $oi => $opt)
-                                    @if($opt && $opt != 'প্রশ্ন নেই' && $opt != 'নিচে দেখুন')
-                                        @php
-                                            $isCorrect = false;
-                                            $ans = strtolower($q['correct_answer']);
-                                            if ($ans == ($oi+1) || $ans == strtolower($opt) || str_contains($ans, 'option_'.(['one','two','three','four','five'][$oi]))) $isCorrect = true;
-                                        @endphp
-                                        <div class="col-md-6">
-                                            <div class="pz-option-item {{ $isCorrect ? 'pz-correct-ans' : '' }}" style="background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 10px; padding: 12px 18px; font-size: 14px; color: #ccc; transition: all 0.3s;">
-                                                <span style="font-weight: 700; color: var(--accent-gold); margin-right: 10px;">{{ ['ক','খ','গ','ঘ','ঙ'][$oi] }}.</span> {!! $opt !!}
-                                            </div>
-                                        </div>
-                                    @endif
-                                @endforeach
+                    <div class="pz-card" style="cursor: default; padding: 28px;">
+                        <div class="pz-glow" style="background:radial-gradient(circle, var(--accent-gold), transparent 70%)"></div>
+                        
+                        {{-- Question Number Badge --}}
+                        <div style="display:flex; align-items:center; gap:12px; margin-bottom:18px;">
+                            <div style="width:38px; height:38px; border-radius:10px; background:rgba(245,197,24,0.12); display:flex; align-items:center; justify-content:center; font-weight:800; color:var(--accent-gold); font-size:16px; flex-shrink:0;">
+                                {{ $toBn($index + 1) }}
                             </div>
-                            <div class="mt-4 d-flex align-items-center gap-3">
-                                <button class="pz-btn-answer" onclick="toggleAnswer('{{ $q['id'] }}')"><i class="ri-eye-line"></i> উত্তর দেখুন</button>
-                                @if($q['content'])
-                                    <button class="pz-btn-explain" onclick="toggleExplain('{{ $q['id'] }}')"><i class="ri-lightbulb-line"></i> ব্যাখ্যা</button>
-                                @endif
-                            </div>
-                            @if($q['content'])
-                                <div id="explain-{{ $q['id'] }}" class="pz-explain-box" style="display: none;">
-                                    <div class="pz-explain-content"><strong>ব্যাখ্যা:</strong><div class="mt-2">{!! $q['content'] !!}</div></div>
-                                </div>
+                            @if(!empty($q['category_name']))
+                                <span style="font-size:12px; background:rgba(245,197,24,0.1); color:var(--accent-gold); border:1px solid rgba(245,197,24,0.25); border-radius:100px; padding:3px 12px; font-weight:600;">{{ $q['category_name'] }}</span>
                             @endif
                         </div>
+
+                        {{-- Question Text --}}
+                        <p style="font-size:16px; font-weight:600; line-height:1.65; margin-bottom:20px; color:#fff;">
+                            {!! $q['question'] !!}
+                        </p>
+
+                        {{-- Options --}}
+                        <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;" id="options-{{ $q['id'] }}">
+                            @foreach ($q['options'] as $oi => $opt)
+                                @if($opt && $opt != 'প্রশ্ন নেই' && $opt != 'নিচে দেখুন')
+                                    @php
+                                        $isCorrect = false;
+                                        $ans = strtolower($q['correct_answer']);
+                                        if ($ans == ($oi+1) || $ans == strtolower($opt) || str_contains($ans, 'option_'.(['one','two','three','four','five'][$oi]))) $isCorrect = true;
+                                    @endphp
+                                    <div class="pz-option-item {{ $isCorrect ? 'pz-correct-ans' : '' }}" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 16px; font-size:14px; color:#ccc; transition:all 0.3s; display:flex; align-items:flex-start; gap:10px;">
+                                        <span style="font-weight:800; color:var(--accent-gold); min-width:20px; flex-shrink:0;">{{ ['ক','খ','গ','ঘ','ঙ'][$oi] }}.</span>
+                                        <span>{!! $opt !!}</span>
+                                    </div>
+                                @endif
+                            @endforeach
+                        </div>
+
+                        {{-- Footer Actions --}}
+                        <div class="pz-footer" style="flex-wrap:wrap; gap:10px;">
+                            <button class="pz-btn-answer" onclick="toggleAnswer('{{ $q['id'] }}')"><i class="ri-eye-line"></i> উত্তর দেখুন</button>
+                            @if($q['content'])
+                                <button class="pz-btn-explain" onclick="toggleExplain('{{ $q['id'] }}')"><i class="ri-lightbulb-line"></i> ব্যাখ্যা</button>
+                            @endif
+                        </div>
+
+                        @if($q['content'])
+                            <div id="explain-{{ $q['id'] }}" class="pz-explain-box" style="display:none; margin-top:16px;">
+                                <div class="pz-explain-content"><strong>ব্যাখ্যা:</strong><div class="mt-2">{!! $q['content'] !!}</div></div>
+                            </div>
+                        @endif
                     </div>
                 @endforeach
             </div>
