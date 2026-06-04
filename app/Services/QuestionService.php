@@ -105,7 +105,7 @@ class QuestionService {
             'year_id'           => 'nullable|integer|exists:years,id',
             'exam_id'           => 'nullable|integer|exists:exams,id',
             'passage_id'        => 'nullable|integer|exists:passages,id',
-            'question_type'     => 'required|string|in:mcq,short_answer,long_answer,true_false, fill_in_the_blanks,matching',
+            'question_type'     => 'required|string|in:mcq,cq,short_answer,long_answer,true_false, fill_in_the_blanks,matching',
         ]);
 
         if ($validator->fails()) {

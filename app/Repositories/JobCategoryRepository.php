@@ -62,6 +62,8 @@ class JobCategoryRepository implements JobCategoryRepositoryInterface
         return response()->json([
             'status' => true,
             'message' => 'Job Category Created Successfully',
+            'id' => $model->id,
+            'name' => $model->name,
             'goto' => route('portal.job-category.index')
         ]);
     }

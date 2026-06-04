@@ -80,6 +80,8 @@ class CategoryRepository implements CategoryRepositoryInterface
         return response()->json([
             'status' => true,
             'message' => 'Category Created Successfully',
+            'id' => $model->id,
+            'name' => $model->name,
             'goto' => route('portal.category.index')
         ]);
     }
