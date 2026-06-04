@@ -394,19 +394,6 @@
                             <div>{!! $q['question'] !!}</div>
                         </div>
 
-                        {{-- Tags: বাংলাদেশ বিষয়াবলী প্রথমে --}}
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-bottom:16px;">
-                            @if(!empty($q['job_category_name']))
-                                <a href="{{ route('slug.handle', $q['job_category_slug']) }}" style="font-size:11px; font-weight:700; padding:4px 12px; border-radius:100px; background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.25); text-decoration:none;">{{ $q['job_category_name'] }}</a>
-                            @endif
-                            @if(!empty($q['exam_name']))
-                                <a href="{{ route('slug.handle', $q['exam_slug']) }}" style="font-size:11px; font-weight:600; padding:4px 12px; border-radius:100px; background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.2); text-decoration:none;">{{ $q['exam_name'] }}</a>
-                            @endif
-                            @if(!empty($q['category_name']))
-                                <a href="{{ route('slug.handle', $q['category_slug']) }}" style="font-size:11px; font-weight:600; padding:4px 12px; border-radius:100px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid rgba(59,130,246,0.2); text-decoration:none;">{{ $q['category_name'] }}</a>
-                            @endif
-                        </div>
-
                         @if ($q['type'] === 'mcq')
                             <div class="opt-grid">
                                 @foreach ($q['options'] as $i => $opt)
@@ -423,14 +410,24 @@
                             </div>
                         @endif
 
-                        {{-- Explanation button --}}
-                        @if($q['content'])
-                        <div style="margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06);">
-                            <button class="btn-premium btn-outline" style="font-size:12px; padding:6px 18px; border-radius:8px;" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $uniqueId }}">
-                                💡 ব্যাখ্যা
-                            </button>
+                        {{-- Tags: বাংলাদেশ বিষয়াবলী প্রথমে — HR এর উপরে --}}
+                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06);">
+                            @if(!empty($q['job_category_name']))
+                                <a href="{{ route('slug.handle', $q['job_category_slug']) }}" style="font-size:11px; font-weight:700; padding:4px 12px; border-radius:100px; background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.25); text-decoration:none;">{{ $q['job_category_name'] }}</a>
+                            @endif
+                            @if(!empty($q['exam_name']))
+                                <a href="{{ route('slug.handle', $q['exam_slug']) }}" style="font-size:11px; font-weight:600; padding:4px 12px; border-radius:100px; background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.2); text-decoration:none;">{{ $q['exam_name'] }}</a>
+                            @endif
+                            @if(!empty($q['category_name']))
+                                <a href="{{ route('slug.handle', $q['category_slug']) }}" style="font-size:11px; font-weight:600; padding:4px 12px; border-radius:100px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid rgba(59,130,246,0.2); text-decoration:none;">{{ $q['category_name'] }}</a>
+                            @endif
+                            @if($q['content'])
+                                <button class="btn-premium btn-outline" style="font-size:11px; padding:4px 14px; border-radius:100px; margin-left:auto;" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $uniqueId }}">
+                                    💡 ব্যাখ্যা
+                                </button>
+                            @endif
                         </div>
-                        @endif
+
 
                         @if($q['content'])
                             <div class="collapse" id="{{ $uniqueId }}">
