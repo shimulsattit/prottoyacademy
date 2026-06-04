@@ -255,12 +255,6 @@ class WebsiteController extends Controller
             return redirect()->route('slug.handle', ['slug' => $normalizedSlug], 301);
         }
 
-        $slugVariants = [
-            $slug,
-            str_replace('-', ' ', $slug),
-            str_replace(' ', '-', $slug)
-        ];
-
         $models = ['Category', 'Blog', 'BlogCategory', 'BlogAuthor', 'BlogTag', 'Page', 'JobCategory'];
 
         if ($index >= count($models)) {
@@ -269,9 +263,14 @@ class WebsiteController extends Controller
 
         // Get the current model name
         $model = $models[$index];
-        if ($model == 'Category' && Category::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
+        
+        $item = null;
+        if (in_array($model, ['Category', 'Blog', 'BlogCategory', 'BlogAuthor', 'Page', 'JobCategory'])) {
+            $item = $this->findModelBySlug("App\\Models\\" . $model, $slug);
+        }
 
-            $category = Category::whereIn('slug', $slugVariants)->first();
+        if ($model == 'Category' && $item) {
+            $category = $item;
 
             if ($category) {
                 // Determine if this is a Current Affairs category (Category ID 312 or its descendants)
@@ -383,8 +382,8 @@ class WebsiteController extends Controller
             }
 
             return $this->fetcher($slug, $request, $index + 1);
-        } elseif ($model == 'Blog' && Blog::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
-            $blog = Blog::whereIn('slug', $slugVariants)->where('status', 1)->first();
+        } elseif ($model == 'Blog' && $item) {
+            $blog = $item;
 
             if ($blog) {
                 $tags = BlogTag::where('status', 1)->get();
@@ -400,8 +399,8 @@ class WebsiteController extends Controller
                 return $this->fetcher($slug, $request, $index + 1);
             }
 
-        } elseif ($model == 'BlogCategory' && BlogCategory::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
-            $category = BlogCategory::whereIn('slug', $slugVariants)->where('status', 1)->first();
+        } elseif ($model == 'BlogCategory' && $item) {
+            $category = $item;
             if ($category) {
 
                 $blogs = Blog::where('blog_category_id', $category->id)->where('status', 1)->paginate(15);
@@ -411,8 +410,8 @@ class WebsiteController extends Controller
                 return $this->fetcher($slug, $request, $index + 1);
             }
 
-        } elseif ($model == 'BlogAuthor' && BlogAuthor::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
-            $author = BlogAuthor::whereIn('slug', $slugVariants)->where('status', 1)->first();
+        } elseif ($model == 'BlogAuthor' && $item) {
+            $author = $item;
             if ($author) {
 
                 $blogs = Blog::where('blog_author_id', $author->id)->where('status', 1)->paginate(15);
@@ -422,15 +421,15 @@ class WebsiteController extends Controller
                 return $this->fetcher($slug, $request, $index + 1);
             }
 
-        } elseif ($model == 'Page' && Page::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
-            $model = Page::where('status', 1)->whereIn('slug', $slugVariants)->first();
+        } elseif ($model == 'Page' && $item) {
+            $model = $item;
             if($model) {
                 return view('web.page', compact('model'));
             } else {
                 return $this->fetcher($slug, $request, $index + 1);
             }
-        } elseif ($model == 'JobCategory' && JobCategory::whereIn('slug', $slugVariants)->where('status', 1)->exists()) {
-            $model = JobCategory::where('status', 1)->whereIn('slug', $slugVariants)->first();
+        } elseif ($model == 'JobCategory' && $item) {
+            $model = $item;
 
             if($model) {
 
@@ -575,5 +574,37 @@ class WebsiteController extends Controller
         // }
 
         return $result;
+    }
+
+    private function findModelBySlug($modelClass, $slug)
+    {
+        $slug = trim($slug, '/');
+        $slugVariants = [
+            $slug,
+            str_replace('-', ' ', $slug),
+            str_replace(' ', '-', $slug),
+            urldecode($slug),
+            str_replace('-', ' ', urldecode($slug)),
+            str_replace(' ', '-', urldecode($slug)),
+        ];
+
+        // Try exact matches first
+        $item = $modelClass::whereIn('slug', $slugVariants)->where('status', 1)->first();
+        if ($item) {
+            return $item;
+        }
+
+        // Try normalized match (remove spaces, hyphens, URL encodings)
+        $cleanSlug = str_replace(['-', ' ', '%20'], '', $slug);
+        $cleanSlugDecoded = str_replace(['-', ' ', '%20'], '', urldecode($slug));
+
+        $item = $modelClass::where(function($q) use ($cleanSlug, $cleanSlugDecoded) {
+            $q->whereRaw("REPLACE(REPLACE(REPLACE(slug, '-', ''), ' ', ''), '%20', '') = ?", [$cleanSlug]);
+            if ($cleanSlug !== $cleanSlugDecoded) {
+                $q->orWhereRaw("REPLACE(REPLACE(REPLACE(slug, '-', ''), ' ', ''), '%20', '') = ?", [$cleanSlugDecoded]);
+            }
+        })->where('status', 1)->first();
+
+        return $item;
     }
 }
