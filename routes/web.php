@@ -108,6 +108,30 @@ Route::get('/clear-cache', function() {
             $out .= " - Found in DB: ID: {$j->id}, Name: {$j->name}, Slug: {$j->slug}, Status: {$j->status}<br>";
         }
     }
+
+    $out .= "<br>=== ENGLISH CATEGORY DIAGNOSTICS ===<br>";
+    $slug4 = "বেসরকারি-প্রভাষক-নিবন্ধন-English";
+    $cat4 = \App\Models\Category::where('slug', $slug4)->first();
+    if ($cat4) {
+        $out .= "Found Category by exact slug '{$slug4}': ID: {$cat4->id}, Name: '{$cat4->name}', Slug: '{$cat4->slug}', Status: {$cat4->status}, Parent: {$cat4->parent_id}<br>";
+    } else {
+        $out .= "Category NOT found by exact slug '{$slug4}'!<br>";
+    }
+
+    $catByID = \App\Models\Category::find(300);
+    if ($catByID) {
+        $out .= "Found Category ID 300 by ID: Name: '{$catByID->name}', Slug: '{$catByID->slug}', Status: {$catByID->status}, Parent: {$catByID->parent_id}<br>";
+    } else {
+        $out .= "Category ID 300 NOT found by ID!<br>";
+    }
+
+    $cats_like_eng = \App\Models\Category::where('name', 'like', '%English%')->get();
+    $out .= "Found " . $cats_like_eng->count() . " categories with Name like 'English':<br>";
+    foreach ($cats_like_eng as $c) {
+        if ($c->id == 300 || str_contains($c->slug, 'নিবন্ধন') || str_contains($c->slug, 'english') || str_contains($c->slug, 'English')) {
+            $out .= " - ID: {$c->id}, Name: '{$c->name}', Slug: '{$c->slug}', Status: {$c->status}, Parent: {$c->parent_id}<br>";
+        }
+    }
     
     return $out;
 });
