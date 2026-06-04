@@ -7,6 +7,20 @@
     .main-wrapper { background: transparent !important; }
     
     .section-premium { position: relative; z-index: 1; padding: 140px 0 60px; }
+
+    /* PAGINATION */
+    .pz-pagination { display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 40px; flex-wrap: wrap; }
+    .pz-page-btn { background: rgba(255,255,255,0.05) !important; border: 1px solid rgba(255,255,255,0.1) !important; color: rgba(255,255,255,0.7) !important; border-radius: 10px !important; padding: 10px 18px !important; font-weight: 600 !important; transition: all .2s !important; font-size: 14px !important; cursor: pointer; }
+    .pz-page-btn.active { background: var(--accent-gold) !important; border-color: var(--accent-gold) !important; color: #07091e !important; box-shadow: 0 4px 12px rgba(245,197,24,0.3) !important; }
+    .pz-page-btn:hover:not(:disabled) { background: rgba(255,255,255,0.1) !important; border-color: rgba(255,255,255,0.3) !important; color: #fff !important; transform: translateY(-2px); }
+    .pz-page-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+    .pz-page-info { color: rgba(255,255,255,0.6); font-size: 14px; margin-left: 10px; }
+
+    /* SIDEBAR SCROLL */
+    .sidebar-scroll { max-height: 480px; overflow-y: auto; padding-right: 8px; }
+    .sidebar-scroll::-webkit-scrollbar { width: 6px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.1); border-radius: 10px; }
+    .sidebar-scroll::-webkit-scrollbar-track { background: transparent; }
     
     /* BREADCRUMB */
     .premium-breadcrumb {
@@ -57,33 +71,8 @@
         border-bottom: 2px solid var(--accent-gold) !important;
     }
 
-    /* TABS - hidden */
-    .nav-tabs-premium { display: none; }
-
-    /* PAGINATION */
-    .pz-pagination {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-        margin-top: 40px;
-        flex-wrap: wrap;
-    }
-    .pz-page-btn {
-        min-width: 42px; height: 42px;
-        display: flex; align-items: center; justify-content: center;
-        border-radius: 10px;
-        background: rgba(255,255,255,0.05);
-        border: 1px solid rgba(255,255,255,0.1);
-        color: rgba(255,255,255,0.7);
-        font-weight: 600; font-size: 14px;
-        cursor: pointer; transition: all .2s;
-        padding: 0 14px;
-    }
-    .pz-page-btn:hover { background: rgba(255,255,255,0.1); color: #fff; border-color: rgba(255,255,255,0.3); }
-    .pz-page-btn.active { background: var(--accent-gold); border-color: var(--accent-gold); color: #07091e; }
-    .pz-page-btn:disabled { opacity: 0.3; cursor: not-allowed; }
-    .pz-page-info { color: var(--text-light); font-size: 14px; padding: 0 8px; }
+    @media (max-width: 768px) {
+        .nav-tabs-premium {
             flex-wrap: nowrap;
             overflow-x: auto;
             padding-bottom: 5px;
@@ -147,26 +136,12 @@
         margin-bottom: 20px;
     }
     .widget-link {
-        display: block; padding: 10px 12px; color: var(--text-light);
+        display: block; padding: 10px 0; color: var(--text-light);
         text-decoration: none; font-size: 15px; transition: all .2s;
         border-bottom: 1px solid rgba(255,255,255,0.05);
-        border-radius: 8px;
     }
-    .widget-link:hover, .widget-link.active { color: var(--accent-gold); padding-left: 10px; background: rgba(245,197,24,0.05); }
-    .widget-link.active { font-weight: 700; color: var(--accent-gold); background: rgba(245,197,24,0.08); border-left: 3px solid var(--accent-gold); }
-
-    /* SIDEBAR SCROLL */
-    .sidebar-scroll {
-        max-height: 600px;
-        overflow-y: auto;
-        overflow-x: hidden;
-        padding-right: 4px;
-        scroll-behavior: smooth;
-    }
-    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
-    .sidebar-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
-    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(245,197,24,0.35); border-radius: 10px; }
-    .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(245,197,24,0.6); }
+    .widget-link:hover, .widget-link.active { color: var(--accent-gold); padding-left: 6px; }
+    .widget-link.active { font-weight: 700; }
 
     /* PROGRESS OVERLAY */
     #pdf-progress-overlay {
@@ -311,6 +286,32 @@
             return str_replace($en, $bn, (string)$num);
         };
         $isStudent = auth()->guard('student')->check();
+
+        // Determine if this is Current Affairs
+        $caCategoryIds = [312];
+        $caLevel1 = App\Models\Category::where('parent_id', 312)->pluck('id')->toArray();
+        $caCategoryIds = array_merge($caCategoryIds, $caLevel1);
+        if (!empty($caLevel1)) {
+            $caLevel2 = App\Models\Category::whereIn('parent_id', $caLevel1)->pluck('id')->toArray();
+            $caCategoryIds = array_merge($caCategoryIds, $caLevel2);
+        }
+        $isCurrentAffairs = in_array($model->category_id, $caCategoryIds);
+
+        // Gather all questions into a flat list
+        $allQuestions = collect();
+        foreach ($final as $categoryBlock) {
+            foreach ($categoryBlock['groups'] as $group) {
+                foreach ($group['questions'] as $q) {
+                    $q['passage_name'] = $group['passage_name'] ?? '';
+                    $q['passage_text'] = $group['passage_text'] ?? '';
+                    $allQuestions->push($q);
+                }
+            }
+        }
+
+        $perPage = 20;
+        $totalQuestions = $allQuestions->count();
+        $totalPages = ceil($totalQuestions / $perPage);
     @endphp
 
     <!-- BREADCRUMB -->
@@ -345,137 +346,296 @@
 
     <div class="row g-5">
         <div class="col-lg-8">
-
-            {{-- FLAT PAGINATED QUESTION LIST --}}
-            @php
-                $allQuestions = [];
-                $globalCounter = 0;
-                foreach ($final as $categoryBlock) {
-                    foreach ($categoryBlock['groups'] as $group) {
-                        foreach ($group['questions'] as $q) {
-                            $q['_counter'] = ++$globalCounter;
-                            $q['_passage_text'] = $group['passage_text'] ?? '';
-                            $q['_passage_name'] = $group['passage_name'] ?? '';
-                            $allQuestions[] = $q;
-                        }
-                    }
-                }
-                $totalQuestions = count($allQuestions);
-                $perPage = 20;
-                $totalPages = max(1, ceil($totalQuestions / $perPage));
-                $labels = ['ক','খ','গ','ঘ','ঙ'];
-            @endphp
-
-            <div id="pz-q-count" style="color: var(--text-light); font-size:14px; margin-bottom:20px;">
-                মোট প্রশ্ন: <strong style="color:var(--accent-gold);">{{ $toBn($totalQuestions) }}</strong>
-            </div>
-
-            <div id="pz-questions-container">
-                @foreach ($allQuestions as $idx => $q)
-                    @php
-                        $correct = intval($q['correct_answer']);
-                        $uniqueId = 'exp_' . $q['id'];
-                        $pageNum = floor($idx / 20) + 1;
-                    @endphp
-                    <div class="q-card-premium pz-q-item" data-page="{{ $pageNum }}" style="{{ $pageNum > 1 ? 'display:none;' : '' }}">
-
-                        {{-- Passage box if exists --}}
-                        @if(!empty($q['_passage_text']) && ($idx == 0 || $allQuestions[$idx-1]['_passage_name'] != $q['_passage_name']))
-                            <div style="background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:16px 20px; margin-bottom:18px; font-size:14px; color:#ccc; line-height:1.7;">
-                                @if(!empty($q['_passage_name']))
-                                    <strong style="color:#fff; display:block; margin-bottom:8px;">📖 {{ $q['_passage_name'] }}</strong>
-                                @endif
-                                {!! $q['_passage_text'] !!}
+            @if ($isCurrentAffairs)
+                {{-- CURRENT AFFAIRS FLAT LAYOUT --}}
+                <div id="pz-questions-container">
+                    @php $counter = 0; @endphp
+                    @foreach ($allQuestions as $index => $q)
+                        @php
+                            $page = floor($index / 20) + 1;
+                            $uniqueId = 'exp_' . $q['id'] . '_ca';
+                            $correct = intval($q['correct_answer']);
+                            $labels = ['ক','খ','গ','ঘ','ঙ'];
+                        @endphp
+                        <div class="q-card-premium pz-q-item" data-page="{{ $page }}" style="{{ $page > 1 ? 'display: none;' : '' }}">
+                            <div class="q-text-premium">
+                                <span class="q-num">{{ $toBn(++$counter) }}.</span>
+                                <div>{!! $q['question'] !!}</div>
                             </div>
-                        @endif
-
-                        <div class="q-text-premium">
-                            <span class="q-num">{{ $toBn($q['_counter']) }}.</span>
-                            <div>{!! $q['question'] !!}</div>
-                        </div>
-
-                        @if ($q['type'] === 'mcq')
-                            <div class="opt-grid">
-                                @foreach ($q['options'] as $i => $opt)
-                                    @if($opt)
-                                        <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
-                                            <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
-                                        </div>
-                                    @endif
-                                @endforeach
-                            </div>
-                        @else
-                            <div style="background:rgba(34,197,94,0.1); border:1px solid rgba(34,197,94,0.2); border-radius:10px; padding:14px 18px; font-size:15px; color:#22c55e; font-weight:600; display:inline-flex; align-items:center; gap:8px;">
-                                <span style="color:var(--accent-gold); font-weight:800;">উত্তর:</span> {!! $q['correct_answer'] !!}
-                            </div>
-                        @endif
-
-                        {{-- Tags: বাংলাদেশ বিষয়াবলী প্রথমে — HR এর উপরে --}}
-                        <div style="display:flex; flex-wrap:wrap; gap:8px; margin-top:18px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.06);">
-                            @if(!empty($q['job_category_name']))
-                                <a href="{{ route('slug.handle', $q['job_category_slug']) }}" style="font-size:11px; font-weight:700; padding:4px 12px; border-radius:100px; background:rgba(34,197,94,0.12); color:#22c55e; border:1px solid rgba(34,197,94,0.25); text-decoration:none;">{{ $q['job_category_name'] }}</a>
-                            @endif
-                            @if(!empty($q['exam_name']))
-                                <a href="{{ route('slug.handle', $q['exam_slug']) }}" style="font-size:11px; font-weight:600; padding:4px 12px; border-radius:100px; background:rgba(245,158,11,0.1); color:#f59e0b; border:1px solid rgba(245,158,11,0.2); text-decoration:none;">{{ $q['exam_name'] }}</a>
-                            @endif
-                            @if(!empty($q['category_name']))
-                                <a href="{{ route('slug.handle', $q['category_slug']) }}" style="font-size:11px; font-weight:600; padding:4px 12px; border-radius:100px; background:rgba(59,130,246,0.1); color:#3b82f6; border:1px solid rgba(59,130,246,0.2); text-decoration:none;">{{ $q['category_name'] }}</a>
-                            @endif
-                            @if($q['content'])
-                                <button class="btn-premium btn-outline" style="font-size:11px; padding:4px 14px; border-radius:100px; margin-left:auto;" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $uniqueId }}">
-                                    💡 ব্যাখ্যা
-                                </button>
-                            @endif
-                        </div>
-
-
-                        @if($q['content'])
-                            <div class="collapse" id="{{ $uniqueId }}">
-                                <div style="background:rgba(255,255,255,0.03); border-left:3px solid var(--accent-gold); padding:18px 20px; margin-top:14px; color:#cbd5e1; font-size:14px; line-height:1.7; border-radius:0 12px 12px 0;">
-                                    <strong style="color:var(--accent-gold); display:block; margin-bottom:8px;">ব্যাখ্যা:</strong>
-                                    {!! $q['content'] !!}
+                            @if ($q['type'] === 'mcq')
+                                <div class="opt-grid">
+                                    @foreach ($q['options'] as $i => $opt)
+                                        @if($opt)
+                                            <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
+                                                <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
+                                            </div>
+                                        @endif
+                                    @endforeach
                                 </div>
+                            @else
+                                <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #22c55e; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                                    <span style="color: var(--accent-gold); font-weight: 800;">উত্তর:</span> {!! $q['correct_answer'] !!}
+                                </div>
+                            @endif
+
+                            {{-- TAGS (Above line) --}}
+                            @php
+                                $tagsList = [];
+                                if (!empty($q['job_category_name'])) {
+                                    $tagsList[] = [
+                                        'name' => $q['job_category_name'],
+                                        'slug' => $q['job_category_slug'],
+                                        'bg' => 'rgba(34, 197, 94, 0.1)',
+                                        'color' => '#22c55e',
+                                        'border' => 'rgba(34, 197, 94, 0.2)'
+                                    ];
+                                }
+                                if (!empty($q['exam_name'])) {
+                                    $tagsList[] = [
+                                        'name' => $q['exam_name'],
+                                        'slug' => $q['exam_slug'],
+                                        'bg' => 'rgba(245, 158, 11, 0.1)',
+                                        'color' => '#f59e0b',
+                                        'border' => 'rgba(245, 158, 11, 0.2)'
+                                    ];
+                                }
+                                if (!empty($q['category_name'])) {
+                                    $tagsList[] = [
+                                        'name' => $q['category_name'],
+                                        'slug' => $q['category_slug'],
+                                        'bg' => 'rgba(59, 130, 246, 0.1)',
+                                        'color' => '#3b82f6',
+                                        'border' => 'rgba(59, 130, 246, 0.2)'
+                                    ];
+                                }
+                            @endphp
+                            @if (!empty($tagsList))
+                                <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-top: 20px; margin-bottom: 12px;">
+                                    @foreach ($tagsList as $tag)
+                                        <a href="{{ route('slug.handle', $tag['slug']) }}" 
+                                           style="font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; background: {{ $tag['bg'] }}; color: {{ $tag['color'] }}; border: 1px solid {{ $tag['border'] }}; text-decoration: none;">
+                                            {{ $tag['name'] }}
+                                        </a>
+                                    @endforeach
+                                </div>
+                            @endif
+
+                            {{-- HORIZONTAL BAR + ACTIONS --}}
+                            <div style="margin-top: 12px; display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 16px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.06);">
+                                @if($q['content'])
+                                    <button class="btn-premium btn-outline" style="font-size: 12px; padding: 6px 20px; border-radius: 8px;" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $uniqueId }}">
+                                        💡 ব্যাখ্যা দেখুন
+                                    </button>
+                                @endif
                             </div>
-                        @endif
+
+                            @if($q['content'])
+                                <div class="collapse" id="{{ $uniqueId }}">
+                                    <div style="background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent-gold); padding: 20px; margin-top: 16px; color: #cbd5e1; font-size: 14px; line-height: 1.7; border-radius: 0 12px 12px 0;">
+                                        <strong style="color: var(--accent-gold); display: block; margin-bottom: 8px;">ব্যাখ্যা:</strong>
+                                        {!! $q['content'] !!}
+                                    </div>
+                                </div>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                {{-- PAGINATION --}}
+                @if($totalPages > 1)
+                <div class="pz-pagination" id="pz-pagination">
+                    <button class="pz-page-btn" id="pz-prev" onclick="pzChangePage(pzCurrentPage - 1)" disabled>‹ আগে</button>
+                    <div id="pz-page-numbers" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
+                    <button class="pz-page-btn" id="pz-next" onclick="pzChangePage(pzCurrentPage + 1)">পরে ›</button>
+                    <span class="pz-page-info" id="pz-page-info">1 / {{ $totalPages }}</span>
+                </div>
+                @endif
+
+            @else
+                {{-- DEFAULT TABBED LAYOUT (BCS, PSC, BANK, ETC.) --}}
+                <!-- TABS -->
+                <ul class="nav nav-tabs nav-tabs-premium" id="examTabs" role="tablist">
+                    <li class="nav-item">
+                        <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all-pane" type="button">সব প্রশ্ন</button>
+                    </li>
+                    @foreach ($categories as $cat)
+                        <li class="nav-item">
+                            <button class="nav-link" data-bs-toggle="tab" data-bs-target="#cat-pane-{{ $cat['id'] }}" type="button">{{ $cat['name'] }}</button>
+                        </li>
+                    @endforeach
+                </ul>
+
+                <div class="tab-content">
+                    <!-- ALL QUESTIONS PANE -->
+                    <div class="tab-pane fade show active" id="all-pane">
+                        @php $counter = 0; @endphp
+                        @foreach ($final as $categoryBlock)
+                            <div style="margin: 40px 0 24px;">
+                                <h3 style="font-family: 'Noto Serif Bengali', serif; font-size: 22px; color: var(--accent-gold); display: flex; align-items: center; gap: 12px;">
+                                    <span style="height: 2px; width: 30px; background: var(--accent-gold); opacity: 0.5;"></span>
+                                    {{ $categoryBlock['category_name'] }}
+                                </h3>
+                            </div>
+
+                            @foreach ($categoryBlock['groups'] as $group)
+                                @if (!empty($group['passage_text']))
+                                    <div style="background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08); border-radius: 12px; padding: 20px; margin-bottom: 24px; font-size: 15px; color: #ccc; line-height: 1.7;">
+                                        <strong style="color: #fff; margin-bottom: 8px; display: block;">📖 {{ $group['passage_name'] }}</strong>
+                                        {!! $group['passage_text'] !!}
+                                    </div>
+                                @endif
+
+                                @foreach ($group['questions'] as $q)
+                                    @php
+                                        $uniqueId = 'exp_' . $q['id'] . '_all';
+                                        $correct = intval($q['correct_answer']);
+                                        $labels = ['ক','খ','গ','ঘ','ঙ'];
+                                    @endphp
+                                    <div class="q-card-premium">
+                                        <div class="q-text-premium">
+                                            <span class="q-num">{{ $toBn(++$counter) }}.</span>
+                                            <div>{!! $q['question'] !!}</div>
+                                        </div>
+                                        @if ($q['type'] === 'mcq')
+                                            <div class="opt-grid">
+                                                @foreach ($q['options'] as $i => $opt)
+                                                    @if($opt)
+                                                        <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
+                                                            <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
+                                                        </div>
+                                                    @endif
+                                                @endforeach
+                                            </div>
+                                        @else
+                                            <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #22c55e; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                                                <span style="color: var(--accent-gold); font-weight: 800;">উত্তর:</span> {!! $q['correct_answer'] !!}
+                                            </div>
+                                        @endif
+
+                                        <!-- TAGS & ACTION -->
+                                        <div style="margin-top: 24px; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 16px; padding-top: 20px; border-top: 1px solid rgba(255,255,255,0.06);">
+                                            <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                                                @if(!empty($q['job_category_name']))
+                                                    <a href="{{ route('slug.handle', $q['job_category_slug']) }}" style="font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; background: rgba(34, 197, 94, 0.1); color: #22c55e; border: 1px solid rgba(34, 197, 94, 0.2); text-decoration: none;">{{ $q['job_category_name'] }}</a>
+                                                @endif
+                                                @if(!empty($q['exam_name']))
+                                                    <a href="{{ route('slug.handle', $q['exam_slug']) }}" style="font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; background: rgba(245, 158, 11, 0.1); color: #f59e0b; border: 1px solid rgba(245, 158, 11, 0.2); text-decoration: none;">{{ $q['exam_name'] }}</a>
+                                                @endif
+                                                @if(!empty($q['category_name']))
+                                                    <a href="{{ route('slug.handle', $q['category_slug']) }}" style="font-size: 11px; font-weight: 600; padding: 4px 12px; border-radius: 100px; background: rgba(59, 130, 246, 0.1); color: #3b82f6; border: 1px solid rgba(59, 130, 246, 0.2); text-decoration: none;">{{ $q['category_name'] }}</a>
+                                                @endif
+                                            </div>
+
+                                            @if($q['content'])
+                                                <button class="btn-premium btn-outline" style="font-size: 12px; padding: 6px 20px; border-radius: 8px;" type="button" data-bs-toggle="collapse" data-bs-target="#{{ $uniqueId }}">
+                                                    💡 व्याख्या देखें
+                                                </button>
+                                            @endif
+                                        </div>
+
+                                        @if($q['content'])
+                                            <div class="collapse" id="{{ $uniqueId }}">
+                                                <div style="background: rgba(255,255,255,0.03); border-left: 3px solid var(--accent-gold); padding: 20px; margin-top: 16px; color: #cbd5e1; font-size: 14px; line-height: 1.7; border-radius: 0 12px 12px 0;">
+                                                    <strong style="color: var(--accent-gold); display: block; margin-bottom: 8px;">ব্যাখ্যা:</strong>
+                                                    {!! $q['content'] !!}
+                                                </div>
+                                            </div>
+                                        @endif
+                                    </div>
+                                @endforeach
+                            @endforeach
+                        @endforeach
                     </div>
-                @endforeach
-            </div>
 
-            {{-- PAGINATION --}}
-            @if($totalPages > 1)
-            <div class="pz-pagination" id="pz-pagination">
-                <button class="pz-page-btn" id="pz-prev" onclick="pzChangePage(pzCurrentPage - 1)">‹ আগে</button>
-                <div id="pz-page-numbers" style="display:flex; gap:8px; flex-wrap:wrap;"></div>
-                <button class="pz-page-btn" id="pz-next" onclick="pzChangePage(pzCurrentPage + 1)">পরে ›</button>
-                <span class="pz-page-info" id="pz-page-info"></span>
-            </div>
+                    <!-- CATEGORY PANES -->
+                    @foreach ($categories as $cat)
+                        <div class="tab-pane fade" id="cat-pane-{{ $cat['id'] }}">
+                            @php $counter = 0; @endphp
+                            @foreach ($final as $categoryBlock)
+                                @if($categoryBlock['category_id'] == $cat['id'])
+                                    @foreach ($categoryBlock['groups'] as $group)
+                                        @foreach ($group['questions'] as $q)
+                                            @php
+                                                $uniqueId = 'exp_' . $q['id'] . '_' . $cat['id'];
+                                                $correct = intval($q['correct_answer']);
+                                                $labels = ['ক','খ','গ','ঘ','ঙ'];
+                                            @endphp
+                                            <div class="q-card-premium">
+                                                <div class="q-text-premium">
+                                                    <span class="q-num">{{ $toBn(++$counter) }}.</span>
+                                                    <div>{!! $q['question'] !!}</div>
+                                                </div>
+                                                @if ($q['type'] === 'mcq')
+                                                    <div class="opt-grid">
+                                                        @foreach ($q['options'] as $i => $opt)
+                                                            @if($opt)
+                                                                <div class="opt-box {{ ($i+1)==$correct ? 'opt-correct' : '' }}">
+                                                                    <span class="opt-label">{{ $labels[$i] }}</span> {!! $opt !!}
+                                                                </div>
+                                                            @endif
+                                                        @endforeach
+                                                    </div>
+                                                @else
+                                                    <div style="background: rgba(34,197,94,0.1); border: 1px solid rgba(34,197,94,0.2); border-radius: 10px; padding: 14px 18px; font-size: 15px; color: #22c55e; font-weight: 600; display: inline-flex; align-items: center; gap: 8px;">
+                                                        <span style="color: var(--accent-gold); font-weight: 800;">উত্তর:</span> {!! $q['correct_answer'] !!}
+                                                    </div>
+                                                @endif
+                                            </div>
+                                        @endforeach
+                                    @endforeach
+                                @endif
+                            @endforeach
+                        </div>
+                    @endforeach
+                </div>
             @endif
-
         </div>
 
         <!-- SIDEBAR -->
         <div class="col-lg-4">
             <aside class="sidebar-widget-premium">
                 <h5 class="widget-title-premium">{{ $mainCategory->name }}</h5>
-                <div class="sidebar-scroll">
-                    @php
-                        $sidebarExams = App\Models\JobCategory::where('category_id', $mainCategory->id)->where('status', 1)->get();
-                        $sidebarExams = $sidebarExams->sortByDesc(function ($sExam) {
-                            if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
-                                $parts = explode('-', $matches[1]);
-                                if (count($parts) === 3) {
-                                    return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                @if ($isCurrentAffairs)
+                    <div class="widget-content sidebar-scroll">
+                        @php
+                            $sidebarExams = App\Models\JobCategory::where('category_id', $mainCategory->id)->where('status', 1)->get();
+                            $sidebarExams = $sidebarExams->sortByDesc(function ($sExam) {
+                                if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
+                                    $parts = explode('-', $matches[1]);
+                                    if (count($parts) === 3) {
+                                        return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                                    }
                                 }
-                            }
-                            return '0000-00-00';
-                        });
-                    @endphp
-                    @foreach ($sidebarExams as $sExam)
-                        <a href="{{ route('slug.handle', $sExam->slug) }}" class="widget-link {{ $model->id == $sExam->id ? 'active' : '' }}" id="sidebar-item-{{ $sExam->id }}">
-                            {{ $sExam->name }}
-                        </a>
-                    @endforeach
-                </div>
+                                return '0000-00-00';
+                            });
+                        @endphp
+                        @foreach ($sidebarExams as $sExam)
+                            <a href="{{ route('slug.handle', $sExam->slug) }}" class="widget-link {{ $model->id == $sExam->id ? 'active' : '' }}">
+                                {{ $sExam->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                @else
+                    <div class="widget-content">
+                        @php
+                            $sidebarExams = App\Models\JobCategory::where('category_id', $mainCategory->id)->where('status', 1)->get();
+                            $sidebarExams = $sidebarExams->sortByDesc(function ($sExam) {
+                                if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
+                                    $parts = explode('-', $matches[1]);
+                                    if (count($parts) === 3) {
+                                        return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
+                                    }
+                                }
+                                return '0000-00-00';
+                            })->take(15);
+                        @endphp
+                        @foreach ($sidebarExams as $sExam)
+                            <a href="{{ route('slug.handle', $sExam->slug) }}" class="widget-link {{ $model->id == $sExam->id ? 'active' : '' }}">
+                                {{ $sExam->name }}
+                            </a>
+                        @endforeach
+                    </div>
+                @endif
             </aside>
         </div>
     </div>
@@ -595,7 +755,8 @@
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 <script>
-    // ── PAGINATION ──────────────────────────────────────────
+    @if ($isCurrentAffairs)
+    // ── CURRENT AFFAIRS PAGINATION ──────────────────────────
     const pzTotalPages = {{ $totalPages ?? 1 }};
     let pzCurrentPage = 1;
 
@@ -645,6 +806,7 @@
             if (last && p - last > 1) {
                 const dots = document.createElement('span');
                 dots.className = 'pz-page-info';
+                dots.style.margin = '0 5px';
                 dots.textContent = '…';
                 container.appendChild(dots);
             }
@@ -659,11 +821,22 @@
 
     document.addEventListener('DOMContentLoaded', function () {
         if (pzTotalPages > 1) pzChangePage(1);
+
+        // Auto-scroll sidebar to active item on page load
+        const activeLink = document.querySelector('.sidebar-scroll .widget-link.active');
+        if (activeLink) {
+            const container = document.querySelector('.sidebar-scroll');
+            if (container) {
+                const linkTop = activeLink.offsetTop;
+                const containerHeight = container.clientHeight;
+                container.scrollTop = linkTop - (containerHeight / 2) + (activeLink.clientHeight / 2);
+            }
+        }
     });
     // ────────────────────────────────────────────────────────
+    @endif
 
     function downloadPDF() {
-
         $('#pdf-progress-overlay').addClass('show');
         
         // Find which tab is active to print only its content or all content
@@ -735,19 +908,4 @@
         }
     }
 </script>
-
-<script>
-    // Auto-scroll sidebar to active item on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        const activeLink = document.querySelector('.sidebar-scroll .widget-link.active');
-        if (activeLink) {
-            const container = document.querySelector('.sidebar-scroll');
-            if (container) {
-                const linkTop = activeLink.offsetTop;
-                const containerHeight = container.clientHeight;
-                container.scrollTop = linkTop - (containerHeight / 2) + (activeLink.clientHeight / 2);
-            }
-        }
-    });
-
 @endpush

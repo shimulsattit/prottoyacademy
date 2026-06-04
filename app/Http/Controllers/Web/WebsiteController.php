@@ -274,7 +274,31 @@ class WebsiteController extends Controller
             $category = Category::whereIn('slug', $slugVariants)->first();
 
             if ($category) {
-                $allJobCategories = JobCategory::with('questions')->where('categorY_id', $category->id)->where('status', 1)->get();
+                // Determine if this is a Current Affairs category (Category ID 312 or its descendants)
+                $caCategoryIds = [312];
+                $caLevel1 = Category::where('parent_id', 312)->pluck('id')->toArray();
+                $caCategoryIds = array_merge($caCategoryIds, $caLevel1);
+                if (!empty($caLevel1)) {
+                    $caLevel2 = Category::whereIn('parent_id', $caLevel1)->pluck('id')->toArray();
+                    $caCategoryIds = array_merge($caCategoryIds, $caLevel2);
+                }
+                
+                $isCurrentAffairs = in_array($category->id, $caCategoryIds);
+
+                if ($isCurrentAffairs) {
+                    // Fetch all job categories recursively under this category
+                    $targetCategoryIds = [$category->id];
+                    $subLevel1 = Category::where('parent_id', $category->id)->pluck('id')->toArray();
+                    $targetCategoryIds = array_merge($targetCategoryIds, $subLevel1);
+                    if (!empty($subLevel1)) {
+                        $subLevel2 = Category::whereIn('parent_id', $subLevel1)->pluck('id')->toArray();
+                        $targetCategoryIds = array_merge($targetCategoryIds, $subLevel2);
+                    }
+                    $allJobCategories = JobCategory::with('questions')->whereIn('category_id', $targetCategoryIds)->where('status', 1)->get();
+                } else {
+                    $allJobCategories = JobCategory::with('questions')->where('categorY_id', $category->id)->where('status', 1)->get();
+                }
+
                 $sortedCategories = $allJobCategories->sortByDesc(function ($sExam) {
                     if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
                         $parts = explode('-', $matches[1]);
@@ -292,6 +316,16 @@ class WebsiteController extends Controller
                     'path' => \Illuminate\Pagination\LengthAwarePaginator::resolveCurrentPath()
                 ]);
 
+
+                // If Current Affairs, show the view immediately with empty childCategories and questions
+                if ($isCurrentAffairs) {
+                    return view('web.category-wise', [
+                        'category'        => $category,
+                        'childCategories' => collect(),
+                        'questions'       => collect(),
+                        'jobCategories'   => $jobCategories
+                    ]);
+                }
 
                 // Check if this category has child categories
                 $childCategories = Category::where('parent_id', $category->id)
