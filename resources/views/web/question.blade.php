@@ -594,11 +594,24 @@
         <!-- SIDEBAR -->
         <div class="col-lg-4">
             <aside class="sidebar-widget-premium">
-                <h5 class="widget-title-premium">{{ $mainCategory->name }}</h5>
+                @php
+                    $sidebarCategory = $mainCategory;
+                    if ($isCurrentAffairs && $mainCategory->parent_id && $mainCategory->parent_id != 312) {
+                        $parentCat = App\Models\Category::find($mainCategory->parent_id);
+                        if ($parentCat) {
+                            $sidebarCategory = $parentCat;
+                        }
+                    }
+                @endphp
+                <h5 class="widget-title-premium">{{ $sidebarCategory->name }}</h5>
                 @if ($isCurrentAffairs)
                     <div class="widget-content sidebar-scroll">
                         @php
-                            $sidebarExams = App\Models\JobCategory::where('category_id', $mainCategory->id)->where('status', 1)->get();
+                            $sidebarCategoryIds = [$sidebarCategory->id];
+                            $subLevel = App\Models\Category::where('parent_id', $sidebarCategory->id)->pluck('id')->toArray();
+                            $sidebarCategoryIds = array_merge($sidebarCategoryIds, $subLevel);
+
+                            $sidebarExams = App\Models\JobCategory::whereIn('category_id', $sidebarCategoryIds)->where('status', 1)->get();
                             $sidebarExams = $sidebarExams->sortByDesc(function ($sExam) {
                                 if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
                                     $parts = explode('-', $matches[1]);
