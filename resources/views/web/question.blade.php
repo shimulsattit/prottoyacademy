@@ -122,12 +122,26 @@
         margin-bottom: 20px;
     }
     .widget-link {
-        display: block; padding: 10px 0; color: var(--text-light);
+        display: block; padding: 10px 12px; color: var(--text-light);
         text-decoration: none; font-size: 15px; transition: all .2s;
         border-bottom: 1px solid rgba(255,255,255,0.05);
+        border-radius: 8px;
     }
-    .widget-link:hover, .widget-link.active { color: var(--accent-gold); padding-left: 6px; }
-    .widget-link.active { font-weight: 700; }
+    .widget-link:hover, .widget-link.active { color: var(--accent-gold); padding-left: 10px; background: rgba(245,197,24,0.05); }
+    .widget-link.active { font-weight: 700; color: var(--accent-gold); background: rgba(245,197,24,0.08); border-left: 3px solid var(--accent-gold); }
+
+    /* SIDEBAR SCROLL */
+    .sidebar-scroll {
+        max-height: 600px;
+        overflow-y: auto;
+        overflow-x: hidden;
+        padding-right: 4px;
+        scroll-behavior: smooth;
+    }
+    .sidebar-scroll::-webkit-scrollbar { width: 4px; }
+    .sidebar-scroll::-webkit-scrollbar-track { background: rgba(255,255,255,0.03); border-radius: 10px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb { background: rgba(245,197,24,0.35); border-radius: 10px; }
+    .sidebar-scroll::-webkit-scrollbar-thumb:hover { background: rgba(245,197,24,0.6); }
 
     /* PROGRESS OVERLAY */
     #pdf-progress-overlay {
@@ -447,7 +461,7 @@
         <div class="col-lg-4">
             <aside class="sidebar-widget-premium">
                 <h5 class="widget-title-premium">{{ $mainCategory->name }}</h5>
-                <div class="widget-content">
+                <div class="sidebar-scroll">
                     @php
                         $sidebarExams = App\Models\JobCategory::where('category_id', $mainCategory->id)->where('status', 1)->get();
                         $sidebarExams = $sidebarExams->sortByDesc(function ($sExam) {
@@ -458,10 +472,10 @@
                                 }
                             }
                             return '0000-00-00';
-                        })->take(15);
+                        });
                     @endphp
                     @foreach ($sidebarExams as $sExam)
-                        <a href="{{ route('slug.handle', $sExam->slug) }}" class="widget-link {{ $model->id == $sExam->id ? 'active' : '' }}">
+                        <a href="{{ route('slug.handle', $sExam->slug) }}" class="widget-link {{ $model->id == $sExam->id ? 'active' : '' }}" id="sidebar-item-{{ $sExam->id }}">
                             {{ $sExam->name }}
                         </a>
                     @endforeach
@@ -657,4 +671,19 @@
         }
     }
 </script>
+
+<script>
+    // Auto-scroll sidebar to active item on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        const activeLink = document.querySelector('.sidebar-scroll .widget-link.active');
+        if (activeLink) {
+            const container = document.querySelector('.sidebar-scroll');
+            if (container) {
+                const linkTop = activeLink.offsetTop;
+                const containerHeight = container.clientHeight;
+                container.scrollTop = linkTop - (containerHeight / 2) + (activeLink.clientHeight / 2);
+            }
+        }
+    });
+
 @endpush
