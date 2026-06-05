@@ -1347,8 +1347,24 @@
         prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${currentPage - 1})" aria-label="Previous"><i class="ri-arrow-left-s-line"></i></a>`;
         ul.appendChild(prevLi);
 
-        // Page Numbers
-        for (let i = 1; i <= lastPage; i++) {
+        // Page Numbers (Limit to 5 page numbers in pagination block)
+        let startPage = 1;
+        let endPage = lastPage;
+
+        if (lastPage > 5) {
+            if (currentPage <= 3) {
+                startPage = 1;
+                endPage = 5;
+            } else if (currentPage + 2 >= lastPage) {
+                startPage = lastPage - 4;
+                endPage = lastPage;
+            } else {
+                startPage = currentPage - 2;
+                endPage = currentPage + 2;
+            }
+        }
+
+        for (let i = startPage; i <= endPage; i++) {
             const pageLi = document.createElement('li');
             pageLi.className = `page-item ${currentPage === i ? 'active' : ''}`;
             pageLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${i})">${formatBanglaNumber(i)}</a>`;
