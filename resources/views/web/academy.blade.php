@@ -1344,7 +1344,7 @@
         // Prev Page
         const prevLi = document.createElement('li');
         prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
-        prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${currentPage - 1})">পূর্ববর্তী</a>`;
+        prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${currentPage - 1})" aria-label="Previous"><i class="ri-arrow-left-s-line"></i></a>`;
         ul.appendChild(prevLi);
 
         // Page Numbers
@@ -1358,7 +1358,7 @@
         // Next Page
         const nextLi = document.createElement('li');
         nextLi.className = `page-item ${currentPage === lastPage ? 'disabled' : ''}`;
-        nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${currentPage + 1})">পরবর্তী</a>`;
+        nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${currentPage + 1})" aria-label="Next"><i class="ri-arrow-right-s-line"></i></a>`;
         ul.appendChild(nextLi);
 
         nav.appendChild(ul);
