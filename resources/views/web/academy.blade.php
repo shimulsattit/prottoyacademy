@@ -75,6 +75,9 @@
         gap: 32px;
         align-items: start;
     }
+    .academy-explorer {
+        position: relative;
+    }
 
     /* SIDEBAR FILTERS */
     .academy-sidebar {
@@ -270,6 +273,7 @@
         display: flex;
         flex-direction: column;
         gap: 20px;
+        transition: opacity 0.3s ease;
     }
     .question-card-academy {
         background: rgba(255, 255, 255, 0.03);
@@ -340,6 +344,15 @@
         border-color: rgba(245, 197, 24, 0.3);
         color: var(--accent-gold);
     }
+    .q-btn-action.view {
+        width: auto;
+        padding: 0 10px;
+        gap: 6px;
+    }
+    .q-view-count {
+        font-size: 13px;
+        font-weight: 600;
+    }
 
     /* MCQ OPTIONS */
     .q-options-academy {
@@ -357,16 +370,49 @@
         color: #ccc;
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 10px;
     }
     .q-option-prefix {
         font-weight: 700;
-        color: var(--accent-gold);
+        color: #fff;
     }
     .q-option-item-academy.correct {
         border-color: rgba(34, 197, 94, 0.3);
         background: rgba(34, 197, 94, 0.06);
         color: #22c55e;
+    }
+    .option-bubble {
+        width: 14px;
+        height: 14px;
+        border: 1.5px solid rgba(255, 255, 255, 0.25);
+        border-radius: 50%;
+        display: inline-block;
+        flex-shrink: 0;
+        transition: all 0.2s ease;
+        position: relative;
+        box-sizing: border-box;
+    }
+    .option-bubble.filled {
+        background-color: #22c55e;
+        border-color: #22c55e;
+    }
+    .option-bubble.filled::after {
+        content: "";
+        display: block;
+        width: 6px;
+        height: 6px;
+        margin: 2.5px;
+        background-color: #fff;
+        border-radius: 50%;
+        box-sizing: border-box;
+    }
+
+    /* SUBTITLE DESCRIPTION */
+    .page-subtitle-premium {
+        color: var(--accent-gold) !important;
+        font-size: 15px;
+        font-weight: 500;
+        margin-top: 10px;
     }
 
     /* TAGS ROW */
@@ -391,9 +437,20 @@
 
     /* LOADING SPINNER */
     .loader-academy {
+        position: absolute;
+        top: 250px;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        z-index: 100;
         text-align: center;
-        padding: 60px 0;
+        padding: 30px 40px;
+        background: rgba(15, 17, 38, 0.95);
+        border: 1px solid rgba(245, 197, 24, 0.25);
+        border-radius: 20px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(12px);
         display: none;
+        width: 320px;
     }
     .spinner-academy {
         width: 48px;
@@ -413,30 +470,264 @@
         opacity: 0.7;
     }
 
+    /* PREMIUM PAGINATION */
+    .pagination {
+        display: flex;
+        padding-left: 0;
+        list-style: none;
+        gap: 6px;
+        margin: 30px 0;
+    }
+    .pagination .page-item {
+        margin: 0;
+    }
+    .pagination .page-link {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 38px;
+        height: 38px;
+        padding: 0 12px;
+        border-radius: 8px !important;
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        color: rgba(255, 255, 255, 0.6) !important;
+        font-size: 14px;
+        font-weight: 600;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .pagination .page-link:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.15);
+        color: #fff !important;
+    }
+    .pagination .page-item.active .page-link {
+        background: var(--accent-gold) !important;
+        border-color: var(--accent-gold) !important;
+        color: #000 !important;
+    }
+    .pagination .page-item.disabled .page-link {
+        opacity: 0.4;
+        pointer-events: none;
+        background: rgba(255, 255, 255, 0.01);
+        border-color: rgba(255, 255, 255, 0.03);
+        color: rgba(255, 255, 255, 0.3) !important;
+    }
+
+    .print-only-container {
+        display: none !important;
+    }
+
     /* PRINT LAYOUT */
     @media print {
-        body { background: #fff !important; color: #000 !important; }
-        .main-wrapper, .premium-breadcrumb, .stats-grid-academy, .academy-sidebar, .controls-wrapper-academy, .active-badges-wrapper, .q-actions-academy, .q-btn-action, .q-tags-academy, footer {
+        @page {
+            size: A4 portrait;
+            margin: 0;
+        }
+        body {
+            background: #fff !important;
+            color: #000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        header, footer, nav, 
+        .edu-header, .edu-footer, 
+        .main-wrapper > header, 
+        .main-wrapper > footer, 
+        .main-wrapper > .rn-progress-parent,
+        .rn-progress-parent,
+        .section-premium {
             display: none !important;
         }
-        .academy-layout {
+        body, .main-wrapper {
+            background: #fff !important;
+            color: #000 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            box-shadow: none !important;
+            overflow: visible !important;
+        }
+        .print-only-container {
             display: block !important;
+            width: 100% !important;
+            background: #fff !important;
+            color: #000 !important;
+        }
+        .print-page {
+            width: 210mm;
+            height: 297mm;
+            box-sizing: border-box;
+            padding: 20mm;
+            position: relative;
+            page-break-after: always;
+            break-after: page;
+            display: flex;
+            flex-direction: column;
+            background: #fff !important;
+            overflow: hidden;
+        }
+        .print-watermark {
+            position: absolute;
+            top: 55%;
+            left: 50%;
+            transform: translate(-50%, -50%) rotate(-45deg);
+            font-size: 80px;
+            font-weight: 900;
+            color: rgba(0, 0, 0, 0.04) !important;
+            white-space: nowrap;
+            pointer-events: none;
+            z-index: 1;
+            user-select: none;
+            font-family: 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+        }
+        .print-header {
+            border-bottom: 1.5px solid #000;
+            padding-bottom: 8px;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            z-index: 2;
+        }
+        .print-header-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: #000;
+            font-family: 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+        }
+        .print-header-meta {
+            font-size: 11px;
+            color: #333;
+            text-align: right;
+            line-height: 1.4;
+        }
+        .print-columns {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            column-gap: 24px;
+            row-gap: 12px;
+            flex: 1;
+            align-content: start;
+            z-index: 2;
+        }
+        .print-q-card {
+            page-break-inside: avoid;
+            break-inside: avoid;
+            font-size: 11px;
+            line-height: 1.35;
+            color: #000;
+            border-bottom: 1px dashed #ddd;
+            padding-bottom: 8px;
+        }
+        .print-q-text {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .print-q-options {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3px;
+            padding-left: 8px;
+        }
+        .print-q-option {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .print-option-bubble {
+            width: 10px;
+            height: 10px;
+            border: 1px solid #000;
+            border-radius: 50%;
+            display: inline-block;
+            flex-shrink: 0;
+            box-sizing: border-box;
+            background: transparent !important;
+        }
+        .print-option-bubble.filled {
+            background-color: #000 !important;
+            border-color: #000 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+        }
+        .print-option-bubble.filled::after {
+            content: "";
+            display: block;
+            width: 6px;
+            height: 6px;
+            margin: 1px;
+            background-color: #000 !important;
+            border-radius: 50%;
+            }
+    }
+
+    /* RESPONSIVE DESIGN */
+    @media (max-width: 992px) {
+        .stats-grid-academy {
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .academy-layout {
+            grid-template-columns: 1fr;
+            gap: 24px;
+        }
+    }
+
+    @media (max-width: 576px) {
+        .stats-grid-academy {
+            grid-template-columns: 1fr;
+            gap: 12px;
+        }
+        .stat-card-academy {
+            padding: 16px 20px;
+        }
+        .stat-value-academy {
+            font-size: 26px;
+        }
+        .controls-wrapper-academy {
+            flex-direction: column;
+            align-items: stretch;
+            gap: 10px;
+        }
+        .search-input-wrapper input {
+            padding: 12px 16px 12px 42px;
+            font-size: 14px;
+        }
+        .search-input-wrapper i {
+            left: 14px;
+            font-size: 16px;
+        }
+        .btn-control-academy {
+            width: 100%;
+            justify-content: center;
+            padding: 12px 16px;
+            font-size: 13.5px;
+        }
+        .q-options-academy {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        .q-option-item-academy {
+            padding: 8px 12px;
+            font-size: 13px;
         }
         .question-card-academy {
-            border: none !important;
-            border-bottom: 1px solid #ccc !important;
-            padding: 16px 0 !important;
-            background: transparent !important;
-            page-break-inside: avoid;
+            padding: 16px 20px;
         }
-        .q-text-academy { color: #000 !important; }
-        .q-option-item-academy { border: none !important; background: transparent !important; color: #000 !important; }
-        .q-option-item-academy.correct { font-weight: 700; }
+        .q-text-academy {
+            font-size: 14.5px;
+            line-height: 1.5;
+        }
     }
+
 </style>
 @endpush
 
 @section('content')
+<!-- Print-only template container -->
+<div id="print-template-container" class="print-only-container"></div>
+
 <div class="section-premium">
     <div class="container">
         
@@ -447,9 +738,8 @@
             <span class="active">একাডেমিক কোশ্চেন ব্যাংক</span>
         </div>
 
-        <!-- HEADER -->
+        <!-- HEADER SUBTITLE -->
         <div class="page-header-premium mb-4">
-            <h1 class="page-title-premium">একাডেমিক কোশ্চেন ব্যাংক</h1>
             <p class="page-subtitle-premium">সহজে শ্রেণি, বিষয় এবং অধ্যায় ভিত্তিক প্রশ্ন অনুসন্ধান করুন</p>
         </div>
 
@@ -457,23 +747,23 @@
         <div class="stats-grid-academy">
             <div class="stat-card-academy">
                 <div class="stat-label-academy">মোট প্রশ্ন</div>
-                <div class="stat-value-academy" id="stat-total">{{ number_format($stats['total_questions']) }}</div>
+                <div class="stat-value-academy" id="stat-total">{{ strtr(number_format($stats['total_questions']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</div>
                 <div class="stat-growth-academy"><i class="ri-arrow-right-up-line"></i> এই মাসে +১২৮</div>
             </div>
             <div class="stat-card-academy">
                 <div class="stat-label-academy">বহুনির্বাচনী (MCQ)</div>
-                <div class="stat-value-academy" id="stat-mcq">{{ number_format($stats['mcq_count']) }}</div>
-                <div class="stat-growth-academy"><i class="ri-book-read-line"></i> ৯টি বিষয়</div>
+                <div class="stat-value-academy" id="stat-mcq">{{ strtr(number_format($stats['mcq_count']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</div>
+                <div class="stat-growth-academy"><i class="ri-book-read-line"></i> <span id="stat-mcq-subjects">{{ strtr(count($stats['subjects']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>টি বিষয়</div>
             </div>
             <div class="stat-card-academy">
                 <div class="stat-label-academy">সৃজনশীল (CQ)</div>
-                <div class="stat-value-academy" id="stat-cq">{{ number_format($stats['cq_count']) }}</div>
-                <div class="stat-growth-academy"><i class="ri-file-edit-line"></i> ৯টি বিষয়</div>
+                <div class="stat-value-academy" id="stat-cq">{{ strtr(number_format($stats['cq_count']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</div>
+                <div class="stat-growth-academy"><i class="ri-file-edit-line"></i> <span id="stat-cq-subjects">{{ strtr(count($stats['subjects']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>টি বিষয়</div>
             </div>
             <div class="stat-card-academy">
                 <div class="stat-label-academy">অধ্যায় কাভার</div>
-                <div class="stat-value-academy">{{ $stats['chapters_count'] }}টি</div>
-                <div class="stat-growth-academy"><i class="ri-layout-grid-line"></i> {{ $stats['classes_count'] }}টি শ্রেণি</div>
+                <div class="stat-value-academy" id="stat-chapters">{{ strtr($stats['chapters_count'], ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}টি</div>
+                <div class="stat-growth-academy"><i class="ri-layout-grid-line"></i> <span id="stat-classes">{{ strtr($stats['classes_count'], ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>টি শ্রেণি</div>
             </div>
         </div>
 
@@ -489,30 +779,48 @@
                     <div class="filter-list-academy">
                         @foreach ($stats['classes'] as $cls)
                             <label class="filter-item-academy">
-                                <input type="checkbox" name="class_ids[]" value="{{ $cls['id'] }}" data-name="{{ $cls['name'] }}">
+                                <input type="checkbox" name="class_ids[]" value="{{ $cls['id'] }}" data-name="{{ $cls['name'] }}" {{ (isset($selectedClassId) && $selectedClassId == $cls['id']) ? 'checked' : '' }}>
                                 <span class="filter-label-academy">
                                     <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
                                     {{ $cls['name'] }}
                                 </span>
-                                <span class="filter-count-academy">{{ $cls['count'] }}</span>
+                                <span class="filter-count-academy">{{ strtr($cls['count'], ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>
                             </label>
                         @endforeach
                     </div>
                 </div>
-
+                
                 <!-- Subject Filters -->
-                <div class="filter-group-academy">
+                <div class="filter-group-academy" id="subject-filter-group" style="display: none;">
                     <h4 class="filter-title-academy">বিষয়</h4>
                     <div class="filter-list-academy">
                         @foreach ($stats['subjects'] as $sub)
-                            <label class="filter-item-academy">
-                                <input type="checkbox" name="subject_ids[]" value="{{ $sub['id'] }}" data-name="{{ $sub['name'] }}">
-                                <span class="filter-label-academy">
-                                    <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
-                                    {{ $sub['name'] }}
-                                </span>
-                                <span class="filter-count-academy">{{ $sub['count'] }}</span>
-                            </label>
+                            <div class="subject-item-wrapper-academy" data-class-id="{{ $sub['class_id'] }}" style="display: none;">
+                                <div class="subject-item-group-academy mb-2">
+                                    <label class="filter-item-academy">
+                                        <input type="checkbox" name="subject_ids[]" value="{{ $sub['id'] }}" data-name="{{ $sub['name'] }}" {{ (isset($selectedSubjectId) && $selectedSubjectId == $sub['id']) ? 'checked' : '' }}>
+                                        <span class="filter-label-academy">
+                                            <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
+                                            {{ $sub['name'] }}
+                                        </span>
+                                        <span class="filter-count-academy">{{ strtr($sub['count'], ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>
+                                    </label>
+                                    @if(!empty($sub['chapters']))
+                                        <div class="chapter-list-academy" style="padding-left: 20px; display: none; flex-direction: column; gap: 8px; margin-top: 8px; margin-bottom: 8px;">
+                                            @foreach($sub['chapters'] as $chap)
+                                                <label class="filter-item-academy" style="opacity: 0.85;">
+                                                    <input type="checkbox" name="chapter_ids[]" value="{{ $chap['id'] }}" data-name="{{ $chap['name'] }}" {{ (isset($selectedChapterId) && $selectedChapterId == $chap['id']) ? 'checked' : '' }}>
+                                                    <span class="filter-label-academy" style="font-size: 13px;">
+                                                        <span class="filter-checkbox-academy" style="width: 15px; height: 15px; border-radius: 3px;"><i class="ri-check-line" style="font-size: 9px;"></i></span>
+                                                        {{ $chap['name'] }}
+                                                    </span>
+                                                    <span class="filter-count-academy" style="font-size: 10px; padding: 1px 6px;">{{ strtr($chap['count'], ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>
+                                                </label>
+                                            @endforeach
+                                        </div>
+                                    @endif
+                                </div>
+                            </div>
                         @endforeach
                     </div>
                 </div>
@@ -523,12 +831,12 @@
                     <div class="filter-list-academy">
                         @foreach ($stats['types'] as $type)
                             <label class="filter-item-academy">
-                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}">
+                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}" {{ ($type['key'] === 'mcq' || (isset($selectedClassId) && $type['count'] > 0)) ? 'checked' : '' }}>
                                 <span class="filter-label-academy">
                                     <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
                                     {{ $type['name'] }}
                                 </span>
-                                <span class="filter-count-academy">{{ $type['count'] }}</span>
+                                <span class="filter-count-academy type-count-badge" data-type-key="{{ $type['key'] }}">{{ strtr($type['count'], ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>
                             </label>
                         @endforeach
                     </div>
@@ -546,7 +854,7 @@
                         <input type="text" id="search-query" placeholder="প্রশ্ন, অধ্যায় বা বিষয় খুঁজুন..." oninput="debounceSearch()">
                     </div>
                     <button class="btn-control-academy" onclick="triggerFilterModal()"><i class="ri-filter-3-line"></i> ফিল্টার</button>
-                    <button class="btn-control-academy" onclick="window.print()"><i class="ri-download-2-line"></i> এক্সপোর্ট</button>
+                    <button class="btn-control-academy" onclick="printAllQuestions()"><i class="ri-printer-line"></i> প্রিন্ট</button>
                 </div>
 
                 <!-- Active badges row -->
@@ -582,7 +890,58 @@
 <script>
     let searchTimeout = null;
 
+    // Function to update visibility of subjects based on selected classes
+    function updateSubjectsVisibility() {
+        const checkedClassIds = Array.from(document.querySelectorAll("input[name='class_ids[]']:checked")).map(cb => cb.value);
+        const subjectFilterGroup = document.getElementById("subject-filter-group");
+        let visibleSubjectsCount = 0;
+        
+        document.querySelectorAll(".subject-item-wrapper-academy").forEach(wrapper => {
+            const classId = wrapper.getAttribute('data-class-id');
+            if (checkedClassIds.includes(classId)) {
+                wrapper.style.display = 'block';
+                visibleSubjectsCount++;
+            } else {
+                wrapper.style.display = 'none';
+                // Uncheck subject and its chapters if class is unchecked
+                const subjectCb = wrapper.querySelector("input[name='subject_ids[]']");
+                if (subjectCb && subjectCb.checked) {
+                    subjectCb.checked = false;
+                }
+            }
+        });
+
+        if (subjectFilterGroup) {
+            if (visibleSubjectsCount > 0) {
+                subjectFilterGroup.style.display = 'block';
+            } else {
+                subjectFilterGroup.style.display = 'none';
+            }
+        }
+    }
+
+    // Function to update visibility of chapters based on selected subjects
+    function updateChaptersVisibility() {
+        document.querySelectorAll(".subject-item-wrapper-academy").forEach(wrapper => {
+            const subjectCb = wrapper.querySelector("input[name='subject_ids[]']");
+            const chapterList = wrapper.querySelector(".chapter-list-academy");
+            
+            if (chapterList) {
+                if (subjectCb && subjectCb.checked && wrapper.style.display !== 'none') {
+                    chapterList.style.display = 'flex';
+                } else {
+                    chapterList.style.display = 'none';
+                    // Uncheck chapters if subject is unchecked
+                    chapterList.querySelectorAll("input[name='chapter_ids[]']:checked").forEach(chapCb => {
+                        chapCb.checked = false;
+                    });
+                }
+            }
+        });
+    }
+
     document.addEventListener("DOMContentLoaded", function() {
+
         // Enforce single-select (mutual exclusion) for Class checkboxes
         const classCheckboxes = document.querySelectorAll("input[name='class_ids[]']");
         classCheckboxes.forEach(cb => {
@@ -594,16 +953,38 @@
                         }
                     });
                 }
+                updateSubjectsVisibility();
+                updateChaptersVisibility();
                 applyFilters(1);
             });
         });
 
-        // Bind change events to subject and types checkboxes
-        document.querySelectorAll("input[name='subject_ids[]'], input[name='types[]']").forEach(cb => {
+        // Bind Subject change events
+        const subjectCheckboxes = document.querySelectorAll("input[name='subject_ids[]']");
+        subjectCheckboxes.forEach(cb => {
+            cb.addEventListener('change', function() {
+                updateChaptersVisibility();
+                applyFilters(1);
+            });
+        });
+
+        // Bind Chapter change events
+        document.querySelectorAll("input[name='chapter_ids[]']").forEach(cb => {
             cb.addEventListener('change', function() {
                 applyFilters(1);
             });
         });
+
+        // Bind Type change events
+        document.querySelectorAll("input[name='types[]']").forEach(cb => {
+            cb.addEventListener('change', function() {
+                applyFilters(1);
+            });
+        });
+
+        // Initialize visibility on load
+        updateSubjectsVisibility();
+        updateChaptersVisibility();
 
         // Load initial questions
         applyFilters(1);
@@ -629,6 +1010,12 @@
             subjectIds.push(checkbox.value);
         });
 
+        // Gather Chapter IDs
+        const chapterIds = [];
+        document.querySelectorAll("input[name='chapter_ids[]']:checked").forEach(checkbox => {
+            chapterIds.push(checkbox.value);
+        });
+
         // Gather Types
         const types = [];
         document.querySelectorAll("input[name='types[]']:checked").forEach(checkbox => {
@@ -643,7 +1030,10 @@
         // If selection is incomplete (must check at least one Class, one Subject, and one Type)
         if (classIds.length === 0 || subjectIds.length === 0 || types.length === 0) {
             document.getElementById('academy-loader').style.display = 'none';
-            document.getElementById('questions-container').style.display = 'flex';
+            const qContainer = document.getElementById('questions-container');
+            qContainer.style.display = 'flex';
+            qContainer.style.opacity = '1';
+            qContainer.style.pointerEvents = 'auto';
             
             let missing = [];
             if (classIds.length === 0) missing.push('শ্রেণি');
@@ -660,14 +1050,17 @@
             return;
         }
 
-        // Show loader, hide list
-        document.getElementById('questions-container').style.display = 'none';
+        // Show loader smoothly, fade list (avoiding display: none to prevent layout collapse)
+        const qContainer = document.getElementById('questions-container');
+        qContainer.style.opacity = '0.2';
+        qContainer.style.pointerEvents = 'none';
         document.getElementById('academy-loader').style.display = 'block';
 
         // AJAX Query
         const params = new URLSearchParams();
         classIds.forEach(id => params.append('class_ids[]', id));
         subjectIds.forEach(id => params.append('subject_ids[]', id));
+        chapterIds.forEach(id => params.append('chapter_ids[]', id));
         types.forEach(type => params.append('types[]', type));
         if (searchQuery) params.append('search', searchQuery);
         params.append('page', page);
@@ -675,20 +1068,79 @@
         fetch("{{ route('academy.filter') }}?" + params.toString())
             .then(res => res.json())
             .then(data => {
+                console.log("Academy filter AJAX response data:", data);
                 document.getElementById('academy-loader').style.display = 'none';
-                document.getElementById('questions-container').style.display = 'flex';
+                
+                const qContainer = document.getElementById('questions-container');
+                qContainer.style.opacity = '1';
+                qContainer.style.pointerEvents = 'auto';
+                
+                window.lastFetchedQuestions = data.questions;
                 
                 // Set counts
-                if (data.pagination) {
-                    document.getElementById('stat-total').innerText = formatBanglaNumber(data.pagination.total);
+                try {
+                    if (data.stats) {
+                        document.getElementById('stat-total').innerText = formatBanglaNumber(data.stats.total_questions);
+                        document.getElementById('stat-mcq').innerText = formatBanglaNumber(data.stats.mcq_count);
+                        document.getElementById('stat-cq').innerText = formatBanglaNumber(data.stats.cq_count);
+                        
+                        const chaptersVal = document.getElementById('stat-chapters');
+                        if (chaptersVal) {
+                            chaptersVal.innerText = formatBanglaNumber(data.stats.chapters_count) + 'টি';
+                        }
+                        
+                        const mcqSub = document.getElementById('stat-mcq-subjects');
+                        if (mcqSub) {
+                            mcqSub.innerText = formatBanglaNumber(data.stats.subjects_count);
+                        }
+                        
+                        const cqSub = document.getElementById('stat-cq-subjects');
+                        if (cqSub) {
+                            cqSub.innerText = formatBanglaNumber(data.stats.subjects_count);
+                        }
+                        
+                        const classesVal = document.getElementById('stat-classes');
+                        if (classesVal) {
+                            classesVal.innerText = formatBanglaNumber(data.stats.classes_count);
+                        }
+
+                        // Update type counts in sidebar
+                        document.querySelectorAll('.type-count-badge').forEach(badge => {
+                            const key = badge.getAttribute('data-type-key');
+                            if (key === 'mcq') {
+                                badge.innerText = formatBanglaNumber(data.stats.mcq_count);
+                            } else if (key === 'cq') {
+                                badge.innerText = formatBanglaNumber(data.stats.cq_count);
+                            } else if (key === 'short') {
+                                badge.innerText = formatBanglaNumber(data.stats.short_count);
+                            }
+                        });
+                    } else if (data.pagination) {
+                        document.getElementById('stat-total').innerText = formatBanglaNumber(data.pagination.total);
+                    }
+                } catch (statsErr) {
+                    console.error("Error updating statistics:", statsErr);
                 }
 
-                renderQuestionsList(data.questions, data.pagination);
-                renderPagination(data.pagination);
+                try {
+                    renderQuestionsList(data.questions, data.pagination);
+                } catch (renderErr) {
+                    console.error("Error rendering questions list:", renderErr);
+                }
+
+                try {
+                    renderPagination(data.pagination);
+                } catch (paginateErr) {
+                    console.error("Error rendering pagination:", paginateErr);
+                }
             })
             .catch(err => {
                 console.error("Error fetching filtered questions", err);
                 document.getElementById('academy-loader').style.display = 'none';
+                
+                const qContainer = document.getElementById('questions-container');
+                qContainer.style.opacity = '1';
+                qContainer.style.pointerEvents = 'auto';
             });
     }
 
@@ -705,30 +1157,34 @@
             return;
         }
 
-        const currentPage = pagination ? pagination.current_page : 1;
-        const perPage = pagination ? pagination.per_page : 20;
+        const currentPage = parseInt(pagination ? pagination.current_page : 1) || 1;
+        const perPage = parseInt(pagination ? pagination.per_page : 20) || 20;
 
         questions.forEach((q, idx) => {
             const serialNum = (currentPage - 1) * perPage + idx + 1;
             const serialNumBn = formatBanglaNumber(serialNum);
             
             // Prepend serial number to question text
-            const displayQuestion = `<span style="font-weight: 700; color: var(--accent-gold); margin-right: 8px;">${serialNumBn}.</span>${q.question}`;
-
+            const displayQuestion = `<span style="font-weight: 700; color: #fff; margin-right: 8px;">${serialNumBn}.</span>${q.question}`;
+ 
             let optionsHtml = '';
             if (q.question_type === 'mcq' && q.options) {
                 optionsHtml = `
                     <div class="q-options-academy">
                         <div class="q-option-item-academy ${q.correct_answer === '1' ? 'correct' : ''}">
+                            <span class="option-bubble ${q.correct_answer === '1' ? 'filled' : ''}"></span>
                             <span class="q-option-prefix">ক.</span> ${q.options.option_a || ''}
                         </div>
                         <div class="q-option-item-academy ${q.correct_answer === '2' ? 'correct' : ''}">
+                            <span class="option-bubble ${q.correct_answer === '2' ? 'filled' : ''}"></span>
                             <span class="q-option-prefix">খ.</span> ${q.options.option_b || ''}
                         </div>
                         <div class="q-option-item-academy ${q.correct_answer === '3' ? 'correct' : ''}">
+                            <span class="option-bubble ${q.correct_answer === '3' ? 'filled' : ''}"></span>
                             <span class="q-option-prefix">গ.</span> ${q.options.option_c || ''}
                         </div>
                         <div class="q-option-item-academy ${q.correct_answer === '4' ? 'correct' : ''}">
+                            <span class="option-bubble ${q.correct_answer === '4' ? 'filled' : ''}"></span>
                             <span class="q-option-prefix">ঘ.</span> ${q.options.option_d || ''}
                         </div>
                     </div>
@@ -741,21 +1197,23 @@
                 <div class="q-header-academy">
                     <div class="q-text-academy">${displayQuestion}</div>
                     <div class="q-actions-academy">
-                        <a href="${q.edit_url}" target="_blank" class="q-btn-action edit" title="এডিট করুন"><i class="ri-edit-line"></i></a>
-                        <button class="q-btn-action" onclick="copyToClipboard(this, ${q.id})" title="কপি করুন"><i class="ri-file-copy-line"></i></button>
-                        <button class="q-btn-action" onclick="printQuestion(${q.id})" title="প্রিন্ট করুন"><i class="ri-printer-line"></i></button>
+                        <a href="${q.edit_url}" target="_blank" class="q-btn-action view" onclick="incrementViewCount(${q.id}, this); return true;" title="বিস্তারিত দেখুন">
+                            <i class="ri-eye-line"></i>
+                            <span class="q-view-count">${formatBanglaNumber(q.view || 0)}</span>
+                        </a>
                     </div>
                 </div>
                 ${optionsHtml}
                 <div class="q-tags-academy">
                     ${q.job_category_name ? `<span class="q-tag-badge"><i class="ri-book-3-line"></i> ${q.job_category_name}</span>` : ''}
                     ${q.category_name ? `<span class="q-tag-badge"><i class="ri-folder-open-line"></i> ${q.category_name}</span>` : ''}
-                    <span class="q-tag-badge"><i class="ri-speed-line"></i> ${q.hard_level_name}</span>
-                    ${q.year_name ? `<span class="q-tag-badge"><i class="ri-calendar-line"></i> ${q.year_name}</span>` : ''}
                 </div>
             `;
             container.appendChild(card);
         });
+
+        // Keep print-only template container updated in background
+        updatePrintTemplate(questions);
     }
 
     function renderActiveBadges() {
@@ -797,6 +1255,8 @@
                 checkbox.checked = false;
             }
         });
+        updateSubjectsVisibility();
+        updateChaptersVisibility();
         applyFilters(1);
     }
 
@@ -810,6 +1270,8 @@
             checkbox.checked = false;
         });
         document.getElementById('search-query').value = '';
+        updateSubjectsVisibility();
+        updateChaptersVisibility();
         applyFilters(1);
     }
 
@@ -845,33 +1307,45 @@
     }
 
     function renderPagination(pagination) {
+        console.log("renderPagination pagination data:", pagination);
         const container = document.getElementById('pagination-container');
         container.innerHTML = '';
 
-        if (!pagination || pagination.last_page <= 1) return;
+        if (!pagination) {
+            console.warn("renderPagination: pagination data is missing.");
+            return;
+        }
 
-        const nav = document.createElement('nav');
+        const currentPage = parseInt(pagination.current_page) || 1;
+        const lastPage = parseInt(pagination.last_page) || 1;
+
+        if (lastPage < 1) {
+            console.warn("renderPagination: lastPage is less than 1.");
+            return;
+        }
+
+        const nav = document.createElement('div');
         const ul = document.createElement('ul');
         ul.className = 'pagination';
 
         // Prev Page
         const prevLi = document.createElement('li');
-        prevLi.className = `page-item ${pagination.current_page === 1 ? 'disabled' : ''}`;
-        prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${pagination.current_page - 1})">পূর্ববর্তী</a>`;
+        prevLi.className = `page-item ${currentPage === 1 ? 'disabled' : ''}`;
+        prevLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${currentPage - 1})">পূর্ববর্তী</a>`;
         ul.appendChild(prevLi);
 
         // Page Numbers
-        for (let i = 1; i <= pagination.last_page; i++) {
+        for (let i = 1; i <= lastPage; i++) {
             const pageLi = document.createElement('li');
-            pageLi.className = `page-item ${pagination.current_page === i ? 'active' : ''}`;
+            pageLi.className = `page-item ${currentPage === i ? 'active' : ''}`;
             pageLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${i})">${formatBanglaNumber(i)}</a>`;
             ul.appendChild(pageLi);
         }
 
         // Next Page
         const nextLi = document.createElement('li');
-        nextLi.className = `page-item ${pagination.current_page === pagination.last_page ? 'disabled' : ''}`;
-        nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${pagination.current_page + 1})">পরবর্তী</a>`;
+        nextLi.className = `page-item ${currentPage === lastPage ? 'disabled' : ''}`;
+        nextLi.innerHTML = `<a class="page-link" href="javascript:void(0)" onclick="applyFilters(${currentPage + 1})">পরবর্তী</a>`;
         ul.appendChild(nextLi);
 
         nav.appendChild(ul);
@@ -881,6 +1355,217 @@
     function formatBanglaNumber(num) {
         const banglaDigits = {'0':'০','1':'১','2':'২','3':'৩','4':'৪','5':'৫','6':'৬','7':'৭','8':'৮','9':'৯'};
         return num.toString().replace(/[0-9]/g, digit => banglaDigits[digit]);
+    }
+
+    function updatePrintTemplate(questions) {
+        try {
+            const printContainer = document.getElementById('print-template-container');
+            if (!printContainer) return;
+
+            printContainer.innerHTML = '';
+
+            if (!questions || questions.length === 0) return;
+
+            // Get active filter details
+            const classNames = Array.from(document.querySelectorAll("input[name='class_ids[]']:checked")).map(cb => cb.getAttribute('data-name'));
+            const subjectNames = Array.from(document.querySelectorAll("input[name='subject_ids[]']:checked")).map(cb => cb.getAttribute('data-name'));
+            const chapterNames = Array.from(document.querySelectorAll("input[name='chapter_ids[]']:checked")).map(cb => cb.getAttribute('data-name'));
+
+            const classDetail = classNames.length > 0 ? classNames.join(', ') : 'সব শ্রেণি';
+            const subjectDetail = subjectNames.length > 0 ? subjectNames.join(', ') : 'সব বিষয়';
+            const chapterDetail = chapterNames.length > 0 ? chapterNames.join(', ') : 'সব অধ্যায়';
+
+            const questionsPerPage = 25;
+            const totalPages = Math.ceil(questions.length / questionsPerPage);
+
+            for (let pageIdx = 0; pageIdx < totalPages; pageIdx++) {
+                const pageDiv = document.createElement('div');
+                pageDiv.className = 'print-page';
+
+                // Watermark
+                const watermark = document.createElement('div');
+                watermark.className = 'print-watermark';
+                watermark.innerText = 'প্রত্যয় একাডেমি';
+                pageDiv.appendChild(watermark);
+
+                // Header
+                const header = document.createElement('div');
+                header.className = 'print-header';
+                
+                const headerTitle = document.createElement('div');
+                headerTitle.className = 'print-header-title';
+                headerTitle.innerText = 'একাডেমিক কোশ্চেন ব্যাংক';
+                
+                const headerMeta = document.createElement('div');
+                headerMeta.className = 'print-header-meta';
+                headerMeta.innerHTML = `
+                    <div><strong>শ্রেণি:</strong> ${classDetail} | <strong>বিষয়:</strong> ${subjectDetail}</div>
+                    <div><strong>অধ্যায়:</strong> ${chapterDetail} | <strong>পৃষ্ঠা:</strong> ${formatBanglaNumber(pageIdx + 1)}/ ${formatBanglaNumber(totalPages)}</div>
+                `;
+                
+                header.appendChild(headerTitle);
+                header.appendChild(headerMeta);
+                pageDiv.appendChild(header);
+
+                // Columns Container
+                const columnsDiv = document.createElement('div');
+                columnsDiv.className = 'print-columns';
+
+                // Populate 25 questions
+                const startIdx = pageIdx * questionsPerPage;
+                const endIdx = Math.min(startIdx + questionsPerPage, questions.length);
+
+                for (let qIdx = startIdx; qIdx < endIdx; qIdx++) {
+                    const q = questions[qIdx];
+                    if (!q) continue;
+                    const serialNum = qIdx + 1;
+                    const serialNumBn = formatBanglaNumber(serialNum);
+
+                    const qCard = document.createElement('div');
+                    qCard.className = 'print-q-card';
+
+                    // Question Text
+                    const qText = document.createElement('div');
+                    qText.className = 'print-q-text';
+                    qText.innerHTML = `<span style="font-weight: 700; margin-right: 5px;">${serialNumBn}.</span>${q.question || ''}`;
+                    qCard.appendChild(qText);
+
+                    // Options
+                    if (q.question_type === 'mcq' && q.options) {
+                        const qOptions = document.createElement('div');
+                        qOptions.className = 'print-q-options';
+
+                        const optionsData = [
+                            { prefix: 'ক.', text: q.options.option_a, key: '1' },
+                            { prefix: 'খ.', text: q.options.option_b, key: '2' },
+                            { prefix: 'গ.', text: q.options.option_c, key: '3' },
+                            { prefix: 'ঘ.', text: q.options.option_d, key: '4' }
+                        ];
+
+                        optionsData.forEach(opt => {
+                            const optDiv = document.createElement('div');
+                            optDiv.className = 'print-q-option';
+                            
+                            const bubble = document.createElement('span');
+                            bubble.className = `print-option-bubble ${q.correct_answer === opt.key ? 'filled' : ''}`;
+                            
+                            const textSpan = document.createElement('span');
+                            textSpan.innerHTML = `<strong>${opt.prefix}</strong> ${opt.text || ''}`;
+
+                            optDiv.appendChild(bubble);
+                            optDiv.appendChild(textSpan);
+                            qOptions.appendChild(optDiv);
+                        });
+
+                        qCard.appendChild(qOptions);
+                    }
+
+                    columnsDiv.appendChild(qCard);
+                }
+
+                pageDiv.appendChild(columnsDiv);
+                printContainer.appendChild(pageDiv);
+            }
+        } catch (printErr) {
+            console.error("Error in updatePrintTemplate:", printErr);
+        }
+    }
+
+    function incrementViewCount(qId, element) {
+        fetch(`/academy/question/${qId}/view`, {
+            method: 'POST',
+            headers: {
+                'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                'Content-Type': 'application/json'
+            }
+        })
+        .then(res => res.json())
+        .then(data => {
+            if (data.status) {
+                const countSpan = element.querySelector('.q-view-count');
+                if (countSpan) {
+                    countSpan.innerText = formatBanglaNumber(data.new_view);
+                }
+                // Update the memory cache as well
+                if (window.lastFetchedQuestions) {
+                    const qIdx = window.lastFetchedQuestions.findIndex(x => x.id === qId);
+                    if (qIdx !== -1) {
+                        window.lastFetchedQuestions[qIdx].view = data.new_view;
+                    }
+                }
+            }
+        })
+        .catch(err => console.error("Error updating view count:", err));
+    }
+
+    function printAllQuestions() {
+        // Gather Class IDs
+        const classIds = [];
+        document.querySelectorAll("input[name='class_ids[]']:checked").forEach(checkbox => {
+            classIds.push(checkbox.value);
+        });
+
+        // Gather Subject IDs
+        const subjectIds = [];
+        document.querySelectorAll("input[name='subject_ids[]']:checked").forEach(checkbox => {
+            subjectIds.push(checkbox.value);
+        });
+
+        // Gather Chapter IDs
+        const chapterIds = [];
+        document.querySelectorAll("input[name='chapter_ids[]']:checked").forEach(checkbox => {
+            chapterIds.push(checkbox.value);
+        });
+
+        // Gather Types
+        const types = [];
+        document.querySelectorAll("input[name='types[]']:checked").forEach(checkbox => {
+            types.push(checkbox.value);
+        });
+
+        const searchQuery = document.getElementById('search-query').value;
+
+        // If selection is incomplete (must check at least one Class, one Subject, and one Type)
+        if (classIds.length === 0 || subjectIds.length === 0 || types.length === 0) {
+            toastr.warning("অনুগ্রহ করে কমপক্ষে একটি শ্রেণি, একটি বিষয় এবং একটি প্রশ্নের ধরন নির্বাচন করুন।");
+            return;
+        }
+
+        // Show a loader/toast
+        const toastId = toastr.info("প্রিন্ট ফাইল প্রস্তুত হচ্ছে, অনুগ্রহ করে অপেক্ষা করুন...", "", { timeOut: 0, extendedTimeOut: 0 });
+
+        // AJAX Query for all questions (print_all=1)
+        const params = new URLSearchParams();
+        classIds.forEach(id => params.append('class_ids[]', id));
+        subjectIds.forEach(id => params.append('subject_ids[]', id));
+        chapterIds.forEach(id => params.append('chapter_ids[]', id));
+        types.forEach(type => params.append('types[]', type));
+        if (searchQuery) params.append('search', searchQuery);
+        params.append('print_all', '1');
+
+        fetch("{{ route('academy.filter') }}?" + params.toString())
+            .then(res => res.json())
+            .then(data => {
+                toastr.clear(toastId);
+                if (data.questions && data.questions.length > 0) {
+                    updatePrintTemplate(data.questions);
+                    // Slight delay to ensure DOM is updated before print modal opens
+                    setTimeout(() => {
+                        window.print();
+                        // Restore original page content print template representation
+                        if (window.lastFetchedQuestions) {
+                            updatePrintTemplate(window.lastFetchedQuestions);
+                        }
+                    }, 500);
+                } else {
+                    toastr.warning("প্রিন্ট করার মতো কোনো প্রশ্ন পাওয়া যায়নি।");
+                }
+            })
+            .catch(err => {
+                console.error("Error preparing print questions", err);
+                toastr.clear(toastId);
+                toastr.error("প্রিন্ট ফাইল প্রস্তুত করতে সমস্যা হয়েছে।");
+            });
     }
 </script>
 @endpush

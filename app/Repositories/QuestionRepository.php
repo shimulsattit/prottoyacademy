@@ -83,8 +83,8 @@ class QuestionRepository implements QuestionRepositoryInterface
                     $model->question_type = $request->question_type;
                     $model->question = $question['question'];
                     $model->correct_answer = $question['correct_answer'];
-                    $model->hard_level = $request->hard_level;
-                    $model->question_mark = $request->question_mark;
+                    $model->hard_level = $request->hard_level ?? 'easy';
+                    $model->question_mark = $request->question_mark ?? 1;
                     $model->slug = $slug;
                     $model->content = $question['description'] ?? null;
                     $model->site_title = $question['site_title'] ?? $question['question'] . ' - '. get_settings('system_name') ;
@@ -183,8 +183,8 @@ class QuestionRepository implements QuestionRepositoryInterface
         $model->question_type = $request->question_type;
         $model->question = $request->question;
         $model->correct_answer = $request->correct_answer;
-        $model->hard_level = $request->hard_level;
-        $model->question_mark = $request->question_mark;
+        $model->hard_level = $request->hard_level ?? $model->hard_level ?? 'easy';
+        $model->question_mark = $request->question_mark ?? $model->question_mark ?? 1;
         $model->content = $request->description;
         $model->site_title = $request->site_title;
         $model->meta_title = $request->meta_title;

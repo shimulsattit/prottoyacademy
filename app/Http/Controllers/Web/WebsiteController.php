@@ -285,8 +285,35 @@ class WebsiteController extends Controller
                 $isCurrentAffairs = in_array($category->id, $caCategoryIds);
 
                 if ($this->isAcademyCategory($category)) {
-                    $stats = $this->getAcademyStats($category);
-                    return view('web.academy', compact('category', 'stats'));
+                    // Resolve the correct Class category for stats calculation
+                    $classCategory = $category;
+                    $selectedClassId = null;
+                    $selectedSubjectId = null;
+                    $selectedChapterId = null;
+
+                    if ($category->id != 783) {
+                        $current = $category;
+                        $path = [];
+                        while ($current && $current->id != 783) {
+                            $path[] = $current;
+                            $current = $current->parent_id ? Category::find($current->parent_id) : null;
+                        }
+                        if (!empty($path)) {
+                            $classCat = end($path);
+                            $classCategory = $classCat;
+                            $selectedClassId = $classCat->id;
+                            
+                            if ($category->id != $classCat->id) {
+                                $selectedChapterId = $category->id;
+                                $selectedSubjectId = Question::where('category_id', $category->id)
+                                    ->where('status', 1)
+                                    ->value('job_category_id');
+                            }
+                        }
+                    }
+
+                    $stats = $this->getAcademyStats($classCategory);
+                    return view('web.academy', compact('category', 'stats', 'selectedClassId', 'selectedSubjectId', 'selectedChapterId'));
                 }
 
                 if ($isCurrentAffairs) {
@@ -616,33 +643,33 @@ class WebsiteController extends Controller
             ->whereIn('category_id', $academyCategoryIds)
             ->where('status', 1);
             
-        // Filter by Classes
-        if ($request->has('class_ids') && is_array($request->class_ids) && !empty($request->class_ids)) {
-            // Find all subcategories (chapters/subjects) recursively under the selected class category IDs (up to 3 levels deep)
-            $classCategoryIds = $request->class_ids;
-            $allCategoryIds = $classCategoryIds;
-            
-            $subLevel1 = Category::whereIn('parent_id', $classCategoryIds)->pluck('id')->toArray();
-            if (!empty($subLevel1)) {
-                $allCategoryIds = array_merge($allCategoryIds, $subLevel1);
-                $subLevel2 = Category::whereIn('parent_id', $subLevel1)->pluck('id')->toArray();
-                if (!empty($subLevel2)) {
-                    $allCategoryIds = array_merge($allCategoryIds, $subLevel2);
+        // Filter by Chapters (Categories)
+        if ($request->has('chapter_ids') && is_array($request->chapter_ids) && !empty($request->chapter_ids)) {
+            $query->whereIn('category_id', $request->chapter_ids);
+        } else {
+            // Filter by Classes
+            if ($request->has('class_ids') && is_array($request->class_ids) && !empty($request->class_ids)) {
+                // Find all subcategories (chapters/subjects) recursively under the selected class category IDs (up to 3 levels deep)
+                $classCategoryIds = $request->class_ids;
+                $allCategoryIds = $classCategoryIds;
+                
+                $subLevel1 = Category::whereIn('parent_id', $classCategoryIds)->pluck('id')->toArray();
+                if (!empty($subLevel1)) {
+                    $allCategoryIds = array_merge($allCategoryIds, $subLevel1);
+                    $subLevel2 = Category::whereIn('parent_id', $subLevel1)->pluck('id')->toArray();
+                    if (!empty($subLevel2)) {
+                        $allCategoryIds = array_merge($allCategoryIds, $subLevel2);
+                    }
                 }
+                $targetCategoryIds = array_unique($allCategoryIds);
+                
+                $query->whereIn('category_id', $targetCategoryIds);
             }
-            $targetCategoryIds = array_unique($allCategoryIds);
-            
-            $query->whereIn('category_id', $targetCategoryIds);
         }
         
         // Filter by Subjects (Job Category)
         if ($request->has('subject_ids') && is_array($request->subject_ids) && !empty($request->subject_ids)) {
             $query->whereIn('job_category_id', $request->subject_ids);
-        }
-        
-        // Filter by Types
-        if ($request->has('types') && is_array($request->types) && !empty($request->types)) {
-            $query->whereIn('question_type', $request->types);
         }
         
         // Filter by Search Query
@@ -658,9 +685,44 @@ class WebsiteController extends Controller
                   });
             });
         }
+
+        // Calculate dynamic stats before filtering by question types
+        $statsQuery = clone $query;
+        $mcqCount = (clone $statsQuery)->where('question_type', 'mcq')->count();
+        $cqCount = (clone $statsQuery)->where('question_type', 'cq')->count();
+        $shortCount = (clone $statsQuery)->where('question_type', 'short')->count();
+        $totalQuestions = $mcqCount + $cqCount + $shortCount;
+        
+        $activeCategoryIds = (clone $statsQuery)->distinct()->pluck('category_id')->toArray();
+        $chaptersCount = Category::whereIn('id', $activeCategoryIds)
+            ->whereNotNull('parent_id')
+            ->where('parent_id', '!=', 783)
+            ->where('status', 1)
+            ->count();
+            
+        $activeSubjectIds = (clone $statsQuery)->whereNotNull('job_category_id')->distinct()->pluck('job_category_id')->toArray();
+        $subjectsCount = count($activeSubjectIds);
+        
+        $classesCount = 0;
+        if (!empty($activeCategoryIds)) {
+            $parentIds = Category::whereIn('id', $activeCategoryIds)->pluck('parent_id')->filter()->unique()->toArray();
+            $classesCount = Category::where(function($q) use ($activeCategoryIds, $parentIds) {
+                $q->whereIn('id', $activeCategoryIds)
+                  ->orWhereIn('id', $parentIds);
+            })->where('parent_id', 783)->where('status', 1)->count();
+        }
+
+        // Now filter by Types for the actual questions list
+        if ($request->has('types') && is_array($request->types) && !empty($request->types)) {
+            $query->whereIn('question_type', $request->types);
+        }
         
         // Execute and Paginate
-        $questions = $query->orderBy('id', 'desc')->paginate(20);
+        if ($request->has('print_all') && $request->print_all == 1) {
+            $questions = $query->orderBy('id', 'desc')->paginate(1000);
+        } else {
+            $questions = $query->orderBy('id', 'desc')->paginate(20);
+        }
         
         // Format Questions for view
         $formatted = collect($questions->items())->map(function($q) {
@@ -683,7 +745,8 @@ class WebsiteController extends Controller
                     'option_d' => html_entity_decode($opt->option_four),
                     'option_e' => html_entity_decode($opt->option_five),
                 ] : null,
-                'edit_url' => route('portal.question.edit', $q->id)
+                'edit_url' => route('portal.question.edit', $q->id),
+                'view' => $q->view ?: 0
             ];
         });
         
@@ -695,8 +758,34 @@ class WebsiteController extends Controller
                 'current_page' => $questions->currentPage(),
                 'last_page' => $questions->lastPage(),
                 'per_page' => $questions->perPage(),
+            ],
+            'stats' => [
+                'total_questions' => $totalQuestions,
+                'mcq_count' => $mcqCount,
+                'cq_count' => $cqCount,
+                'short_count' => $shortCount,
+                'chapters_count' => $chaptersCount,
+                'subjects_count' => $subjectsCount,
+                'classes_count' => $classesCount
             ]
         ]);
+    }
+
+    public function academyIncrementView($id)
+    {
+        $question = Question::find($id);
+        if ($question) {
+            $question->view = ($question->view ?: 0) + 1;
+            $question->save();
+            return response()->json([
+                'status' => true,
+                'new_view' => $question->view
+            ]);
+        }
+        return response()->json([
+            'status' => false,
+            'message' => 'Question not found'
+        ], 404);
     }
 
     private function isAcademyCategory($category)
@@ -719,27 +808,47 @@ class WebsiteController extends Controller
 
     private function getAcademyStats($category)
     {
-        // Get all descendant category IDs
-        $descendantIds = [$category->id];
-        $level1 = Category::where('parent_id', $category->id)->pluck('id')->toArray();
-        $descendantIds = array_merge($descendantIds, $level1);
-        if (!empty($level1)) {
-            $level2 = Category::whereIn('parent_id', $level1)->pluck('id')->toArray();
-            $descendantIds = array_merge($descendantIds, $level2);
+        if ($category->id == 783) {
+            // Academy Root
+            $classes = Category::where('parent_id', 783)->where('status', 1)->get();
+            $classIds = $classes->pluck('id')->toArray();
+            
+            $chapters = Category::whereIn('parent_id', $classIds)->where('status', 1)->get();
+            $chapterIds = $chapters->pluck('id')->toArray();
+            
+            $descendantIds = array_unique(array_merge([783], $classIds, $chapterIds));
+            
+            $totalQuestions = Question::whereIn('category_id', $descendantIds)->where('status', 1)->count();
+            $mcqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'mcq')->count();
+            $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->count();
+            $shortCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'short')->count();
+            
+            $chaptersCount = $chapters->count();
+            $classesCount = $classes->count();
+            
+            $subjectCategoryIds = $classIds;
+        } else {
+            // A specific Class category (e.g. Class 8)
+            $classIds = [$category->id];
+            
+            $chapters = Category::where('parent_id', $category->id)->where('status', 1)->get();
+            $chapterIds = $chapters->pluck('id')->toArray();
+            
+            $descendantIds = array_unique(array_merge($classIds, $chapterIds));
+            
+            $totalQuestions = Question::whereIn('category_id', $descendantIds)->where('status', 1)->count();
+            $mcqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'mcq')->count();
+            $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->count();
+            $shortCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'short')->count();
+            
+            $chaptersCount = $chapters->count();
+            $classesCount = 1;
+            
+            $subjectCategoryIds = $classIds;
         }
         
-        $descendantIds = array_unique($descendantIds);
-        
-        $totalQuestions = Question::whereIn('category_id', $descendantIds)->where('status', 1)->count();
-        $mcqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'mcq')->count();
-        $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->count();
-        $shortCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'short')->count();
-        
-        $chaptersCount = Category::whereIn('parent_id', $level1)->where('status', 1)->count();
-        $classesCount = count($level1);
-        
         // Classes sidebar
-        $classes = Category::where('parent_id', 783)->where('status', 1)->get()->map(function($c) {
+        $classesSidebar = Category::where('parent_id', 783)->where('status', 1)->get()->map(function($c) {
             $classSubIds = [$c->id];
             $subs = Category::where('parent_id', $c->id)->pluck('id')->toArray();
             $classSubIds = array_merge($classSubIds, $subs);
@@ -754,14 +863,45 @@ class WebsiteController extends Controller
             return $c['count'] > 0;
         })->values()->toArray();
         
-        // Subjects sidebar
-        $subjects = JobCategory::whereIn('category_id', $level1)->where('status', 1)->get()->map(function($jc) {
+        // Subjects sidebar with nested chapters
+        $subjects = JobCategory::whereIn('category_id', $subjectCategoryIds)->where('status', 1)->get()->map(function($jc) {
             $count = Question::where('job_category_id', $jc->id)->where('status', 1)->count();
+            
+            // Find chapters for this subject
+            $chapterIds = Question::where('job_category_id', $jc->id)
+                ->where('status', 1)
+                ->select('category_id')
+                ->distinct()
+                ->pluck('category_id')
+                ->toArray();
+                
+            $chapters = Category::whereIn('id', $chapterIds)
+                ->whereNotNull('parent_id')
+                ->where('parent_id', '!=', 783)
+                ->where('status', 1)
+                ->get()
+                ->map(function($chap) use ($jc) {
+                    $chapCount = Question::where('category_id', $chap->id)
+                        ->where('job_category_id', $jc->id)
+                        ->where('status', 1)
+                        ->count();
+                    return [
+                        'id' => $chap->id,
+                        'name' => $chap->name,
+                        'slug' => $chap->slug,
+                        'count' => $chapCount
+                    ];
+                })->filter(function($chap) {
+                    return $chap['count'] > 0;
+                })->values()->toArray();
+                
             return [
                 'id' => $jc->id,
                 'name' => $jc->name,
                 'slug' => $jc->slug,
-                'count' => $count
+                'count' => $count,
+                'class_id' => $jc->category_id,
+                'chapters' => $chapters
             ];
         })->filter(function($jc) {
             return $jc['count'] > 0;
@@ -773,7 +913,7 @@ class WebsiteController extends Controller
             'cq_count' => $cqCount,
             'chapters_count' => $chaptersCount ?: 74,
             'classes_count' => $classesCount ?: 3,
-            'classes' => $classes,
+            'classes' => $classesSidebar,
             'subjects' => $subjects,
             'types' => [
                 ['key' => 'mcq', 'name' => 'বহুনির্বাচনী', 'count' => $mcqCount],
