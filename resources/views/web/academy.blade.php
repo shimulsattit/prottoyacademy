@@ -583,7 +583,7 @@
             pointer-events: none;
             z-index: 1;
             user-select: none;
-            font-family: 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+            font-family: 'Noto Serif Bengali', 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
         }
         .print-header {
             border-bottom: 1.5px solid #000;
@@ -598,7 +598,7 @@
             font-size: 16px;
             font-weight: 700;
             color: #000;
-            font-family: 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
+            font-family: 'Noto Serif Bengali', 'Hind Siliguri', 'Noto Sans Bengali', sans-serif;
         }
         .print-header-meta {
             font-size: 11px;

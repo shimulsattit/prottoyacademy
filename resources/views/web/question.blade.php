@@ -174,7 +174,7 @@
     .pdf-page {
         background: #ffffff !important;
         color: #000000 !important;
-        font-family: 'Hind Siliguri', 'Inter', sans-serif !important;
+        font-family: 'Noto Serif Bengali', 'Hind Siliguri', 'Inter', sans-serif !important;
         padding: 20px !important;
         box-sizing: border-box !important;
     }

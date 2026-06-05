@@ -104,6 +104,14 @@
                 --accent-gold: #f5c518;
                 --accent-orange: #ff6b35;
                 --text-light: #b8c4e8;
+                --font-primary: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif !important;
+                --font-secondary: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif !important;
+            }
+            
+            body, h1, h2, h3, h4, h5, h6, p, a, li, input, button, textarea, select, 
+            .q-text-premium, .opt-box, .pz-card, .premium-breadcrumb, .stat-value-academy, 
+            .q-text-academy, .q-option-item-academy, .filter-label-academy, .nav-links a {
+                font-family: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif !important;
             }
             
             /* MathJax & MathML Color Inherit Fix */
@@ -125,7 +133,7 @@
             body {
                 background-color: #050714 !important;
                 color: #fff !important;
-                font-family: 'Hind Siliguri', sans-serif;
+                font-family: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif !important;
                 overflow-x: hidden;
             }
             body::before {

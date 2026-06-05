@@ -166,7 +166,7 @@
 
   .pz-btn {
     display: flex !important; align-items: center !important; gap: 8px !important;
-    color: #fff !important; font-family: 'Hind Siliguri', sans-serif !important;
+    color: #fff !important; font-family: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif !important;
     font-size: 14px !important; font-weight: 700 !important;
     padding: 10px 20px !important; border: none !important; border-radius: 10px !important;
     box-shadow: 0 4px 16px rgba(0,0,0,0.25);
@@ -268,8 +268,8 @@
   <p style="max-width: 580px; font-size: clamp(14px, 4vw, 17px); color: var(--text-light); line-height: 1.75; margin: 0 auto 36px;">চাকরি, ব্যাংক, ভর্তি ও বোর্ড পরীক্ষার জন্য লক্ষাধিক প্রশ্ন, মডেল টেস্ট ও বিস্তারিত সমাধান — সম্পূর্ণ বাংলায়।<br><strong style="color:#f5c518">প্রত্যয় একাডেমি</strong> — আপনার সাফল্যের সঙ্গী।</p>
   
   <div class="hero-btns-premium" style="display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-bottom: 56px;">
-    <a href="{{ route('register') }}" class="btn-primary" style="background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange)); color: #07091e; font-family: 'Hind Siliguri', sans-serif; font-size: 16px; font-weight: 700; padding: 13px 30px; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 22px rgba(245,197,24,0.35); text-decoration: none;">🎯 বিনামূল্যে শুরু করুন</a>
-    <a href="#" class="btn-outline" style="background: transparent; color: #fff; font-family: 'Hind Siliguri', sans-serif; font-size: 16px; font-weight: 600; padding: 13px 30px; border: 1.5px solid rgba(255,255,255,0.22); border-radius: 10px; cursor: pointer; text-decoration: none;">📖 ডেমো দেখুন</a>
+    <a href="{{ route('register') }}" class="btn-primary" style="background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange)); color: #07091e; font-family: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif; font-size: 16px; font-weight: 700; padding: 13px 30px; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 22px rgba(245,197,24,0.35); text-decoration: none;">🎯 বিনামূল্যে শুরু করুন</a>
+    <a href="#" class="btn-outline" style="background: transparent; color: #fff; font-family: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif; font-size: 16px; font-weight: 600; padding: 13px 30px; border: 1.5px solid rgba(255,255,255,0.22); border-radius: 10px; cursor: pointer; text-decoration: none;">📖 ডেমো দেখুন</a>
   </div>
   
   <div class="stats-row-exact">
@@ -534,7 +534,7 @@
             <p class="text-light opacity-75" style="font-size: 15px;">প্রথম ৩০ দিন সব ক্যাটাগরি ফ্রি। কোনো ক্রেডিট কার্ড লাগবে না।</p>
         </div>
         <div class="col-lg-4 text-lg-end">
-            <a href="{{ route('register') }}" class="btn-primary" style="background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange)); color: #07091e; font-family: 'Hind Siliguri', sans-serif; font-size: 17px; font-weight: 700; padding: 15px 38px; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 22px rgba(245,197,24,0.35); text-decoration: none; display: inline-block;">🎓 এখনই নিবন্ধন করুন</a>
+            <a href="{{ route('register') }}" class="btn-primary" style="background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange)); color: #07091e; font-family: 'Noto Serif Bengali', 'Hind Siliguri', sans-serif; font-size: 17px; font-weight: 700; padding: 15px 38px; border: none; border-radius: 10px; cursor: pointer; box-shadow: 0 6px 22px rgba(245,197,24,0.35); text-decoration: none; display: inline-block;">🎓 এখনই নিবন্ধন করুন</a>
         </div>
     </div>
     <div class="position-absolute bottom-0 end-0 opacity-05" style="font-size: 220px; line-height: 1; transform: translate(20%, 20%); color: rgba(255,255,255,0.05); pointer-events: none;">✦</div>
