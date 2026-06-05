@@ -299,6 +299,9 @@
         font-weight: 600;
         line-height: 1.6;
         color: #fff;
+        min-width: 0;
+        word-break: break-word;
+        overflow-wrap: break-word;
     }
     .q-type-badge-academy {
         font-size: 11px;
@@ -473,6 +476,7 @@
     /* PREMIUM PAGINATION */
     .pagination {
         display: flex;
+        flex-wrap: wrap;
         padding-left: 0;
         list-style: none;
         gap: 6px;
@@ -664,6 +668,9 @@
 
     /* RESPONSIVE DESIGN */
     @media (max-width: 992px) {
+        .section-premium {
+            padding: 100px 0 60px !important;
+        }
         .stats-grid-academy {
             grid-template-columns: repeat(2, 1fr);
             gap: 16px;
@@ -675,6 +682,9 @@
     }
 
     @media (max-width: 576px) {
+        .academy-sidebar {
+            padding: 16px;
+        }
         .stats-grid-academy {
             grid-template-columns: 1fr;
             gap: 12px;
@@ -713,11 +723,14 @@
             font-size: 13px;
         }
         .question-card-academy {
-            padding: 16px 20px;
+            padding: 16px 16px;
         }
         .q-text-academy {
-            font-size: 14.5px;
+            font-size: 14px;
             line-height: 1.5;
+        }
+        .q-header-academy {
+            gap: 12px;
         }
     }
 
