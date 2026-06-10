@@ -1165,7 +1165,7 @@
             const serialNumBn = formatBanglaNumber(serialNum);
             
             // Prepend serial number to question text
-            const displayQuestion = `<span style="font-weight: 700; color: #fff; margin-right: 8px;">${serialNumBn}.</span>${q.question}`;
+            const displayQuestion = `<span style="font-weight: 700; color: var(--accent-gold); margin-right: 8px;">${serialNumBn}.</span>${q.question}`;
  
             let optionsHtml = '';
             if (q.question_type === 'mcq' && q.options) {
@@ -1187,6 +1187,13 @@
                             <span class="option-bubble ${q.correct_answer === '4' ? 'filled' : ''}"></span>
                             <span class="q-option-prefix">ঘ.</span> ${q.options.option_d || ''}
                         </div>
+                    </div>
+                `;
+            } else if (q.correct_answer) {
+                optionsHtml = `
+                    <div style="margin-top: 14px; padding: 12px 18px; background: rgba(245, 197, 24, 0.06); border: 1px solid rgba(245, 197, 24, 0.15); border-radius: 10px; color: #fff; font-size: 15px; display: flex; align-items: center; gap: 8px;">
+                        <span style="font-weight: 700; color: var(--accent-gold);">উত্তর:</span>
+                        <span style="font-weight: 600;">${q.correct_answer}</span>
                     </div>
                 `;
             }
