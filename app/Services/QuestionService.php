@@ -106,6 +106,7 @@ class QuestionService {
             'exam_id'           => 'nullable|integer|exists:exams,id',
             'passage_id'        => 'nullable|integer|exists:passages,id',
             'question_type'     => 'required|string|in:mcq,cq,short_answer,long_answer,true_false, fill_in_the_blanks,matching',
+            'is_math'           => 'nullable|boolean',
         ]);
 
         if ($validator->fails()) {
@@ -154,7 +155,16 @@ class QuestionService {
         foreach ($rows as $key => &$row) {
             if ($key === 0 || empty($row[0])) continue;
 
-            $jobCategoryName = isset($row[$request->question_type == 'mcq' ? 7 : 2]) ? trim($row[$request->question_type == 'mcq' ? 7 : 2]) : '';
+            if ($request->question_type == 'mcq') {
+                $jobCategoryName = isset($row[7]) ? trim($row[7]) : '';
+                $jobCategoryIndex = 8;
+            } elseif ($request->question_type == 'cq') {
+                $jobCategoryName = isset($row[9]) ? trim($row[9]) : '';
+                $jobCategoryIndex = 10;
+            } else {
+                $jobCategoryName = isset($row[2]) ? trim($row[2]) : '';
+                $jobCategoryIndex = 3;
+            }
             $jobCategoryId = null;
 
             if (!empty($jobCategoryName)) {
@@ -175,19 +185,25 @@ class QuestionService {
                 $jobCategoryId = $jobCategory->id;
             }
             // Append the resolved ID to the row array at specific index
-            $row[$request->question_type == 'mcq' ? 8 : 3] = $jobCategoryId;
+            $row[$jobCategoryIndex] = $jobCategoryId;
         }
         unset($row);
 
         $questions = 0;
+        foreach ($rows as $key => $row) {
+            if ($key === 0 || empty($row[0])) continue;
+            $questions++;
+        }
+
+        $isMath = $request->input('is_math', 0);
         $content = '';
 
-        $counter = 0;
-
         if($request->question_type == 'mcq') {
-            $content = view('portal.question.card', compact('rows'))->render();
+            $content = view('portal.question.card', compact('rows', 'isMath'))->render();
+        } elseif($request->question_type == 'cq') {
+            $content = view('portal.question.cq-card', compact('rows', 'isMath'))->render();
         } else {
-            $content = view('portal.question.short-card', compact('rows'))->render();
+            $content = view('portal.question.short-card', compact('rows', 'isMath'))->render();
         }
 
         // foreach ($rows as $key => $row) {

@@ -53,6 +53,9 @@
                         <a href="{{ asset('question-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
                             MCQ Question File
                         </a>
+                        <a href="{{ asset('cq-question-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
+                            CQ Question File
+                        </a>
                         <a href="{{ asset('short-question-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
                             Short Question File
                         </a>
@@ -103,6 +106,7 @@
                                     <select name="question_type" id="question_type" class="form-control select" data-placeholder="Select One" data-parsley-errors-container="#question_type_error" required data-minimum-results-for-search="Infinity">
                                         <option value="">Select One</option>
                                         <option selected value="mcq">MCQ (Multiple Choice Question)</option>
+                                        <option value="cq">সৃজনশীল (CQ)</option>
                                         <option value="short_answer">Short Answer</option>
                                         <option value="long_answer">Long Answer</option>
                                         <option disabled value="true_false">True/ False</option>
@@ -168,7 +172,7 @@
                                     <span id="passage_id_error"></span>
                                 </div>
 
-                                <div class="col-md-6 form-group mb-3">
+                                <div class="col-md-4 form-group mb-3">
                                     <label for="hard_level">Hard Level <span class="text-danger">*</span></label>
                                     <select name="hard_level" id="hard_level" class="form-control select" data-placeholder="Select One" data-parsley-errors-container="#hard_level_error" required data-minimum-results-for-search="Infinity">
                                         <option value="">Select One</option>
@@ -179,9 +183,17 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-6 form-group mb-3">
+                                <div class="col-md-4 form-group mb-3">
                                     <label for="question_mark">Question Mark <span class="text-danger">*</span></label>
                                     <input type="text" name="question_mark" id="question_mark" class="form-control number" value="1" required>
+                                </div>
+
+                                <div class="col-md-4 form-group mb-3">
+                                    <label for="is_math">Is math Question? <span class="text-danger">*</span></label>
+                                    <select name="is_math" id="is_math" class="form-control select" required>
+                                        <option selected value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
                                 </div>
 
                                 <div class="col-md-12 form-group mb-3">
@@ -217,8 +229,39 @@
 @endsection
 
 @push('scripts')
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ckeditor/4.9.2/ckeditor.js"></script>
     <script>
         _componentSelect();
+
+        // MathML receive handler (once)
+        window.addEventListener('message', function (event) {
+            if (event.data.type === 'insertMathML') {
+                if (window.mathTargetEditor) {
+                    window.mathTargetEditor.insertHtml(event.data.data);
+                }
+            }
+        }, false);
+
+        // Reusable CKEditor initializer
+        function editor(editorName) {
+            if (CKEDITOR.instances[editorName]) {
+                CKEDITOR.instances[editorName].destroy(true);
+            }
+
+            CKEDITOR.replace(editorName, {
+                extraPlugins: 'iMathEQ',
+                height: 120,
+                filebrowserUploadUrl: "/editor/upload?_token=" + document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                filebrowserUploadMethod: 'form',
+                toolbar: [
+                    { name: 'basicstyles', items: ['Bold', 'Italic', 'Underline', 'RemoveFormat'] },
+                    { name: 'paragraph', items: ['NumberedList', 'BulletedList', '-', 'Outdent', 'Indent'] },
+                    { name: 'insert', items: ['Image', 'Table', 'HorizontalRule', 'SpecialChar', 'iMathEQ'] },
+                    { name: 'styles', items: ['Format', 'FontSize'] },
+                    { name: 'tools', items: ['Maximize', 'Source'] }
+                ]
+            });
+        }
         
 
         $(document).on('change', '#question_type', function() {
@@ -482,6 +525,14 @@
 
             $(".ajax_error").remove();
 
+            if (typeof CKEDITOR !== 'undefined') {
+                for (var instanceName in CKEDITOR.instances) {
+                    if (CKEDITOR.instances.hasOwnProperty(instanceName)) {
+                        CKEDITOR.instances[instanceName].updateElement();
+                    }
+                }
+            }
+
             var submit_url = $('.content_form').attr('action');
             var formData = new FormData($(".content_form")[0]);
 
@@ -524,6 +575,15 @@
                         // preview.innerHTML = "";
 
                         $('#data-area').html(data.html);
+
+                        if ($('#is_math').val() == 1 && typeof CKEDITOR !== 'undefined') {
+                            $('.editor-textarea').each(function() {
+                                var editorId = $(this).attr('id');
+                                if (editorId) {
+                                    editor(editorId);
+                                }
+                            });
+                        }
 
                         $('.custom-select').select2().trigger('change');
 

@@ -90,61 +90,123 @@ class QuestionRepository implements QuestionRepositoryInterface
         DB::transaction(function () use ($request, $passageId) {
             $questions = $request->questions;
             if($questions && is_array($questions) && count($questions) > 0) {
-                foreach($questions as $questionKey => $question) {
-                    if($request->is_math == 1) {
-                        $slug = date('Y-m-d-h-i-s-'). rand(1000000, 9999999);
-                    } else {
-                        $qText = $question['question'] ?? '';
-                        $slug = \Illuminate\Support\Str::slug($qText) ?: date('d-m-Y-h-i-s');
-                        $slug = substr($slug, 0, 150);
-                        if (Question::withTrashed()->where('slug', $slug)->exists()) {
-                            $slug = $slug . '-'. \Illuminate\Support\Str::random(5). '-' . date('d-m-Y-h-i-s');
+                // Check if this is an imported CQ format: each element has 'stimulus' and 'sub_questions'
+                $isImportedCQ = ($request->question_type === 'cq' && isset(reset($questions)['stimulus']));
+
+                if ($isImportedCQ) {
+                    foreach ($questions as $cqKey => $cqData) {
+                        $stimulusText = $cqData['stimulus'] ?? '';
+                        if (empty($stimulusText)) {
+                            continue;
+                        }
+                        
+                        // Create a Passage for this specific CQ row
+                        $passage = new \App\Models\Passage();
+                        $passage->admin_id = auth()->guard('admin')->user()->id;
+                        $passage->uuid = (string) \Illuminate\Support\Str::uuid();
+                        $passage->name = \Illuminate\Support\Str::limit(strip_tags($stimulusText), 50);
+                        $passage->passage = $stimulusText;
+                        $passage->status = 1;
+                        $passage->save();
+                        
+                        $rowPassageId = $passage->id;
+                        $subQuestions = $cqData['sub_questions'] ?? [];
+                        
+                        foreach ($subQuestions as $subIndex => $subQ) {
+                            $qText = $subQ['question'] ?? '';
+                            if (empty($qText)) {
+                                continue;
+                            }
+                            
+                            if ($request->is_math == 1) {
+                                $slug = date('Y-m-d-h-i-s-'). rand(1000000, 9999999);
+                            } else {
+                                $slug = \Illuminate\Support\Str::slug($qText) ?: date('d-m-Y-h-i-s');
+                                $slug = substr($slug, 0, 150);
+                                if (Question::withTrashed()->where('slug', $slug)->exists()) {
+                                    $slug = $slug . '-'. \Illuminate\Support\Str::random(5). '-' . date('d-m-Y-h-i-s');
+                                }
+                            }
+                            
+                            $model = new Question();
+                            $model->admin_id = auth()->guard('admin')->user()->id;
+                            $model->category_id = $request->category_id[count($request->category_id) - 1];
+                            $model->job_category_id = isset($cqData['job_category_id']) && $cqData['job_category_id'] !== '' ? $cqData['job_category_id'] : $request->job_category_id;
+                            $model->year_id = $request->year_id;
+                            $model->exam_id = $request->exam_id;
+                            $model->passage_id = $rowPassageId;
+                            $model->uuid = (string) Str::uuid();
+                            $model->question_type = $request->question_type;
+                            $model->question = $qText;
+                            $model->correct_answer = $subQ['correct_answer'] ?? '';
+                            $model->hard_level = $request->hard_level ?? 'easy';
+                            $model->question_mark = $subQ['question_mark'] ?? 1;
+                            $model->slug = $slug;
+                            $model->content = null;
+                            $model->site_title = \Illuminate\Support\Str::limit(strip_tags($qText), 60) . ' - '. get_settings('system_name');
+                            $model->meta_title = \Illuminate\Support\Str::limit(strip_tags($qText), 60) . ' - '. get_settings('system_name');
+                            $model->meta_keywords = $request->meta_keywords ?? null;
+                            $model->meta_description = \Illuminate\Support\Str::limit(strip_tags($qText), 150) . ' - '. get_settings('system_name');
+                            $model->status = $request->status;
+                            $model->save();
                         }
                     }
+                } else {
+                    foreach($questions as $questionKey => $question) {
+                        if($request->is_math == 1) {
+                            $slug = date('Y-m-d-h-i-s-'). rand(1000000, 9999999);
+                        } else {
+                            $qText = $question['question'] ?? '';
+                            $slug = \Illuminate\Support\Str::slug($qText) ?: date('d-m-Y-h-i-s');
+                            $slug = substr($slug, 0, 150);
+                            if (Question::withTrashed()->where('slug', $slug)->exists()) {
+                                $slug = $slug . '-'. \Illuminate\Support\Str::random(5). '-' . date('d-m-Y-h-i-s');
+                            }
+                        }
 
-                    $model = new Question();
-                    $model->admin_id = auth()->guard('admin')->user()->id;
-                    $model->category_id = $request->category_id[count($request->category_id) - 1];
-                    $model->job_category_id = isset($question['job_category_id']) ? $question['job_category_id'] : $request->job_category_id;
-                    $model->year_id = $request->year_id;
-                    $model->exam_id = $request->exam_id;
-                    $model->passage_id = $passageId ?? $request->passage_id;
-                    $model->uuid = (string) Str::uuid();
-                    $model->question_type = $request->question_type;
-                    $model->question = $question['question'];
-                    $model->correct_answer = $question['correct_answer'];
-                    $model->hard_level = $request->hard_level ?? 'easy';
-                    $model->question_mark = $question['question_mark'] ?? $request->question_mark ?? 1;
-                    $model->slug = $slug;
-                    $model->content = $question['description'] ?? null;
-                    $model->site_title = $question['site_title'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 60) . ' - '. get_settings('system_name') ;
-                    $model->meta_title = $question['meta_title'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 60) . ' - '. get_settings('system_name') ;
-                    $model->meta_keywords = $request->meta_keywords ?? $question['meta_keywords'] ?? null;
-                    $model->meta_description = $question['meta_description'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 150) . ' - '. get_settings('system_name');
-                    $model->meta_article_tag = $question['meta_article_tag'] ?? null;
-                    $model->status = $request->status;
-                    $model->save();
+                        $model = new Question();
+                        $model->admin_id = auth()->guard('admin')->user()->id;
+                        $model->category_id = $request->category_id[count($request->category_id) - 1];
+                        $model->job_category_id = isset($question['job_category_id']) && $question['job_category_id'] !== '' ? $question['job_category_id'] : $request->job_category_id;
+                        $model->year_id = $request->year_id;
+                        $model->exam_id = $request->exam_id;
+                        $model->passage_id = $passageId ?? $request->passage_id;
+                        $model->uuid = (string) Str::uuid();
+                        $model->question_type = $request->question_type;
+                        $model->question = $question['question'];
+                        $model->correct_answer = $question['correct_answer'];
+                        $model->hard_level = $request->hard_level ?? 'easy';
+                        $model->question_mark = $question['question_mark'] ?? $request->question_mark ?? 1;
+                        $model->slug = $slug;
+                        $model->content = $question['description'] ?? null;
+                        $model->site_title = $question['site_title'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 60) . ' - '. get_settings('system_name') ;
+                        $model->meta_title = $question['meta_title'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 60) . ' - '. get_settings('system_name') ;
+                        $model->meta_keywords = $request->meta_keywords ?? $question['meta_keywords'] ?? null;
+                        $model->meta_description = $question['meta_description'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 150) . ' - '. get_settings('system_name');
+                        $model->meta_article_tag = $question['meta_article_tag'] ?? null;
+                        $model->status = $request->status;
+                        $model->save();
 
-                    if(isset($question['description']) && $question['description'] && $model) {
-                        $log = new \App\Models\QuestionDescriptionLog();
-                        $log->type = 'question';
-                        $log->question_id = $model->id;
-                        $log->admin_id = auth()->guard('admin')->user()->id;
-                        $log->description = $question['description'];
-                        $log->save();
+                        if(isset($question['description']) && $question['description'] && $model) {
+                            $log = new \App\Models\QuestionDescriptionLog();
+                            $log->type = 'question';
+                            $log->question_id = $model->id;
+                            $log->admin_id = auth()->guard('admin')->user()->id;
+                            $log->description = $question['description'];
+                            $log->save();
+                        }
+                
+                        if($model && $model->question_type == 'mcq') {
+                            $option = new Option();
+                            $option->question_id = $model->id;
+                            $option->option_one = $question['option_one'];
+                            $option->option_two = $question['option_two'] ?? null;
+                            $option->option_three = $question['option_three'] ?? null;
+                            $option->option_four = $question['option_four'] ?? null;
+                            $option->option_five = $question['option_five'] ?? null;
+                            $option->save();
+                        }
                     }
-            
-                    if($model && $model->question_type == 'mcq') {
-                        $option = new Option();
-                        $option->question_id = $model->id;
-                        $option->option_one = $question['option_one'];
-                        $option->option_two = $question['option_two'] ?? null;
-                        $option->option_three = $question['option_three'] ?? null;
-                        $option->option_four = $question['option_four'] ?? null;
-                        $option->option_five = $question['option_five'] ?? null;
-                        $option->save();
-                    }
-
                 }
             }
         });

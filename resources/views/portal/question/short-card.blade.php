@@ -16,23 +16,29 @@
         <div class="card-body row">
             <div class="col-md-12j mb-3 form-group">
                 <label for="question_{{ $counter }}">Question <span class="text-danger">*</span></label>
-                <input type="text" 
-                       name="questions[{{ $counter }}][question]" 
-                       id="question_{{ $counter }}" 
-                       class="form-control" 
-                       required 
-                       value="{{ old("questions.$counter.question", $row[0]) }}">
+                @if(isset($isMath) && $isMath == 1)
+                    <textarea name="questions[{{ $counter }}][question]" 
+                              id="question_{{ $counter }}" 
+                              class="form-control editor-textarea" 
+                              required>{{ old("questions.$counter.question", $row[0]) }}</textarea>
+                @else
+                    <input type="text" 
+                           name="questions[{{ $counter }}][question]" 
+                           id="question_{{ $counter }}" 
+                           class="form-control" 
+                           required 
+                           value="{{ old("questions.$counter.question", $row[0]) }}">
+                @endif
                 <input type="hidden" name="questions[{{ $counter }}][description]" value="">
                 <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[3] ?? '' }}">
             </div>
 
             <div class="col-md-12 form-group mb-3">
                 <label for="correct_answer_{{ $counter }}">Correct Answer</label>
-                <textarea type="text" 
-                       name="questions[{{ $counter }}][correct_answer]" 
-                       id="question_{{ $counter }}" 
-                       class="form-control" 
-                       required 
+                <textarea name="questions[{{ $counter }}][correct_answer]" 
+                          id="correct_answer_{{ $counter }}" 
+                          class="form-control {{ (isset($isMath) && $isMath == 1) ? 'editor-textarea' : '' }}" 
+                          required 
                 >{{ old("questions.$counter.question", $row[1]) }}</textarea>
             </div>
 
