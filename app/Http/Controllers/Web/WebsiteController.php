@@ -635,7 +635,7 @@ class WebsiteController extends Controller
         $academyCategoryIds = array_unique($academyCategoryIds);
         
         // Start Query
-        $query = Question::with(['options', 'category', 'job_category', 'year'])
+        $query = Question::with(['options', 'category', 'job_category', 'year', 'passage'])
             ->whereIn('category_id', $academyCategoryIds)
             ->where('status', 1);
             
@@ -732,6 +732,25 @@ class WebsiteController extends Controller
         // Format Questions for view
         $formatted = collect($questions->items())->map(function($q) {
             $opt = $q->options;
+
+            // For creative questions (cq), load passage details and all sub-questions of the passage
+            $passageText = null;
+            $subQuestions = [];
+            if ($q->question_type === 'cq' && $q->passage_id) {
+                $passageText = $q->passage?->passage;
+                $subQuestions = Question::where('passage_id', $q->passage_id)
+                    ->orderBy('question_mark', 'asc')
+                    ->get()
+                    ->map(function($sub) {
+                        return [
+                            'id' => $sub->id,
+                            'question' => $sub->question,
+                            'question_mark' => $sub->question_mark,
+                            'correct_answer' => $sub->correct_answer,
+                        ];
+                    })->toArray();
+            }
+
             return [
                 'id' => $q->id,
                 'question' => $q->question,
@@ -751,7 +770,10 @@ class WebsiteController extends Controller
                     'option_e' => html_entity_decode($opt->option_five),
                 ] : null,
                 'edit_url' => route('portal.question.edit', $q->id),
-                'view' => $q->view ?: 0
+                'view' => $q->view ?: 0,
+                'passage_id' => $q->passage_id,
+                'passage_text' => $passageText,
+                'sub_questions' => $subQuestions
             ];
         });
         

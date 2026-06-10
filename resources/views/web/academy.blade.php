@@ -1173,9 +1173,68 @@
         const currentPage = parseInt(pagination ? pagination.current_page : 1) || 1;
         const perPage = parseInt(pagination ? pagination.per_page : 20) || 20;
 
+        const renderedPassages = new Set();
+
         questions.forEach((q, idx) => {
             const serialNum = (currentPage - 1) * perPage + idx + 1;
             const serialNumBn = formatBanglaNumber(serialNum);
+
+            if (q.question_type === 'cq') {
+                if (q.passage_id) {
+                    if (renderedPassages.has(q.passage_id)) {
+                        return; // Skip since we already rendered this passage's sub-questions grouped together
+                    }
+                    renderedPassages.add(q.passage_id);
+                }
+
+                // Render CQ accordion card
+                let subQuestionsHtml = '';
+                if (q.sub_questions && q.sub_questions.length > 0) {
+                    subQuestionsHtml = q.sub_questions.map((sub, sIdx) => {
+                        const prefixes = ['ক.', 'খ.', 'গ.', 'ঘ.'];
+                        const prefix = prefixes[sIdx] || '';
+                        const markBn = formatBanglaNumber(sub.question_mark || (sIdx + 1));
+                        return `
+                            <div class="cq-sub-question-item mb-3" style="border-bottom: 1px dashed rgba(255, 255, 255, 0.05); padding-bottom: 16px;">
+                                <div class="d-flex align-items-start justify-content-between gap-3">
+                                    <div class="cq-sub-question-text" style="font-size: 15px; color: #fff; line-height: 1.6;">
+                                        <span class="fw-bold text-accent-gold" style="color: var(--accent-gold); margin-right: 6px;">${prefix}</span> ${sub.question} <span style="background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; font-size: 11px; margin-left: 6px; color: rgba(255,255,255,0.5);">নম্বর: ${markBn}</span>
+                                    </div>
+                                    <button class="cq-btn-answer" onclick="toggleCqAnswer(this)" style="background: rgba(245, 197, 24, 0.08); border: 1.5px solid rgba(245, 197, 24, 0.25); color: var(--accent-gold); border-radius: 8px; font-weight: 600; font-size: 12px; padding: 4px 14px; cursor: pointer; transition: all 0.2s; white-space: nowrap;">উত্তর</button>
+                                </div>
+                                <div class="cq-answer-box mt-3 p-3 rounded" style="display: none; background: rgba(34, 197, 94, 0.04); border-left: 3px solid #22c55e; color: #22c55e; font-size: 14px; line-height: 1.6;">
+                                    <strong style="color: #22c55e; display: block; margin-bottom: 6px;"><i class="ri-checkbox-circle-line me-1"></i> আদর্শ উত্তর:</strong>
+                                    <div>${sub.correct_answer}</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('');
+                }
+
+                const card = document.createElement('div');
+                card.className = 'question-card-academy cq-accordion-card mb-4';
+                card.style.cssText = 'background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 18px; padding: 24px 28px;';
+                card.innerHTML = `
+                    <div class="cq-accordion-header d-flex justify-content-between align-items-center" onclick="toggleCqAccordion(this)" style="cursor: pointer; user-select: none;">
+                        <div class="d-flex align-items-center">
+                            <span class="cq-serial-badge" style="width: 32px; height: 32px; border-radius: 50%; background: rgba(245, 197, 24, 0.1); color: var(--accent-gold); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; margin-right: 12px;">${serialNumBn}</span>
+                            <span class="fw-bold fs-5 text-white">${q.category_name || 'সৃজনশীল প্রশ্ন'}</span>
+                        </div>
+                        <i class="ri-arrow-up-s-line fs-3 text-white-50 transition-icon" style="transition: transform 0.3s;"></i>
+                    </div>
+                    
+                    <div class="cq-accordion-body mt-4" style="display: block;">
+                        <div class="cq-stimulus-box mb-4" style="border-left: 4px solid var(--accent-gold); background: rgba(255, 255, 255, 0.02); padding: 18px; border-radius: 0 12px 12px 0; font-style: italic; line-height: 1.7; color: rgba(255, 255, 255, 0.9); font-size: 15px; border-bottom: 1px solid rgba(255,255,255,0.05);">
+                            ${q.passage_text || q.question}
+                        </div>
+                        <div class="cq-sub-questions-list">
+                            ${subQuestionsHtml}
+                        </div>
+                    </div>
+                `;
+                container.appendChild(card);
+                return;
+            }
             
             // Prepend serial number to question text
             const displayQuestion = `<span style="font-weight: 700; color: #fff; margin-right: 8px;">${serialNumBn}.</span>${q.question}`;
@@ -1227,6 +1286,39 @@
 
         // Keep print-only template container updated in background
         updatePrintTemplate(questions);
+    }
+
+    function toggleCqAccordion(headerElement) {
+        const card = headerElement.closest('.cq-accordion-card');
+        const body = card.querySelector('.cq-accordion-body');
+        const icon = card.querySelector('.transition-icon');
+        
+        if (body.style.display === 'none') {
+            body.style.display = 'block';
+            icon.className = 'ri-arrow-up-s-line fs-3 text-white-50 transition-icon';
+        } else {
+            body.style.display = 'none';
+            icon.className = 'ri-arrow-down-s-line fs-3 text-white-50 transition-icon';
+        }
+    }
+
+    function toggleCqAnswer(buttonElement) {
+        const item = buttonElement.closest('.cq-sub-question-item');
+        const answerBox = item.querySelector('.cq-answer-box');
+        
+        if (answerBox.style.display === 'none') {
+            answerBox.style.display = 'block';
+            buttonElement.innerText = 'উত্তর বন্ধ করুন';
+            buttonElement.style.background = 'rgba(239, 68, 68, 0.08)';
+            buttonElement.style.borderColor = 'rgba(239, 68, 68, 0.25)';
+            buttonElement.style.color = '#ef4444';
+        } else {
+            answerBox.style.display = 'none';
+            buttonElement.innerText = 'উত্তর';
+            buttonElement.style.background = 'rgba(245, 197, 24, 0.08)';
+            buttonElement.style.borderColor = 'rgba(245, 197, 24, 0.25)';
+            buttonElement.style.color = 'var(--accent-gold)';
+        }
     }
 
     function renderActiveBadges() {
