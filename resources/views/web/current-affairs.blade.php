@@ -1191,7 +1191,7 @@
                 `;
             } else if (q.correct_answer) {
                 optionsHtml = `
-                    <div style="margin-top: 10px; color: #22c55e; font-size: 15px; font-weight: 600;">
+                    <div style="margin-top: -4px; margin-bottom: 12px; color: #22c55e; font-size: 15px; font-weight: 600;">
                         <strong>উত্তর:</strong> ${q.correct_answer}
                     </div>
                 `;
