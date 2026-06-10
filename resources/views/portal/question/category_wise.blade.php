@@ -62,11 +62,16 @@
                                     </div>
                                 </div>
                                 
-                                <!-- MCQ / Short Question Tabs -->
+                                <!-- MCQ / CQ / Short Question Tabs -->
                                 <ul class="nav nav-tabs nav-line-tabs mb-3 fs-6" id="question-type-tabs" style="display: none; padding-left: 20px;">
                                     <li class="nav-item">
                                         <a class="nav-link active fw-bold text-uppercase" id="mcq-tab-link" href="javascript:void(0);" data-type="mcq" style="padding: 10px 20px; font-size: 14px;">
                                             <i class="fas fa-list-ol me-2"></i> MCQ Question
+                                        </a>
+                                    </li>
+                                    <li class="nav-item">
+                                        <a class="nav-link fw-bold text-uppercase" id="cq-tab-link" href="javascript:void(0);" data-type="cq" style="padding: 10px 20px; font-size: 14px;">
+                                            <i class="fas fa-file-signature me-2"></i> CQ (সৃজনশীল)
                                         </a>
                                     </li>
                                     <li class="nav-item">
@@ -304,8 +309,10 @@
                         const matching = g.questions.filter(q => {
                             if (filterType === 'mcq') {
                                 return q.type === 'mcq';
+                            } else if (filterType === 'cq') {
+                                return q.type === 'cq';
                             } else {
-                                return q.type !== 'mcq';
+                                return q.type !== 'mcq' && q.type !== 'cq';
                             }
                         });
                         if (matching.length > 0) {
@@ -321,8 +328,10 @@
                         const matchingQuestions = g.questions.filter(q => {
                             if (filterType === 'mcq') {
                                 return q.type === 'mcq';
+                            } else if (filterType === 'cq') {
+                                return q.type === 'cq';
                             } else {
-                                return q.type !== 'mcq';
+                                return q.type !== 'mcq' && q.type !== 'cq';
                             }
                         });
 
