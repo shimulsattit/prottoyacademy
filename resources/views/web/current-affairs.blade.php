@@ -718,6 +718,27 @@
             gap: 12px;
         }
     }
+
+    /* CUSTOM SCROLLBAR FOR SUB-CATEGORIES */
+    #subject-filter-group .filter-list-academy {
+        max-height: 500px;
+        overflow-y: auto;
+        padding-right: 8px;
+    }
+    #subject-filter-group .filter-list-academy::-webkit-scrollbar {
+        width: 8px;
+    }
+    #subject-filter-group .filter-list-academy::-webkit-scrollbar-track {
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+    }
+    #subject-filter-group .filter-list-academy::-webkit-scrollbar-thumb {
+        background: rgba(245, 197, 24, 0.4);
+        border-radius: 10px;
+    }
+    #subject-filter-group .filter-list-academy::-webkit-scrollbar-thumb:hover {
+        background: rgba(245, 197, 24, 0.7);
+    }
 </style>
 @endpush
 
@@ -828,7 +849,7 @@
                     <div class="filter-list-academy">
                         @foreach ($stats['types'] as $type)
                             <label class="filter-item-academy">
-                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}" {{ ($type['key'] === 'mcq' || (isset($selectedClassId) && $type['count'] > 0)) ? 'checked' : '' }}>
+                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}">
                                 <span class="filter-label-academy">
                                     <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
                                     {{ $type['name'] }}
