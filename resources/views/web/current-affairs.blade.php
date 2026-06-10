@@ -774,9 +774,9 @@
                 <div class="stat-growth-academy"><i class="ri-book-read-line"></i> <span id="stat-mcq-subjects">{{ strtr(count($stats['subjects']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>টি সাব-ক্যাটাগরি</div>
             </div>
             <div class="stat-card-academy">
-                <div class="stat-label-academy">সৃজনশীল (CQ)</div>
-                <div class="stat-value-academy" id="stat-cq">{{ strtr(number_format($stats['cq_count']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</div>
-                <div class="stat-growth-academy"><i class="ri-file-edit-line"></i> <span id="stat-cq-subjects">{{ strtr(count($stats['subjects']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>টি সাব-ক্যাটাগরি</div>
+                <div class="stat-label-academy">সংক্ষিপ্ত (Short)</div>
+                <div class="stat-value-academy" id="stat-short">{{ strtr(number_format($stats['short_count']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</div>
+                <div class="stat-growth-academy"><i class="ri-file-edit-line"></i> <span id="stat-short-subjects">{{ strtr(count($stats['subjects']), ['0'=>'০','1'=>'১','2'=>'২','3'=>'৩','4'=>'৪','5'=>'৫','6'=>'৬','7'=>'৭','8'=>'৮','9'=>'৯']) }}</span>টি সাব-ক্যাটাগরি</div>
             </div>
             <div class="stat-card-academy">
                 <div class="stat-label-academy">টপিক কাভার</div>
@@ -1103,7 +1103,7 @@
                     if (data.stats) {
                         document.getElementById('stat-total').innerText = formatBanglaNumber(data.stats.total_questions);
                         document.getElementById('stat-mcq').innerText = formatBanglaNumber(data.stats.mcq_count);
-                        document.getElementById('stat-cq').innerText = formatBanglaNumber(data.stats.cq_count);
+                        document.getElementById('stat-short').innerText = formatBanglaNumber(data.stats.short_count);
                         
                         const chaptersVal = document.getElementById('stat-chapters');
                         if (chaptersVal) {
@@ -1115,7 +1115,7 @@
                             mcqSub.innerText = formatBanglaNumber(data.stats.subjects_count);
                         }
                         
-                        const cqSub = document.getElementById('stat-cq-subjects');
+                        const cqSub = document.getElementById('stat-short-subjects');
                         if (cqSub) {
                             cqSub.innerText = formatBanglaNumber(data.stats.subjects_count);
                         }
