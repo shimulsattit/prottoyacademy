@@ -1191,9 +1191,8 @@
                 `;
             } else if (q.correct_answer) {
                 optionsHtml = `
-                    <div style="margin-top: 14px; padding: 12px 18px; background: rgba(245, 197, 24, 0.06); border: 1px solid rgba(245, 197, 24, 0.15); border-radius: 10px; color: #fff; font-size: 15px; display: flex; align-items: center; gap: 8px;">
-                        <span style="font-weight: 700; color: var(--accent-gold);">উত্তর:</span>
-                        <span style="font-weight: 600;">${q.correct_answer}</span>
+                    <div style="margin-top: 10px; color: #22c55e; font-size: 15px; font-weight: 600;">
+                        <strong>উত্তর:</strong> ${q.correct_answer}
                     </div>
                 `;
             }
