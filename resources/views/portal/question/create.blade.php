@@ -70,7 +70,7 @@
 
         <div id="app_content" class="app-content flex-column-fluid">
             <div id="app_content_container" class="app-container container-xxl">
-                <form action="{{ route('portal.question.store') }}" method="POST" class="content_form">
+                <form action="{{ route('portal.question.store') }}" method="POST" enctype="multipart/form-data" class="content_form">
                     @csrf
                     <div class="card">
                         <div class="card-body">
@@ -208,12 +208,12 @@
                                     <span id="exam_id_error"></span>
                                 </div>
 
-                                <div class="col-md-3 form-group mb-3">
+                                <div class="col-md-3 form-group mb-3" id="question_mark_container">
                                     <label for="question_mark">Question Mark <span class="text-danger">*</span></label>
                                     <input type="text" name="question_mark" id="question_mark" class="form-control number" value="1" required>
                                 </div>
                                 
-                                <div class="col-md-3 form-group mb-3">
+                                <div class="col-md-3 form-group mb-3" id="status_container">
                                     <label for="status">Status <span class="text-danger">*</span></label>
                                     <select name="status" id="status" class="form-control select" required>
                                         <option value="1">Publish</option>
@@ -221,7 +221,7 @@
                                     </select>
                                 </div>
 
-                                <div class="col-md-3 form-group mb-3">
+                                <div class="col-md-3 form-group mb-3" id="passage_container">
                                     <label for="passage_id">Passage </label>
                                     <select name="passage_id" id="passage_id" class="form-control" data-parsley-errors-container="#passage_id_error"></select>
                                     <span id="passage_id_error"></span>
@@ -334,7 +334,7 @@
                     </div>
 
                     @if(Auth::guard('admin')->user()->hasPermissionTo('question.create'))
-                        <div class="card mt-3">
+                        <div class="card mt-3" id="default_submit_card">
                             <div class="card-body">
                                 <div class="col-md-12 text-center">
                                     <button type="button" class="btn btn-sm btn-block btn-info" id="add_more">
@@ -442,6 +442,7 @@
 
     <script>
         _componentSelect();
+        let mcq_initial_content = $('#data-area').html();
 
         var _formValidationQuestionInput = function () {
             if ($('.content_form').length > 0) {
@@ -455,8 +456,15 @@
             $('.content_form').on('submit', function (e) {
                 e.preventDefault();
 
-                $('#submit').hide();
-                $('#submitting').show();
+                let is_cq = ($('#question_type').val() === 'cq');
+
+                if (is_cq) {
+                    $('#cq_draft_btn, #cq_publish_btn').hide();
+                    $('#cq_submitting_btn').show();
+                } else {
+                    $('#submit').hide();
+                    $('#submitting').show();
+                }
 
                 $(".ajax_error").remove();
 
@@ -519,8 +527,13 @@
                             }
                         }
 
-                        $('#submit').show();
-                        $('#submitting').hide();
+                        if (is_cq) {
+                            $('#cq_draft_btn, #cq_publish_btn').show();
+                            $('#cq_submitting_btn').hide();
+                        } else {
+                            $('#submit').show();
+                            $('#submitting').hide();
+                        }
                     },
                     error: function (data) {
                         var jsonValue = $.parseJSON(data.responseText);
@@ -546,8 +559,13 @@
                             toastr.warning(jsonValue.message);
                         }
 
-                        $('#submit').show();
-                        $('#submitting').hide();
+                        if (is_cq) {
+                            $('#cq_draft_btn, #cq_publish_btn').show();
+                            $('#cq_submitting_btn').hide();
+                        } else {
+                            $('#submit').show();
+                            $('#submitting').hide();
+                        }
                     }
                 });
             });
@@ -1018,6 +1036,8 @@
 
             if(question_type == 'mcq') {
                 editors = ['name', 'option_one', 'option_two', 'option_three', 'option_four', 'option_five'];
+            } else if(question_type == 'cq') {
+                editors = ['stimulus', 'cq_q_a', 'cq_q_b', 'cq_q_c', 'cq_q_d', 'cq_ans_a', 'cq_ans_b', 'cq_ans_c', 'cq_ans_d'];
             } else {
                 editors = ['short_question', 'correct_answer'];
             }
@@ -1090,17 +1110,162 @@
             </div>
         `;
 
+        let cq_content = `
+            <div class="card mt-3" style="border: 1px solid #e4e6ef; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <div class="card-header bg-light d-flex align-items-center py-3" style="border-bottom: 1px solid #eff2f5;">
+                    <h4 class="card-title fw-bold text-dark m-0 fs-5"><i class="fas fa-file-alt text-primary me-2"></i> উদ্দীপক (Stimulus)</h4>
+                </div>
+                <div class="card-body">
+                    <div class="form-group mb-3">
+                        <label for="stimulus" class="form-label fw-bold text-gray-800" style="font-size: 14px;">উদ্দীপকের বিষয়বস্তু লিখুন <span class="text-danger">*</span></label>
+                        <textarea name="stimulus" id="stimulus" class="form-control" placeholder="এখানে উদ্দীপক লিখুন — গল্প, ঘটনা, চিত্র বর্ণনা ইত্যাদি..." rows="4" required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="stimulus_image" class="form-label fw-bold text-gray-800" style="font-size: 14px;"><i class="fas fa-image text-muted me-1"></i> ছবি সংযুক্ত করুন (ঐচ্ছিক)</label>
+                        <input type="file" name="stimulus_image" id="stimulus_image" class="form-control" style="border-radius: 6px; border: 1px solid #dbdfe9; padding: 8px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" style="border: 1px solid #e4e6ef; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <div class="card-header bg-light d-flex align-items-center py-3" style="border-bottom: 1px solid #eff2f5;">
+                    <h4 class="card-title fw-bold text-dark m-0 fs-5"><i class="fas fa-list-ol text-primary me-2"></i> সৃজনশীল প্রশ্নসমূহ</h4>
+                </div>
+                <div class="card-body">
+                    <!-- ক (জ্ঞানমূলক প্রশ্ন) -->
+                    <div class="border rounded p-4 mb-4" style="background-color: #ffffff; border: 1px solid #eff2f5; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-dark fs-6" style="color: #3f4254 !important;">
+                                <i class="fas fa-book-open text-primary me-2"></i> ক (জ্ঞানমূলক প্রশ্ন)
+                            </span>
+                            <span style="background-color: #f1f8f5; color: #181c32; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #e4e6ef;">নম্বর: ১</span>
+                        </div>
+                        <input type="hidden" name="questions[0][question_mark]" value="1">
+                        <div class="form-group mb-0">
+                            <label class="form-label fw-semibold text-gray-700 mb-1" style="font-size: 13px;">প্রশ্ন লিখুন <span class="text-danger">*</span></label>
+                            <textarea name="questions[0][question]" id="cq_q_a" class="form-control" placeholder="ক-অংশের প্রশ্ন লিখুন..." required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- খ (অনুধাবনমূলক প্রশ্ন) -->
+                    <div class="border rounded p-4 mb-4" style="background-color: #ffffff; border: 1px solid #eff2f5; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-dark fs-6" style="color: #3f4254 !important;">
+                                <i class="fas fa-brain text-primary me-2"></i> খ (অনুধাবনমূলক প্রশ্ন)
+                            </span>
+                            <span style="background-color: #f1f8f5; color: #181c32; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #e4e6ef;">নম্বর: ২</span>
+                        </div>
+                        <input type="hidden" name="questions[1][question_mark]" value="2">
+                        <div class="form-group mb-0">
+                            <label class="form-label fw-semibold text-gray-700 mb-1" style="font-size: 13px;">প্রশ্ন লিখুন <span class="text-danger">*</span></label>
+                            <textarea name="questions[1][question]" id="cq_q_b" class="form-control" placeholder="খ-অংশের প্রশ্ন লিখুন..." required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- গ (প্রয়োগমূলক প্রশ্ন) -->
+                    <div class="border rounded p-4 mb-4" style="background-color: #ffffff; border: 1px solid #eff2f5; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-dark fs-6" style="color: #3f4254 !important;">
+                                <i class="fas fa-pencil-alt text-primary me-2"></i> গ (প্রয়োগমূলক প্রশ্ন)
+                            </span>
+                            <span style="background-color: #f1f8f5; color: #181c32; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #e4e6ef;">নম্বর: ৩</span>
+                        </div>
+                        <input type="hidden" name="questions[2][question_mark]" value="3">
+                        <div class="form-group mb-0">
+                            <label class="form-label fw-semibold text-gray-700 mb-1" style="font-size: 13px;">প্রশ্ন লিখুন <span class="text-danger">*</span></label>
+                            <textarea name="questions[2][question]" id="cq_q_c" class="form-control" placeholder="গ-অংশের প্রশ্ন লিখুন..." required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                        </div>
+                    </div>
+
+                    <!-- ঘ (উচ্চতর দক্ষতা মূলক প্রশ্ন) -->
+                    <div class="border rounded p-4 mb-0" style="background-color: #ffffff; border: 1px solid #eff2f5; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.01);">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <span class="fw-bold text-dark fs-6" style="color: #3f4254 !important;">
+                                <i class="fas fa-chart-line text-primary me-2"></i> ঘ (উচ্চতর দক্ষতা মূলক প্রশ্ন)
+                            </span>
+                            <span style="background-color: #f1f8f5; color: #181c32; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; border: 1px solid #e4e6ef;">নম্বর: ৪</span>
+                        </div>
+                        <input type="hidden" name="questions[3][question_mark]" value="4">
+                        <div class="form-group mb-0">
+                            <label class="form-label fw-semibold text-gray-700 mb-1" style="font-size: 13px;">প্রশ্ন লিখুন <span class="text-danger">*</span></label>
+                            <textarea name="questions[3][question]" id="cq_q_d" class="form-control" placeholder="ঘ-অংশের প্রশ্ন লিখুন..." required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mt-3" style="border: 1px solid #e4e6ef; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+                <div class="card-header bg-light d-flex align-items-center py-3" style="border-bottom: 1px solid #eff2f5;">
+                    <h4 class="card-title fw-bold text-dark m-0 fs-5"><i class="fas fa-check-double text-primary me-2"></i> উত্তর / মার্কিং স্কিম</h4>
+                </div>
+                <div class="card-body">
+                    <div class="form-group mb-4">
+                        <label for="cq_ans_a" class="form-label fw-bold text-dark" style="font-size: 14px;">(ক) উত্তর <span class="text-danger">*</span></label>
+                        <textarea name="questions[0][correct_answer]" id="cq_ans_a" class="form-control" placeholder="ক-এর আদর্শ উত্তর লিখুন..." rows="2" required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="cq_ans_b" class="form-label fw-bold text-dark" style="font-size: 14px;">(খ) উত্তর <span class="text-danger">*</span></label>
+                        <textarea name="questions[1][correct_answer]" id="cq_ans_b" class="form-control" placeholder="খ-এর আদর্শ উত্তর লিখুন..." rows="2" required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="cq_ans_c" class="form-label fw-bold text-dark" style="font-size: 14px;">(গ) উত্তর <span class="text-danger">*</span></label>
+                        <textarea name="questions[2][correct_answer]" id="cq_ans_c" class="form-control" placeholder="গ-এর আদর্শ উত্তর লিখুন..." rows="2" required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                    </div>
+                    <div class="form-group mb-4">
+                        <label for="cq_ans_d" class="form-label fw-bold text-dark" style="font-size: 14px;">(ঘ) উত্তর <span class="text-danger">*</span></label>
+                        <textarea name="questions[3][correct_answer]" id="cq_ans_d" class="form-control" placeholder="ঘ-এর আদর্শ উত্তর লিখুন..." rows="2" required style="border-radius: 6px; border: 1px solid #dbdfe9;"></textarea>
+                    </div>
+                    <div class="form-group mb-0">
+                        <label for="meta_keywords_cq" class="form-label fw-bold text-dark" style="font-size: 14px;">ট্যাগ / কীওয়ার্ড (কমা দিয়ে আলাদা করুন)</label>
+                        <input type="text" name="meta_keywords" id="meta_keywords_cq" class="form-control" placeholder="যেমন: পরিবেশ, বাস্তবতন্ত্র, খাদ্যশৃঙ্খল" style="border-radius: 6px; border: 1px solid #dbdfe9; padding: 10px;">
+                    </div>
+                </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-3 mt-4 mb-4">
+                <button type="button" class="btn btn-light px-4 py-2" id="cq_draft_btn" style="border-radius: 6px; font-weight: 500; border: 1px solid #dbdfe9; background-color: #f5f8fa; color: #3f4254;">
+                    <i class="fas fa-file-alt me-2" style="color: #a1a5b7;"></i> ড্রাফট সেভ করুন
+                </button>
+                <button type="button" class="btn btn-primary px-4 py-2" id="cq_publish_btn" style="border-radius: 6px; font-weight: 500; background-color: #50cd89; border-color: #50cd89; color: white;">
+                    <i class="fas fa-paper-plane me-2"></i> প্রকাশ করুন
+                </button>
+                <button type="button" class="btn btn-outline-primary px-4 py-2" id="cq_submitting_btn" style="display: none; border-radius: 6px; color: #50cd89; border-color: #50cd89;" disabled>
+                    <i class="fas fa-spinner fa-spin me-2"></i> প্রসেসিং...
+                </button>
+            </div>
+        `;
+
         $(document).on('change', '#question_type', function() {
             let val = $(this).val();
             if(val == 'mcq') {
                 $('#add_more').show();
-                $('#data-area').html("");
+                $('#data-area').html(mcq_initial_content);
                 $('#data-area').show();
 
                 $('#add_more_short_or_long').hide();
                 $('#short-long-area').html("");
                 $('#short-long-area').hide();
-            } else if(val == 'short_answer' || val == 'long_answer' || val == 'cq') {
+
+                // Show standard containers
+                $('#question_mark_container').show();
+                $('#status_container').show();
+                $('#passage_container').show();
+                $('#default_submit_card').show();
+
+                // Re-initialize select2 if needed
+                if (typeof _componentSelect === 'function') {
+                    _componentSelect();
+                }
+
+                if ($('#is_math').val() == 1) {
+                    editor('name');
+                    editor('option_one');
+                    editor('option_two');
+                    editor('option_three');
+                    editor('option_four');
+                    editor('option_five');
+                }
+            } else if(val == 'short_answer' || val == 'long_answer') {
                 $('#add_more').hide();
                 $('#data-area').html("");
                 $('#data-area').hide();
@@ -1108,6 +1273,39 @@
                 $('#add_more_short_or_long').show();
                 $('#short-long-area').html(short_long_content);
                 $('#short-long-area').show();
+
+                // Show standard containers
+                $('#question_mark_container').show();
+                $('#status_container').show();
+                $('#passage_container').show();
+                $('#default_submit_card').show();
+
+                if ($('#is_math').val() == 1) {
+                    editor('short_question');
+                    editor('correct_answer');
+                }
+            } else if(val == 'cq') {
+                $('#add_more').hide();
+                $('#data-area').html("");
+                $('#data-area').hide();
+
+                $('#add_more_short_or_long').hide();
+                $('#short-long-area').html(cq_content);
+                $('#short-long-area').show();
+
+                // Hide standard containers & default submit card
+                $('#question_mark_container').hide();
+                $('#status_container').hide();
+                $('#passage_container').hide();
+                $('#default_submit_card').hide();
+
+                // Clear selected passage value
+                $('#passage_id').val(null).trigger('change');
+
+                if ($('#is_math').val() == 1) {
+                    let cqEditors = ['stimulus', 'cq_q_a', 'cq_q_b', 'cq_q_c', 'cq_q_d', 'cq_ans_a', 'cq_ans_b', 'cq_ans_c', 'cq_ans_d'];
+                    cqEditors.forEach(id => editor(id));
+                }
             } else {
                 $('#add_more').hide();
                 $('#data-area').html("");
@@ -1426,6 +1624,19 @@
                         toastr.error('অধ্যায় তৈরি করতে কোনো সমস্যা হয়েছে।');
                     }
                 });
+            });
+
+            // Creative Question Save Draft & Publish click handlers
+            $(document).on('click', '#cq_draft_btn', function(e) {
+                e.preventDefault();
+                $('#status').val('0').trigger('change');
+                $('.content_form').submit();
+            });
+
+            $(document).on('click', '#cq_publish_btn', function(e) {
+                e.preventDefault();
+                $('#status').val('1').trigger('change');
+                $('.content_form').submit();
             });
 
             // Initialize pre-selected options dynamically

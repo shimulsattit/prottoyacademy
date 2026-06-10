@@ -59,16 +59,46 @@ class QuestionRepository implements QuestionRepositoryInterface
 
         // dd($request->all());
 
-        DB::transaction(function () use ($request) {
+        $passageId = $request->passage_id;
+        if ($request->question_type === 'cq' && $request->has('stimulus')) {
+            $passageText = $request->stimulus;
+            if ($request->hasFile('stimulus_image')) {
+                $file = $request->file('stimulus_image');
+                $filename = time() . '_' . uniqid() . '.' . $file->getClientOriginalExtension();
+                
+                // Ensure directory exists
+                if (!file_exists(public_path('uploads/passages'))) {
+                    mkdir(public_path('uploads/passages'), 0777, true);
+                }
+                
+                $file->move(public_path('uploads/passages'), $filename);
+                $imageUrl = asset('uploads/passages/' . $filename);
+                $passageText .= '<br><img src="' . $imageUrl . '" class="img-fluid" style="max-width: 100%; height: auto;">';
+            }
+            
+            $passage = new \App\Models\Passage();
+            $passage->admin_id = auth()->guard('admin')->user()->id;
+            $passage->uuid = (string) \Illuminate\Support\Str::uuid();
+            $passage->name = \Illuminate\Support\Str::limit(strip_tags($request->stimulus), 50);
+            $passage->passage = $passageText;
+            $passage->status = 1;
+            $passage->save();
+            
+            $passageId = $passage->id;
+        }
+
+        DB::transaction(function () use ($request, $passageId) {
             $questions = $request->questions;
             if($questions && is_array($questions) && count($questions) > 0) {
                 foreach($questions as $questionKey => $question) {
                     if($request->is_math == 1) {
                         $slug = date('Y-m-d-h-i-s-'). rand(1000000, 9999999);
                     } else {
-                        $slug = Str::slug($question['question']) ?? date('d-m-Y-h-i-s');
+                        $qText = $question['question'] ?? '';
+                        $slug = \Illuminate\Support\Str::slug($qText) ?: date('d-m-Y-h-i-s');
+                        $slug = substr($slug, 0, 150);
                         if (Question::withTrashed()->where('slug', $slug)->exists()) {
-                            $slug = $slug . '-'. Str::random(5). '-' . date('d-m-Y-h-i-s');
+                            $slug = $slug . '-'. \Illuminate\Support\Str::random(5). '-' . date('d-m-Y-h-i-s');
                         }
                     }
 
@@ -78,24 +108,24 @@ class QuestionRepository implements QuestionRepositoryInterface
                     $model->job_category_id = isset($question['job_category_id']) ? $question['job_category_id'] : $request->job_category_id;
                     $model->year_id = $request->year_id;
                     $model->exam_id = $request->exam_id;
-                    $model->passage_id = $request->passage_id;
+                    $model->passage_id = $passageId ?? $request->passage_id;
                     $model->uuid = (string) Str::uuid();
                     $model->question_type = $request->question_type;
                     $model->question = $question['question'];
                     $model->correct_answer = $question['correct_answer'];
                     $model->hard_level = $request->hard_level ?? 'easy';
-                    $model->question_mark = $request->question_mark ?? 1;
+                    $model->question_mark = $question['question_mark'] ?? $request->question_mark ?? 1;
                     $model->slug = $slug;
                     $model->content = $question['description'] ?? null;
-                    $model->site_title = $question['site_title'] ?? $question['question'] . ' - '. get_settings('system_name') ;
-                    $model->meta_title = $question['meta_title'] ?? $question['question'] . ' - '. get_settings('system_name') ;
-                    $model->meta_keywords = $question['meta_keywords'] ?? null;
-                    $model->meta_description = $question['meta_description'] ?? $question['question'] . ' - '. get_settings('system_name');
+                    $model->site_title = $question['site_title'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 60) . ' - '. get_settings('system_name') ;
+                    $model->meta_title = $question['meta_title'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 60) . ' - '. get_settings('system_name') ;
+                    $model->meta_keywords = $request->meta_keywords ?? $question['meta_keywords'] ?? null;
+                    $model->meta_description = $question['meta_description'] ?? \Illuminate\Support\Str::limit(strip_tags($question['question']), 150) . ' - '. get_settings('system_name');
                     $model->meta_article_tag = $question['meta_article_tag'] ?? null;
                     $model->status = $request->status;
                     $model->save();
 
-                    if($question['description'] && $model) {
+                    if(isset($question['description']) && $question['description'] && $model) {
                         $log = new \App\Models\QuestionDescriptionLog();
                         $log->type = 'question';
                         $log->question_id = $model->id;
