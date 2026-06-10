@@ -116,6 +116,7 @@ Route::get('/clear-cache', function() {
 
 Route::get('academy/filter', [WebsiteController::class, 'academyFilter'])->name('academy.filter');
 Route::post('academy/question/{id}/view', [WebsiteController::class, 'academyIncrementView'])->name('academy.question.view');
+Route::get('current-affairs/filter', [WebsiteController::class, 'currentAffairsFilter'])->name('current-affairs.filter');
 
 Route::any('{slug}', [WebsiteController::class, 'fetcher'])->name('slug.handle')->where('slug', '^(?!portal(?:$|/)).*$');
 
