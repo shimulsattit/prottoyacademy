@@ -340,22 +340,29 @@
                         const hasPassage = g.passage_id !== null && g.passage_text !== null && g.passage_text.trim() !== "";
 
                         if (hasPassage) {
+                            const passageStatus = matchingQuestions[0].status;
                             contentHtml += `
                                 <div class="passage-group my-4 p-3">
-                                    <div class="passage-header px-3 py-2 mb-3 rounded">
-                                        <h6 class="mb-1"><i class="fas fa-book-open"></i> ${g.passage_name}</h6>
-                                        <div class="text passage-text">${g.passage_text}</div>
+                                    <div class="passage-header px-3 py-2 mb-3 rounded d-flex justify-content-between align-items-center">
+                                        <div>
+                                            <h6 class="mb-1"><strong>${++counter}.</strong> <i class="fas fa-book-open"></i> ${g.passage_name}</h6>
+                                            <div class="text passage-text">${g.passage_text}</div>
+                                        </div>
+                                        <div>
+                                            <span id="passage_status_badge_${g.passage_id}" class="badge ${passageStatus == 1 ? 'badge-success bg-success' : 'badge-danger bg-danger'}" style="font-size: 11px; padding: 5px 10px;">
+                                                ${passageStatus == 1 ? 'পাবলিশ' : 'আনপাবলিশ'}
+                                            </span>
+                                        </div>
                                     </div>
                             `;
                         }
 
-                        matchingQuestions.forEach((q) => {
+                        matchingQuestions.forEach((q, qIndex) => {
                             const correctAnswer = parseInt(q.correct_answer || '0');
                             let prefix = '';
-                            if (q.type === 'cq') {
-                                const mark = parseInt(q.question_mark || '1');
-                                const cqLetters = {1: 'ক', 2: 'খ', 3: 'গ', 4: 'ঘ'};
-                                prefix = (cqLetters[mark] || 'ক') + '.';
+                            if (hasPassage) {
+                                const cqLetters = {0: 'ক', 1: 'খ', 2: 'গ', 3: 'ঘ'};
+                                prefix = (cqLetters[qIndex] || (qIndex + 1)) + '.';
                             } else {
                                 prefix = (++counter) + '.';
                             }
@@ -367,9 +374,11 @@
                                         <span class="question-html" data-html='${q.question.replace(/'/g, "&apos;")}'></span>
 
                                         <div class="float-end mt-5">
-                                            <span id="status_badge_${q.id}" class="badge ${q.status == 1 ? 'badge-success bg-success' : 'badge-danger bg-danger'} me-2 align-middle" style="font-size: 11px; padding: 5px 10px;">
-                                                ${q.status == 1 ? 'পাবলিশ' : 'আনপাবলিশ'}
-                                            </span>
+                                            ${!hasPassage ? `
+                                                <span id="status_badge_${q.id}" class="badge ${q.status == 1 ? 'badge-success bg-success' : 'badge-danger bg-danger'} me-2 align-middle" style="font-size: 11px; padding: 5px 10px;">
+                                                    ${q.status == 1 ? 'পাবলিশ' : 'আনপাবলিশ'}
+                                                </span>
+                                            ` : ''}
                                             ${permissions.canUpdate ? `
                                                 <button id="content_management" data-url="/portal/question/${q.id}/short-edit" class="btn btn-sm btn-primary btn-icon">
                                                     <i class="fas fa-edit"></i>
@@ -626,6 +635,18 @@
                         $statusBadge.removeClass('badge-danger bg-danger').addClass('badge-success bg-success').text('পাবলিশ');
                     } else {
                         $statusBadge.removeClass('badge-success bg-success').addClass('badge-danger bg-danger').text('আনপাবলিশ');
+                    }
+                }
+
+                // Update passage status badge
+                if (data.passage_id) {
+                    const $passageBadge = $('#passage_status_badge_' + data.passage_id);
+                    if ($passageBadge.length && data.question_status !== undefined) {
+                        if (data.question_status == 1) {
+                            $passageBadge.removeClass('badge-danger bg-danger').addClass('badge-success bg-success').text('পাবলিশ');
+                        } else {
+                            $passageBadge.removeClass('badge-success bg-success').addClass('badge-danger bg-danger').text('আনপাবলিশ');
+                        }
                     }
                 }
 
