@@ -666,6 +666,14 @@
             }
     }
 
+    /* CQ Accordion Base styling */
+    .cq-accordion-card {
+        background: rgba(255, 255, 255, 0.03);
+        border: 1px solid rgba(255, 255, 255, 0.07);
+        border-radius: 18px;
+        padding: 24px 28px;
+    }
+
     /* RESPONSIVE DESIGN */
     @media (max-width: 992px) {
         .section-premium {
@@ -731,6 +739,38 @@
         }
         .q-header-academy {
             gap: 12px;
+        }
+        
+        /* CQ Mobile Responsive Enhancements */
+        .cq-accordion-card {
+            padding: 16px 16px !important;
+            border-radius: 14px !important;
+        }
+        .cq-sub-question-header {
+            flex-direction: column !important;
+            align-items: stretch !important;
+            gap: 12px !important;
+        }
+        .cq-sub-question-header .cq-btn-answer {
+            align-self: flex-end !important;
+            margin-top: 4px;
+        }
+        .cq-sub-question-text {
+            font-size: 14px !important;
+        }
+        .cq-stimulus-box {
+            padding: 12px 14px !important;
+            font-size: 14px !important;
+            line-height: 1.6 !important;
+        }
+        .cq-serial-badge {
+            width: 28px !important;
+            height: 28px !important;
+            font-size: 13px !important;
+            margin-right: 8px !important;
+        }
+        .cq-accordion-header .fs-5 {
+            font-size: 16px !important;
         }
     }
 
@@ -1196,7 +1236,7 @@
                         const markBn = formatBanglaNumber(sub.question_mark || (sIdx + 1));
                         return `
                             <div class="cq-sub-question-item mb-3" style="border-bottom: 1px dashed rgba(255, 255, 255, 0.05); padding-bottom: 16px;">
-                                <div class="d-flex align-items-start justify-content-between gap-3">
+                                <div class="cq-sub-question-header d-flex align-items-start justify-content-between gap-3">
                                     <div class="cq-sub-question-text" style="font-size: 15px; color: #fff; line-height: 1.6;">
                                         <span class="fw-bold text-accent-gold" style="color: var(--accent-gold); margin-right: 6px;">${prefix}</span> ${sub.question} <span style="background: rgba(255,255,255,0.06); padding: 1px 6px; border-radius: 4px; font-size: 11px; margin-left: 6px; color: rgba(255,255,255,0.5);">নম্বর: ${markBn}</span>
                                     </div>
@@ -1213,7 +1253,6 @@
 
                 const card = document.createElement('div');
                 card.className = 'question-card-academy cq-accordion-card mb-4';
-                card.style.cssText = 'background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 18px; padding: 24px 28px;';
                 card.innerHTML = `
                     <div class="cq-accordion-header d-flex justify-content-between align-items-center" onclick="toggleCqAccordion(this)" style="cursor: pointer; user-select: none;">
                         <div class="d-flex align-items-center">
