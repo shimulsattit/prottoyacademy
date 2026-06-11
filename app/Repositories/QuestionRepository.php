@@ -286,6 +286,10 @@ class QuestionRepository implements QuestionRepositoryInterface
         $model->status = $request->status;
         $model->save();
 
+        if ($model->question_type === 'cq' && $model->passage_id) {
+            Question::where('passage_id', $model->passage_id)->update(['status' => $request->status]);
+        }
+
         if($request->description != '' && $model) {
             $log = new \App\Models\QuestionDescriptionLog();
             $log->type = 'question';
