@@ -151,24 +151,45 @@ class QuestionService {
             unset($row);
         }
 
-        // Dynamically parse and resolve Job Category column for each row
+        // Dynamically parse and resolve Job Category and Sub Category columns for each row
         foreach ($rows as $key => &$row) {
             if ($key === 0 || empty($row[0])) continue;
 
+            $catId = is_array($request->category_id) ? $request->category_id[count($request->category_id) - 1] : $request->category_id;
+
             if ($request->question_type == 'mcq') {
-                $jobCategoryName = isset($row[7]) ? trim($row[7]) : '';
-                $jobCategoryIndex = 8;
+                if ($isCurrentAffairs) {
+                    $jobCategoryName = isset($row[7]) ? trim($row[7]) : '';
+                    $jobCategoryIndex = 8;
+                    $subCategoryName = '';
+                    $subCategoryIndex = null;
+                } else {
+                    $jobCategoryName = isset($row[9]) ? trim($row[9]) : '';
+                    $subCategoryName = isset($row[10]) ? trim($row[10]) : '';
+                    $jobCategoryIndex = 11; // We store resolved job_category_id at index 11
+                    $subCategoryIndex = 12; // We store resolved sub_category_id at index 12
+                }
             } elseif ($request->question_type == 'cq') {
                 $jobCategoryName = isset($row[9]) ? trim($row[9]) : '';
-                $jobCategoryIndex = 10;
+                $subCategoryName = isset($row[10]) ? trim($row[10]) : '';
+                $jobCategoryIndex = 11; // We store resolved job_category_id at index 11
+                $subCategoryIndex = 12; // We store resolved sub_category_id at index 12
             } else {
-                $jobCategoryName = isset($row[2]) ? trim($row[2]) : '';
-                $jobCategoryIndex = 3;
+                if ($isCurrentAffairs) {
+                    $jobCategoryName = isset($row[2]) ? trim($row[2]) : '';
+                    $jobCategoryIndex = 3;
+                    $subCategoryName = '';
+                    $subCategoryIndex = null;
+                } else {
+                    $jobCategoryName = isset($row[4]) ? trim($row[4]) : '';
+                    $subCategoryName = isset($row[5]) ? trim($row[5]) : '';
+                    $jobCategoryIndex = 6;
+                    $subCategoryIndex = 7;
+                }
             }
+            
             $jobCategoryId = null;
-
             if (!empty($jobCategoryName)) {
-                $catId = is_array($request->category_id) ? $request->category_id[count($request->category_id) - 1] : $request->category_id;
                 $jobCategory = \App\Models\JobCategory::where('category_id', $catId)
                     ->where('name', 'LIKE', '%' . $jobCategoryName . '%')
                     ->first();
@@ -178,14 +199,51 @@ class QuestionService {
                         'category_id' => $catId,
                         'uuid' => (string) \Illuminate\Support\Str::uuid(),
                         'name' => $jobCategoryName,
-                        'slug' => \Illuminate\Support\Str::slug($jobCategoryName),
+                        'slug' => \Illuminate\Support\Str::slug($jobCategoryName) ?: (string) \Illuminate\Support\Str::uuid(),
                         'status' => 1
                     ]);
                 }
                 $jobCategoryId = $jobCategory->id;
             }
-            // Append the resolved ID to the row array at specific index
+
+            $subCategoryId = null;
+            if (!empty($subCategoryName)) {
+                $subCategory = \App\Models\Category::where('parent_id', $catId)
+                    ->where('name', 'LIKE', '%' . $subCategoryName . '%')
+                    ->first();
+                if (!$subCategory) {
+                    // Unicode safe slug generation for Bengali category name
+                    $slug = preg_replace('/\s+/u', '-', trim($subCategoryName));
+                    $slug = preg_replace('/[^\p{L}\p{N}-]/u', '', $slug);
+                    $slug = mb_strtolower($slug, 'UTF-8');
+                    $slug = preg_replace('/-+/', '-', $slug);
+                    $slug = trim($slug, '-');
+                    $slug = $slug ?: date('YmdHis') . '-' . rand(100, 999);
+                    
+                    if (\App\Models\Category::withTrashed()->where('slug', $slug)->exists()) {
+                        $slug = $slug . '-' . rand(1000, 9999);
+                    }
+
+                    $subCategory = \App\Models\Category::create([
+                        'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                        'parent_id' => $catId,
+                        'admin_id' => auth()->guard('admin')->id(),
+                        'name' => $subCategoryName,
+                        'slug' => $slug,
+                        'header' => $subCategoryName,
+                        'content' => $subCategoryName,
+                        'site_title' => $subCategoryName . ' - ' . get_settings('system_name'),
+                        'meta_title' => $subCategoryName . ' - ' . get_settings('system_name'),
+                        'status' => 1
+                    ]);
+                }
+                $subCategoryId = $subCategory->id;
+            }
+
             $row[$jobCategoryIndex] = $jobCategoryId;
+            if ($subCategoryIndex !== null) {
+                $row[$subCategoryIndex] = $subCategoryId;
+            }
         }
         unset($row);
 
@@ -199,11 +257,11 @@ class QuestionService {
         $content = '';
 
         if($request->question_type == 'mcq') {
-            $content = view('portal.question.card', compact('rows', 'isMath'))->render();
+            $content = view('portal.question.card', compact('rows', 'isMath', 'isCurrentAffairs'))->render();
         } elseif($request->question_type == 'cq') {
-            $content = view('portal.question.cq-card', compact('rows', 'isMath'))->render();
+            $content = view('portal.question.cq-card', compact('rows', 'isMath', 'isCurrentAffairs'))->render();
         } else {
-            $content = view('portal.question.short-card', compact('rows', 'isMath'))->render();
+            $content = view('portal.question.short-card', compact('rows', 'isMath', 'isCurrentAffairs'))->render();
         }
 
         // foreach ($rows as $key => $row) {

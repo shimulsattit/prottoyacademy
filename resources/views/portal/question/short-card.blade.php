@@ -30,7 +30,12 @@
                            value="{{ old("questions.$counter.question", $row[0]) }}">
                 @endif
                 <input type="hidden" name="questions[{{ $counter }}][description]" value="">
-                <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[3] ?? '' }}">
+                @if(isset($isCurrentAffairs) && $isCurrentAffairs)
+                    <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[3] ?? '' }}">
+                @else
+                    <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[6] ?? $row[3] ?? '' }}">
+                    <input type="hidden" name="questions[{{ $counter }}][category_id]" value="{{ $row[7] ?? '' }}">
+                @endif
             </div>
 
             <div class="col-md-12 form-group mb-3">

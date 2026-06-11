@@ -15,7 +15,8 @@
         $ans_c = $row[6] ?? '';
         $q_d = $row[7] ?? '';
         $ans_d = $row[8] ?? '';
-        $job_category_id = $row[10] ?? '';
+        $job_category_id = $row[11] ?? '';
+        $sub_category_id = $row[12] ?? '';
     @endphp
 
     <div class="card mt-4" style="border: 1px solid #e4e6ef; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
@@ -26,6 +27,7 @@
         </div>
         <div class="card-body">
             <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $job_category_id }}">
+            <input type="hidden" name="questions[{{ $counter }}][category_id]" value="{{ $sub_category_id }}">
             
             <!-- Stimulus (উদ্দীপক) -->
             <div class="form-group mb-4">

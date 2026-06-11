@@ -748,7 +748,7 @@
         <div class="premium-breadcrumb">
             <a href="{{ route('home') }}">হোম</a>
             <span>/</span>
-            <span class="active">একাডেমিক কোশ্চেন ব্যাংক</span>
+            <span class="active">একাডেমিক প্রশ্ন ব্যাংক</span>
         </div>
 
         <!-- HEADER SUBTITLE -->
@@ -844,7 +844,7 @@
                     <div class="filter-list-academy">
                         @foreach ($stats['types'] as $type)
                             <label class="filter-item-academy">
-                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}" {{ ($type['key'] === 'mcq' || (isset($selectedClassId) && $type['count'] > 0)) ? 'checked' : '' }}>
+                                <input type="checkbox" name="types[]" value="{{ $type['key'] }}" data-name="{{ $type['name'] }}" {{ (isset($selectedClassId) && $type['count'] > 0) ? 'checked' : '' }}>
                                 <span class="filter-label-academy">
                                     <span class="filter-checkbox-academy"><i class="ri-check-line"></i></span>
                                     {{ $type['name'] }}
@@ -1515,7 +1515,7 @@
                 
                 const headerTitle = document.createElement('div');
                 headerTitle.className = 'print-header-title';
-                headerTitle.innerText = 'একাডেমিক কোশ্চেন ব্যাংক';
+                headerTitle.innerText = 'একাডেমিক প্রশ্ন ব্যাংক';
                 
                 const headerMeta = document.createElement('div');
                 headerMeta.className = 'print-header-meta';

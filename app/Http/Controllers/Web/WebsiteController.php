@@ -637,7 +637,18 @@ class WebsiteController extends Controller
         // Start Query
         $query = Question::with(['options', 'category', 'job_category', 'year', 'passage'])
             ->whereIn('category_id', $academyCategoryIds)
-            ->where('status', 1);
+            ->where('status', 1)
+            ->where(function($q) {
+                $q->where('question_type', '!=', 'cq')
+                  ->orWhereNull('passage_id')
+                  ->orWhereIn('id', function($subQuery) {
+                      $subQuery->selectRaw('MIN(id)')
+                               ->from('questions')
+                               ->where('question_type', 'cq')
+                               ->whereNotNull('passage_id')
+                               ->groupBy('passage_id');
+                  });
+            });
             
         // Filter by Chapters (Categories)
         if ($request->has('chapter_ids') && is_array($request->chapter_ids) && !empty($request->chapter_ids)) {
@@ -845,10 +856,10 @@ class WebsiteController extends Controller
             
             $descendantIds = array_unique(array_merge([783], $classIds, $chapterIds));
             
-            $totalQuestions = Question::whereIn('category_id', $descendantIds)->where('status', 1)->count();
             $mcqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'mcq')->count();
-            $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->count();
+            $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
             $shortCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+            $totalQuestions = $mcqCount + $cqCount + $shortCount;
             
             $chaptersCount = $chapters->count();
             $classesCount = $classes->count();
@@ -863,10 +874,10 @@ class WebsiteController extends Controller
             
             $descendantIds = array_unique(array_merge($classIds, $chapterIds));
             
-            $totalQuestions = Question::whereIn('category_id', $descendantIds)->where('status', 1)->count();
             $mcqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'mcq')->count();
-            $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->count();
+            $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
             $shortCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+            $totalQuestions = $mcqCount + $cqCount + $shortCount;
             
             $chaptersCount = $chapters->count();
             $classesCount = 1;
@@ -879,7 +890,12 @@ class WebsiteController extends Controller
             $classSubIds = [$c->id];
             $subs = Category::where('parent_id', $c->id)->pluck('id')->toArray();
             $classSubIds = array_merge($classSubIds, $subs);
-            $count = Question::whereIn('category_id', $classSubIds)->where('status', 1)->count();
+            
+            $mcqCount = Question::whereIn('category_id', $classSubIds)->where('status', 1)->where('question_type', 'mcq')->count();
+            $cqCount = Question::whereIn('category_id', $classSubIds)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::whereIn('category_id', $classSubIds)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
+            $shortCount = Question::whereIn('category_id', $classSubIds)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+            $count = $mcqCount + $cqCount + $shortCount;
+            
             return [
                 'id' => $c->id,
                 'name' => $c->name,
@@ -892,7 +908,10 @@ class WebsiteController extends Controller
         
         // Subjects sidebar with nested chapters
         $subjects = JobCategory::whereIn('category_id', $subjectCategoryIds)->where('status', 1)->get()->map(function($jc) {
-            $count = Question::where('job_category_id', $jc->id)->where('status', 1)->count();
+            $mcqCount = Question::where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'mcq')->count();
+            $cqCount = Question::where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
+            $shortCount = Question::where('job_category_id', $jc->id)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+            $count = $mcqCount + $cqCount + $shortCount;
             
             // Find chapters for this subject
             $chapterIds = Question::where('job_category_id', $jc->id)
@@ -908,10 +927,11 @@ class WebsiteController extends Controller
                 ->where('status', 1)
                 ->get()
                 ->map(function($chap) use ($jc) {
-                    $chapCount = Question::where('category_id', $chap->id)
-                        ->where('job_category_id', $jc->id)
-                        ->where('status', 1)
-                        ->count();
+                    $chapMcqCount = Question::where('category_id', $chap->id)->where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'mcq')->count();
+                    $chapCqCount = Question::where('category_id', $chap->id)->where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::where('category_id', $chap->id)->where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
+                    $chapShortCount = Question::where('category_id', $chap->id)->where('job_category_id', $jc->id)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+                    $chapCount = $chapMcqCount + $chapCqCount + $chapShortCount;
+                    
                     return [
                         'id' => $chap->id,
                         'name' => $chap->name,
@@ -993,10 +1013,10 @@ class WebsiteController extends Controller
         
         $descendantIds = array_unique(array_merge([312], $mainCatIds, $subCatIds));
         
-        $totalQuestions = Question::whereIn('category_id', $descendantIds)->where('status', 1)->count();
         $mcqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'mcq')->count();
-        $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->count();
+        $cqCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::whereIn('category_id', $descendantIds)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
         $shortCount = Question::whereIn('category_id', $descendantIds)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+        $totalQuestions = $mcqCount + $cqCount + $shortCount;
         
         $subCatsCount = $subCats->count();
         $mainCatsCount = $mainCats->count();
@@ -1006,7 +1026,10 @@ class WebsiteController extends Controller
             $catSubIds = [$c->id];
             $subs = Category::where('parent_id', $c->id)->pluck('id')->toArray();
             $catSubIds = array_merge($catSubIds, $subs);
-            $count = Question::whereIn('category_id', $catSubIds)->where('status', 1)->count();
+            $mcqCount = Question::whereIn('category_id', $catSubIds)->where('status', 1)->where('question_type', 'mcq')->count();
+            $cqCount = Question::whereIn('category_id', $catSubIds)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::whereIn('category_id', $catSubIds)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
+            $shortCount = Question::whereIn('category_id', $catSubIds)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+            $count = $mcqCount + $cqCount + $shortCount;
             return [
                 'id' => $c->id,
                 'name' => $c->name,
@@ -1019,7 +1042,10 @@ class WebsiteController extends Controller
         
         // Subjects list for sidebar (Job Categories)
         $subjects = JobCategory::whereIn('category_id', array_merge([312], $mainCatIds, $subCatIds))->where('status', 1)->get()->map(function($jc) use ($mainCatIds) {
-            $count = Question::where('job_category_id', $jc->id)->where('status', 1)->count();
+            $mcqCount = Question::where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'mcq')->count();
+            $cqCount = Question::where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
+            $shortCount = Question::where('job_category_id', $jc->id)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+            $count = $mcqCount + $cqCount + $shortCount;
             
             // Find which main categories have questions in this job category
             $questionCatIds = Question::where('job_category_id', $jc->id)
@@ -1071,10 +1097,10 @@ class WebsiteController extends Controller
                 ->where('status', 1)
                 ->get()
                 ->map(function($sub) use ($jc) {
-                    $subCount = Question::where('category_id', $sub->id)
-                        ->where('job_category_id', $jc->id)
-                        ->where('status', 1)
-                        ->count();
+                    $subMcqCount = Question::where('category_id', $sub->id)->where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'mcq')->count();
+                    $subCqCount = Question::where('category_id', $sub->id)->where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->distinct('passage_id')->count('passage_id') + Question::where('category_id', $sub->id)->where('job_category_id', $jc->id)->where('status', 1)->where('question_type', 'cq')->whereNull('passage_id')->count();
+                    $subShortCount = Question::where('category_id', $sub->id)->where('job_category_id', $jc->id)->where('status', 1)->whereIn('question_type', ['short', 'short_answer'])->count();
+                    $subCount = $subMcqCount + $subCqCount + $subShortCount;
                     return [
                         'id' => $sub->id,
                         'name' => $sub->name,
@@ -1147,7 +1173,18 @@ class WebsiteController extends Controller
         // Start Query
         $query = Question::with(['options', 'category', 'job_category', 'year'])
             ->whereIn('category_id', $caCategoryIds)
-            ->where('status', 1);
+            ->where('status', 1)
+            ->where(function($q) {
+                $q->where('question_type', '!=', 'cq')
+                  ->orWhereNull('passage_id')
+                  ->orWhereIn('id', function($subQuery) {
+                      $subQuery->selectRaw('MIN(id)')
+                               ->from('questions')
+                               ->where('question_type', 'cq')
+                               ->whereNotNull('passage_id')
+                               ->groupBy('passage_id');
+                  });
+            });
             
         // Filter by Chapters (Categories)
         if ($request->has('chapter_ids') && is_array($request->chapter_ids) && !empty($request->chapter_ids)) {
