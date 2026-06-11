@@ -351,14 +351,25 @@
 
                         matchingQuestions.forEach((q) => {
                             const correctAnswer = parseInt(q.correct_answer || '0');
+                            let prefix = '';
+                            if (q.type === 'cq') {
+                                const mark = parseInt(q.question_mark || '1');
+                                const cqLetters = {1: 'ক', 2: 'খ', 3: 'গ', 4: 'ঘ'};
+                                prefix = (cqLetters[mark] || 'ক') + '.';
+                            } else {
+                                prefix = (++counter) + '.';
+                            }
 
                             contentHtml += `
                                 <div id="question_${q.id}" class="mt-3 pb-2 question-item ${hasPassage ? 'question-in-passage' : ''}">
                                     <div class="clearfix">
-                                        <strong class="me-2">${++counter}.</strong>
+                                        <strong class="me-2">${prefix}</strong>
                                         <span class="question-html" data-html='${q.question.replace(/'/g, "&apos;")}'></span>
 
                                         <div class="float-end mt-5">
+                                            <span id="status_badge_${q.id}" class="badge ${q.status == 1 ? 'badge-success bg-success' : 'badge-danger bg-danger'} me-2 align-middle" style="font-size: 11px; padding: 5px 10px;">
+                                                ${q.status == 1 ? 'পাবলিশ' : 'আনপাবলিশ'}
+                                            </span>
                                             ${permissions.canUpdate ? `
                                                 <button id="content_management" data-url="/portal/question/${q.id}/short-edit" class="btn btn-sm btn-primary btn-icon">
                                                     <i class="fas fa-edit"></i>
@@ -606,7 +617,17 @@
                 const $qBlock = $('#question_' + questionId);
 
                 // Update question text
-                $qBlock.find('strong').html(`Q. ${data.question}`);
+                $qBlock.find('span.question-html').html(data.question);
+
+                // Update status badge
+                const $statusBadge = $('#status_badge_' + questionId);
+                if ($statusBadge.length && data.question_status !== undefined) {
+                    if (data.question_status == 1) {
+                        $statusBadge.removeClass('badge-danger bg-danger').addClass('badge-success bg-success').text('পাবলিশ');
+                    } else {
+                        $statusBadge.removeClass('badge-success bg-success').addClass('badge-danger bg-danger').text('আনপাবলিশ');
+                    }
+                }
 
                 // Update options
                 let options = [

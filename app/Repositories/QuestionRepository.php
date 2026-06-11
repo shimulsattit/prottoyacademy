@@ -317,6 +317,7 @@ class QuestionRepository implements QuestionRepositoryInterface
                 'question' => $model->question,
                 'correct_answer' => $model->correct_answer,
                 'content' => $model->content,
+                'question_status' => $model->status,
                 'option_one' => isset($option) ? $option->option_one : '',
                 'option_two' => isset($option) ? $option->option_two : '',
                 'option_three' => isset($option) ? $option->option_three : '',

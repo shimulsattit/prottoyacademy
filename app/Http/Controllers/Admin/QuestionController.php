@@ -334,6 +334,8 @@ class QuestionController extends Controller
                     'id' => $q->id,
                     'uuid' => $q->uuid,
                     'type' => $q->question_type,
+                    'status' => $q->status,
+                    'question_mark' => $q->question_mark,
                     'category_id' => $q->category_id,
                     'passage_id' => $q->passage_id,
                     'question' => $this->replacePTags($q->question),
@@ -374,7 +376,7 @@ class QuestionController extends Controller
                     'passage_id' => $passageId,
                     'passage_name' => $questionsInPassage->first()['passage_name'] ?? '',
                     'passage_text' => $questionsInPassage->first()['passage_text'] ?? '',
-                    'questions' => array_values($questionsInPassage->map(function ($q) {
+                    'questions' => array_values($questionsInPassage->sortBy('question_mark')->map(function ($q) {
                         return collect($q)->except(['passage_name', 'passage_text']);
                     })->toArray()),
                 ];
