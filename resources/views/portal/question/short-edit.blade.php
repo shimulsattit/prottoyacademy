@@ -14,7 +14,6 @@
     <input type="hidden" name="meta_description" value="{{ $question->meta_description }}">
     <input type="hidden" name="meta_keywords" value="{{ $question->meta_keywords }}">
     <input type="hidden" name="meta_article_tag" value="{{ $question->meta_article_tag }}">
-    <input type="hidden" name="status" value="{{ $question->status }}">
     <div class="modal-header">
         <h5 class="modal-title">Update Question Information</h5>
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -67,6 +66,14 @@
                     <textarea name="correct_answer" id="correct_answer" cols="30" rows="3" class="form-control">{{ $question->correct_answer }}</textarea>
                 </div>
             @endif
+
+            <div class="col-md-12 form-group mb-3">
+                <label for="status">Status <span class="text-danger">*</span></label>
+                <select name="status" id="status" class="form-control" required>
+                    <option {{ $question->status == 1 ? 'selected' : '' }} value="1">Publish</option>
+                    <option {{ $question->status == 0 ? 'selected' : '' }} value="0">Unpublish (Draft)</option>
+                </select>
+            </div>
 
             <div class="col-md-12 form-group mb-3">
                 <label for="content">Description</label>
