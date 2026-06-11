@@ -90,6 +90,8 @@ class PassageRepository implements PassageRepositoryInterface
         $model->status = $request->status;
         $model->save();
 
+        \App\Models\Question::where('passage_id', $model->id)->update(['status' => $request->status]);
+
         return response()->json([
             'status' => true,
             'message' => 'Passage Updated Successfully',

@@ -356,6 +356,7 @@ class QuestionController extends Controller
                         : $q->category?->breadcrumb()->first()->name,
                     'passage_name' => $q->passage?->name,
                     'passage_text' => $q->passage?->passage,
+                    'passage_uuid' => $q->passage?->uuid,
                 ];
             });
 
@@ -376,6 +377,7 @@ class QuestionController extends Controller
                     'passage_id' => $passageId,
                     'passage_name' => $questionsInPassage->first()['passage_name'] ?? '',
                     'passage_text' => $questionsInPassage->first()['passage_text'] ?? '',
+                    'passage_uuid' => $questionsInPassage->first()['passage_uuid'] ?? '',
                     'questions' => array_values($questionsInPassage->sortBy('question_mark')->map(function ($q) {
                         return collect($q)->except(['passage_name', 'passage_text']);
                     })->toArray()),

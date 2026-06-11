@@ -348,10 +348,15 @@
                                             <h6 class="mb-1"><strong>${++counter}.</strong> <i class="fas fa-book-open"></i> ${g.passage_name}</h6>
                                             <div class="text passage-text">${g.passage_text}</div>
                                         </div>
-                                        <div>
+                                        <div class="d-flex align-items-center gap-2">
                                             <span id="passage_status_badge_${g.passage_id}" class="badge ${passageStatus == 1 ? 'badge-success bg-success' : 'badge-danger bg-danger'}" style="font-size: 11px; padding: 5px 10px;">
                                                 ${passageStatus == 1 ? 'পাবলিশ' : 'আনপাবলিশ'}
                                             </span>
+                                            ${permissions.canUpdate && g.passage_uuid ? `
+                                                <a href="/portal/passage/${g.passage_uuid}/edit" class="btn btn-sm btn-primary btn-icon" title="Edit Passage">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                            ` : ''}
                                         </div>
                                     </div>
                             `;
