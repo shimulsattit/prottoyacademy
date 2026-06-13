@@ -124,13 +124,15 @@ class QuestionService {
         $sheet = $spreadsheet->getActiveSheet();
         $rows = $sheet->toArray();
 
-        // Check if the target category is under Current Affairs
+        // Check if the target category is under Current Affairs or Academy
         $catId = is_array($request->category_id) ? $request->category_id[count($request->category_id) - 1] : $request->category_id;
         $category = \App\Models\Category::find($catId);
         $isCurrentAffairs = false;
+        $isAcademy = false;
         if ($category) {
             $breadcrumbs = $category->breadcrumb();
             $isCurrentAffairs = $breadcrumbs->contains('slug', 'current-affairs');
+            $isAcademy = $breadcrumbs->contains('slug', 'academy');
         }
 
         // Normalize Current Affairs short questions:
@@ -156,6 +158,107 @@ class QuestionService {
             if ($key === 0 || empty($row[0])) continue;
 
             $catId = is_array($request->category_id) ? $request->category_id[count($request->category_id) - 1] : $request->category_id;
+
+            if ($isAcademy) {
+                $chapterName = isset($row[0]) ? trim($row[0]) : '';
+
+                // Resolve Chapter category under the selected Class Category ($catId)
+                $chapterId = null;
+                if (!empty($chapterName) && $catId) {
+                    $chapterCategory = \App\Models\Category::where('parent_id', $catId)
+                        ->where('name', 'LIKE', '%' . $chapterName . '%')
+                        ->first();
+                    if (!$chapterCategory) {
+                        $slug = preg_replace('/\s+/u', '-', trim($chapterName));
+                        $slug = preg_replace('/[^\p{L}\p{N}-]/u', '', $slug);
+                        $slug = mb_strtolower($slug, 'UTF-8');
+                        $slug = preg_replace('/-+/', '-', $slug);
+                        $slug = trim($slug, '-');
+                        $slug = $slug ?: date('YmdHis') . '-' . rand(100, 999);
+                        
+                        if (\App\Models\Category::withTrashed()->where('slug', $slug)->exists()) {
+                            $slug = $slug . '-' . rand(1000, 9999);
+                        }
+
+                        $chapterCategory = \App\Models\Category::create([
+                            'uuid' => (string) \Illuminate\Support\Str::uuid(),
+                            'parent_id' => $catId,
+                            'admin_id' => auth()->guard('admin')->id(),
+                            'name' => $chapterName,
+                            'slug' => $slug,
+                            'header' => $chapterName,
+                            'content' => $chapterName,
+                            'site_title' => $chapterName . ' - ' . get_settings('system_name'),
+                            'meta_title' => $chapterName . ' - ' . get_settings('system_name'),
+                            'status' => 1
+                        ]);
+                    }
+                    $chapterId = $chapterCategory->id;
+                }
+
+                $subjectJobCategoryId = $request->job_category_id;
+
+                // Shift row elements based on question type
+                if ($request->question_type == 'mcq') {
+                    $question = isset($row[1]) ? trim($row[1]) : '';
+                    $opt1 = isset($row[2]) ? trim($row[2]) : '';
+                    $opt2 = isset($row[3]) ? trim($row[3]) : '';
+                    $opt3 = isset($row[4]) ? trim($row[4]) : '';
+                    $opt4 = isset($row[5]) ? trim($row[5]) : '';
+                    $opt5 = isset($row[6]) ? trim($row[6]) : '';
+                    $correctAnswer = isset($row[7]) ? trim($row[7]) : '';
+                    $hardLevel = isset($row[8]) ? trim($row[8]) : '';
+                    $mark = isset($row[9]) ? trim($row[9]) : '';
+
+                    $row[0] = $question;
+                    $row[1] = $opt1;
+                    $row[2] = $opt2;
+                    $row[3] = $opt3;
+                    $row[4] = $opt4;
+                    $row[5] = $opt5;
+                    $row[6] = $correctAnswer;
+                    $row[7] = $hardLevel;
+                    $row[8] = $mark;
+                    $row[11] = $subjectJobCategoryId;
+                    $row[12] = $chapterId;
+                } elseif ($request->question_type == 'cq') {
+                    $stimulus = isset($row[1]) ? trim($row[1]) : '';
+                    $q_a = isset($row[2]) ? trim($row[2]) : '';
+                    $ans_a = isset($row[3]) ? trim($row[3]) : '';
+                    $q_b = isset($row[4]) ? trim($row[4]) : '';
+                    $ans_b = isset($row[5]) ? trim($row[5]) : '';
+                    $q_c = isset($row[6]) ? trim($row[6]) : '';
+                    $ans_c = isset($row[7]) ? trim($row[7]) : '';
+                    $q_d = isset($row[8]) ? trim($row[8]) : '';
+                    $ans_d = isset($row[9]) ? trim($row[9]) : '';
+
+                    $row[0] = $stimulus;
+                    $row[1] = $q_a;
+                    $row[2] = $ans_a;
+                    $row[3] = $q_b;
+                    $row[4] = $ans_b;
+                    $row[5] = $q_c;
+                    $row[6] = $ans_c;
+                    $row[7] = $q_d;
+                    $row[8] = $ans_d;
+                    $row[11] = $subjectJobCategoryId;
+                    $row[12] = $chapterId;
+                } else {
+                    $question = isset($row[1]) ? trim($row[1]) : '';
+                    $correctAnswer = isset($row[2]) ? trim($row[2]) : '';
+                    $hardLevel = isset($row[3]) ? trim($row[3]) : '';
+                    $mark = isset($row[4]) ? trim($row[4]) : '';
+
+                    $row[0] = $question;
+                    $row[1] = $correctAnswer;
+                    $row[2] = $hardLevel;
+                    $row[3] = $mark;
+                    $row[6] = $subjectJobCategoryId;
+                    $row[7] = $chapterId;
+                }
+                
+                continue;
+            }
 
             if ($request->question_type == 'mcq') {
                 if ($isCurrentAffairs) {
@@ -257,11 +360,11 @@ class QuestionService {
         $content = '';
 
         if($request->question_type == 'mcq') {
-            $content = view('portal.question.card', compact('rows', 'isMath', 'isCurrentAffairs'))->render();
+            $content = view('portal.question.card', compact('rows', 'isMath', 'isCurrentAffairs', 'isAcademy'))->render();
         } elseif($request->question_type == 'cq') {
-            $content = view('portal.question.cq-card', compact('rows', 'isMath', 'isCurrentAffairs'))->render();
+            $content = view('portal.question.cq-card', compact('rows', 'isMath', 'isCurrentAffairs', 'isAcademy'))->render();
         } else {
-            $content = view('portal.question.short-card', compact('rows', 'isMath', 'isCurrentAffairs'))->render();
+            $content = view('portal.question.short-card', compact('rows', 'isMath', 'isCurrentAffairs', 'isAcademy'))->render();
         }
 
         // foreach ($rows as $key => $row) {

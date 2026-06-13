@@ -13,9 +13,13 @@
         $preSelectedJobCategory = \App\Models\JobCategory::find(request('job_category_id'));
     }
     $isCurrentAffairs = false;
+    $isAcademy = false;
     if ($categoryBreadcrumb->count() > 0) {
         $currentAffairsParent = \App\Models\Category::where('slug', 'current-affairs')->first();
         $isCurrentAffairs = $currentAffairsParent ? $categoryBreadcrumb->contains('id', $currentAffairsParent->id) : false;
+        
+        $academyParent = \App\Models\Category::where('slug', 'academy')->first();
+        $isAcademy = $academyParent ? $categoryBreadcrumb->contains('id', $academyParent->id) : false;
     }
 @endphp
 @push('style')
@@ -48,6 +52,16 @@
                         </a>
                         <a href="{{ asset('current-affairs-short-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
                             <i class="fas fa-file-excel me-1"></i> Current Affairs Short File
+                        </a>
+                    @elseif($isAcademy)
+                        <a href="{{ asset('academy-mcq-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
+                            <i class="fas fa-file-excel me-1"></i> Academy MCQ File
+                        </a>
+                        <a href="{{ asset('academy-cq-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
+                            <i class="fas fa-file-excel me-1"></i> Academy CQ File
+                        </a>
+                        <a href="{{ asset('academy-short-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
+                            <i class="fas fa-file-excel me-1"></i> Academy Short File
                         </a>
                     @else
                         <a href="{{ asset('question-demo.xlsx') }}" download class="btn btn-sm fw-bold btn-primary">
@@ -131,6 +145,27 @@
                                         <label for="job_category_id_display" class="fw-semibold text-gray-700 fs-7 mb-1">Job Category</label>
                                         <input type="text" id="job_category_id_display" class="form-control" value="Auto-imported from Excel sheet" disabled style="background: #f1f3f9;">
                                         <input type="hidden" name="job_category_id" value="">
+                                    </div>
+                                @elseif($isAcademy)
+                                    <div class="col-md-12 mb-3">
+                                        <div class="alert alert-dismissible bg-light-primary border border-primary d-flex flex-column flex-sm-row w-100 p-5 mb-5" style="background-color: rgba(94, 114, 228, 0.08); border-color: rgba(94, 114, 228, 0.3) !important;">
+                                            <span class="svg-icon svg-icon-2hx svg-icon-primary me-4 mb-5 mb-sm-0">
+                                                <i class="fas fa-info-circle fs-2hx text-primary"></i>
+                                            </span>
+                                            <div class="d-flex flex-column pe-0 pe-sm-10">
+                                                <h5 class="mb-1 text-primary fw-bold" style="color: #5e72e4 !important;">Academy Chapter Auto-Mapping</h5>
+                                                <span class="text-gray-800 fs-7">For Academy questions, the Chapter is automatically resolved and mapped from your Excel sheet columns. The Class (Category) and Subject (Job Category) must be manually selected below.</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-4 form-group mb-3">
+                                        <label for="job_category_id">Job Category</label>
+                                        <select name="job_category_id" id="job_category_id" class="form-control" data-parsley-errors-container="#job_category_id_error">
+                                            @if($preSelectedJobCategory)
+                                                <option value="{{ $preSelectedJobCategory->id }}" selected>{{ $preSelectedJobCategory->name }}</option>
+                                            @endif
+                                        </select>
+                                        <span id="job_category_id_error"></span>
                                     </div>
                                 @else
                                     <div class="col-md-4 form-group mb-3">
