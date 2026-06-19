@@ -612,15 +612,7 @@
                             $sidebarCategoryIds = array_merge($sidebarCategoryIds, $subLevel);
 
                             $sidebarExams = App\Models\JobCategory::whereIn('category_id', $sidebarCategoryIds)->where('status', 1)->get();
-                            $sidebarExams = $sidebarExams->sortByDesc(function ($sExam) {
-                                if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
-                                    $parts = explode('-', $matches[1]);
-                                    if (count($parts) === 3) {
-                                        return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
-                                    }
-                                }
-                                return '0000-00-00';
-                            });
+                            $sidebarExams = $sidebarExams->sortByDesc('id');
                         @endphp
                         @foreach ($sidebarExams as $sExam)
                             <a href="{{ route('slug.handle', $sExam->slug) }}" class="widget-link {{ $model->id == $sExam->id ? 'active' : '' }}">
@@ -632,15 +624,7 @@
                     <div class="widget-content">
                         @php
                             $sidebarExams = App\Models\JobCategory::where('category_id', $mainCategory->id)->where('status', 1)->get();
-                            $sidebarExams = $sidebarExams->sortByDesc(function ($sExam) {
-                                if (preg_match('/\((\d{2}-\d{2}-\d{4})\)/', $sExam->name, $matches)) {
-                                    $parts = explode('-', $matches[1]);
-                                    if (count($parts) === 3) {
-                                        return $parts[2] . '-' . $parts[1] . '-' . $parts[0];
-                                    }
-                                }
-                                return '0000-00-00';
-                            })->take(15);
+                            $sidebarExams = $sidebarExams->sortByDesc('id')->take(15);
                         @endphp
                         @foreach ($sidebarExams as $sExam)
                             <a href="{{ route('slug.handle', $sExam->slug) }}" class="widget-link {{ $model->id == $sExam->id ? 'active' : '' }}">
