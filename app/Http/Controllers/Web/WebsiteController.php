@@ -470,8 +470,7 @@ class WebsiteController extends Controller
                     ->pluck('category_id')
                     ->toArray();
 
-                $childCategoryIds = collect($categories)->pluck('id')->toArray();
-                $targetCategoryIds = array_unique(array_merge($childCategoryIds, $validCategoryIds));
+                $targetCategoryIds = $validCategoryIds;
 
                 // Now build category array with name and slug
                 $categories = Category::whereIn('id', $targetCategoryIds)
