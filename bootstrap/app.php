@@ -16,12 +16,20 @@ return Application::configure(basePath: dirname(__DIR__))
                 ->prefix('portal')
                 ->name('portal.')
                 ->group(base_path('routes/portal.php'));
+            Route::middleware(['web', 'isTeacher'])
+                ->prefix('teacher')
+                ->name('teacher.')
+                ->group(base_path('routes/teacher.php'));
         }
     )
     ->withMiddleware(function (Middleware $middleware) {
         $middleware->alias([
-            'isAdmin' => \App\Http\Middleware\AdminAuth::class,
+            'isAdmin'   => \App\Http\Middleware\AdminAuth::class,
             'isStudent' => \App\Http\Middleware\StudentAuth::class,
+            'isTeacher' => \App\Http\Middleware\TeacherAuth::class,
+            'role' => \Spatie\Permission\Middleware\RoleMiddleware::class,
+            'permission' => \Spatie\Permission\Middleware\PermissionMiddleware::class,
+            'role_or_permission' => \Spatie\Permission\Middleware\RoleOrPermissionMiddleware::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

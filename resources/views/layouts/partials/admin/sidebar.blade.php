@@ -49,7 +49,7 @@
         @endif
 
         @if($user->hasPermissionTo('question.view'))
-            <a href="{{ route('portal.question.index') }}" class="nav-item {{ Request::is('portal/question*') && !Request::is('portal/import-question*') && !Request::is('portal/pdf-questions*') ? 'active' : '' }}">
+            <a href="{{ route('portal.question.index') }}" class="nav-item {{ Request::is('portal/question*') && !Request::is('portal/import-question*') && !Request::is('portal/pdf-questions*') && !Request::is('portal/question-tag*') ? 'active' : '' }}">
                 <i class="fas fa-question-circle"></i>
                 <span class="nav-label">প্রশ্নব্যাংক</span>
             </a>
@@ -72,6 +72,13 @@
             <a href="{{ route('portal.passage.index') }}" class="nav-item {{ Request::is('portal/passage*') ? 'active' : '' }}">
                 <i class="fas fa-align-left"></i>
                 <span class="nav-label">প্যাসেজ</span>
+            </a>
+        @endif
+
+        @if($user->hasPermissionTo('question.view'))
+            <a href="{{ route('portal.question-tag.index') }}" class="nav-item {{ Request::is('portal/question-tag*') ? 'active' : '' }}">
+                <i class="fas fa-tags"></i>
+                <span class="nav-label">প্রশ্ন ট্যাগ</span>
             </a>
         @endif
 
@@ -195,6 +202,19 @@
                 </div>
             @endif
         @endif
+
+        <!-- User Management Section -->
+        @role('super-admin')
+            <div class="section-title">ব্যবহারকারী ব্যবস্থাপনা</div>
+            <a href="{{ route('portal.teachers.index') }}" class="nav-item {{ Request::is('portal/teachers*') ? 'active' : '' }}">
+                <i class="fas fa-chalkboard-teacher"></i>
+                <span class="nav-label">শিক্ষকগণ</span>
+            </a>
+            <a href="{{ route('portal.students.index') }}" class="nav-item {{ Request::is('portal/students*') ? 'active' : '' }}">
+                <i class="fas fa-user-graduate"></i>
+                <span class="nav-label">শিক্ষার্থীগণ</span>
+            </a>
+        @endrole
 
         <!-- Administration Section -->
         <div class="section-title">প্রশাসন</div>

@@ -1,2 +1,11 @@
 User-agent: *
-Disallow:
+Allow: /
+
+# Disallow admin/portal areas
+Disallow: /portal/
+Disallow: /portal
+Disallow: /student/
+Disallow: /teacher/
+
+# Allow sitemap
+Sitemap: https://prottoyacademy.com/sitemap.xml

@@ -320,4 +320,42 @@
     }
 </script>
 @endpush
+
+@push('schema')
+@php
+    $bcItems = [
+        ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')],
+    ];
+    $pos = 2;
+    if (isset($category)) {
+        $breadcrumbChain = method_exists($category, 'breadcrumb') ? $category->breadcrumb() : collect([]);
+        foreach ($breadcrumbChain as $bc) {
+            $bcItems[] = ['@type' => 'ListItem', 'position' => $pos++, 'name' => $bc->name ?? '', 'item' => url($bc->slug ?? '')];
+        }
+        // Add current page if not already included
+        $lastItem = end($bcItems);
+        if (($lastItem['item'] ?? '') !== url()->current()) {
+            $bcItems[] = ['@type' => 'ListItem', 'position' => $pos, 'name' => $category->name ?? '', 'item' => url()->current()];
+        }
+    }
+@endphp
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": {!! json_encode($bcItems, JSON_UNESCAPED_UNICODE) !!}
+}
+</script>
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "EducationalOrganization",
+    "name": "{{ get_settings('system_name') ?? 'Prottoy Academy' }}",
+    "url": "{{ url('/') }}",
+    "description": "{{ isset($category) ? ($category->meta_description ?? $category->name) : 'Prottoy Academy' }}"
+}
+</script>
+@endpush
+
 @endsection

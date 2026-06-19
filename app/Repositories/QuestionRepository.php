@@ -57,7 +57,28 @@ class QuestionRepository implements QuestionRepositoryInterface
             ]);
         }
 
-        // dd($request->all());
+        // Check if data is truncated or missing required keys due to max_input_vars limit
+        $questions = $request->questions;
+        if ($questions && is_array($questions)) {
+            $isImportedCQ = ($request->question_type === 'cq' && isset(reset($questions)['stimulus']));
+            foreach ($questions as $key => $q) {
+                if ($isImportedCQ) {
+                    if (!isset($q['stimulus']) || !isset($q['sub_questions']) || !is_array($q['sub_questions'])) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'PHP max_input_vars limit exceeded or form data truncated. Please contact the system administrator to increase the max_input_vars limit in the php.ini configuration.'
+                        ]);
+                    }
+                } else {
+                    if (!isset($q['question']) || !isset($q['correct_answer'])) {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'PHP max_input_vars limit exceeded or form data truncated. Please contact the system administrator to increase the max_input_vars limit in the php.ini configuration.'
+                        ]);
+                    }
+                }
+            }
+        }
 
         $passageId = $request->passage_id;
         if ($request->question_type === 'cq' && $request->has('stimulus')) {

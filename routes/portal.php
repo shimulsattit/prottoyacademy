@@ -92,8 +92,10 @@ Route::get('bin/passage', [PassageController::class, 'trashedItem'])->name('bin.
 Route::delete('restore/passage/{id}', [PassageController::class, 'restore'])->name('passage.restore');
 Route::delete('force-delete/passage/{id}', [PassageController::class, 'forceDelete'])->name('passage.force-delete');
 Route::resource('passage', PassageController::class);
-Route::resource('roles', RoleController::class);
-Route::resource('stuff', AdminController::class);
+Route::middleware(['role:super-admin'])->group(function() {
+    Route::resource('roles', RoleController::class);
+    Route::resource('stuff', AdminController::class);
+});
 
 Route::get('/get-categories', [CategoryController::class, 'getCategories']);
 Route::get('/get-categories/search', [CategoryController::class, 'getSearchedCategories']);
@@ -154,6 +156,16 @@ Route::prefix('blog-tag')->name('blog-tag.')->group(function () {
     Route::delete('/delete/{id}', [\App\Http\Controllers\Admin\BlogTagController::class, 'destroy'])->name('destroy');
 });
 
+// Question Tag
+Route::prefix('question-tag')->name('question-tag.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\QuestionTagController::class, 'index'])->name('index');
+    Route::get('/create', [\App\Http\Controllers\Admin\QuestionTagController::class, 'create'])->name('create');
+    Route::post('/store', [\App\Http\Controllers\Admin\QuestionTagController::class, 'store'])->name('store');
+    Route::get('/edit/{id}', [\App\Http\Controllers\Admin\QuestionTagController::class, 'edit'])->name('edit');
+    Route::patch('/update/{id}', [\App\Http\Controllers\Admin\QuestionTagController::class, 'update'])->name('update');
+    Route::delete('/delete/{id}', [\App\Http\Controllers\Admin\QuestionTagController::class, 'destroy'])->name('destroy');
+});
+
 // Blog
 Route::prefix('blog')->name('blog.')->group(function () {
     Route::get('/', [\App\Http\Controllers\Admin\BlogController::class, 'index'])->name('index');
@@ -182,3 +194,24 @@ Route::get('/question-description-logs/activity', [AdminController::class, 'getA
 
 // routes/web.php or routes/api.php (if using API)
 Route::post('/dashboard/description-logs-data', [AdminController::class, 'fetchDescriptionLogs'])->name('dashboard.logs.data');
+
+Route::middleware(['role:super-admin'])->group(function() {
+    // ===================== Teacher Management =====================
+    Route::get('teachers',                      [\App\Http\Controllers\Admin\TeacherController::class, 'index'])->name('teachers.index');
+    Route::get('teachers/pending',              [\App\Http\Controllers\Admin\TeacherController::class, 'pending'])->name('teachers.pending');
+    Route::post('teachers/{id}/approve',        [\App\Http\Controllers\Admin\TeacherController::class, 'approve'])->name('teachers.approve');
+    Route::post('teachers/{id}/block',          [\App\Http\Controllers\Admin\TeacherController::class, 'block'])->name('teachers.block');
+    Route::post('teachers/{id}/unblock',        [\App\Http\Controllers\Admin\TeacherController::class, 'unblock'])->name('teachers.unblock');
+    Route::delete('teachers/{id}',              [\App\Http\Controllers\Admin\TeacherController::class, 'destroy'])->name('teachers.destroy');
+
+    // Teacher Question Approval
+    Route::get('teacher-questions/pending',         [\App\Http\Controllers\Admin\TeacherController::class, 'pendingQuestions'])->name('teacher-questions.pending');
+    Route::post('teacher-questions/{id}/approve',   [\App\Http\Controllers\Admin\TeacherController::class, 'approveQuestion'])->name('teacher-questions.approve');
+    Route::post('teacher-questions/{id}/reject',    [\App\Http\Controllers\Admin\TeacherController::class, 'rejectQuestion'])->name('teacher-questions.reject');
+
+    // ===================== Student Management =====================
+    Route::get('students',              [\App\Http\Controllers\Admin\StudentController::class, 'index'])->name('students.index');
+    Route::post('students/{id}/block',  [\App\Http\Controllers\Admin\StudentController::class, 'block'])->name('students.block');
+    Route::post('students/{id}/unblock',[\App\Http\Controllers\Admin\StudentController::class, 'unblock'])->name('students.unblock');
+    Route::delete('students/{id}',      [\App\Http\Controllers\Admin\StudentController::class, 'destroy'])->name('students.destroy');
+});

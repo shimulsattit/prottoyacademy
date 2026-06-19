@@ -29,6 +29,16 @@ Route::get('portal', function() {
     return redirect()->route('portal.login');
 });
 
+// Teacher Auth (public — no middleware)
+Route::get('teacher/login',    [\App\Http\Controllers\Teacher\TeacherAuthController::class, 'loginPage'])->name('teacher.login');
+Route::post('teacher/login',   [\App\Http\Controllers\Teacher\TeacherAuthController::class, 'login'])->name('teacher.login.post');
+Route::get('teacher/register', [\App\Http\Controllers\Teacher\TeacherAuthController::class, 'registerPage'])->name('teacher.register');
+Route::post('teacher/register',[\App\Http\Controllers\Teacher\TeacherAuthController::class, 'register'])->name('teacher.register.post');
+
+// Student Leaderboard (public)
+Route::get('student/leaderboard', [\App\Http\Controllers\Portal\LoginController::class, 'leaderboard'])->name('student.leaderboard');
+
+
 Route::get('portal/login', [LoginController::class, 'index'])->name('portal.login');
 Route::post('portal/login/access', [LoginController::class, 'login'])->name('portal.login.post');
 

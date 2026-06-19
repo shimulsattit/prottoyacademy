@@ -33,7 +33,7 @@
                 @if(isset($isCurrentAffairs) && $isCurrentAffairs)
                     <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[8] ?? '' }}">
                 @else
-                    <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[11] ?? $row[8] ?? '' }}">
+                    <input type="hidden" name="questions[{{ $counter }}][job_category_id]" value="{{ $row[11] ?? '' }}">
                     <input type="hidden" name="questions[{{ $counter }}][category_id]" value="{{ $row[12] ?? '' }}">
                 @endif
             </div>

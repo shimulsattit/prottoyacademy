@@ -762,6 +762,72 @@
 </div>
 @endforeach
 
+@push('schema')
+@php
+    // Build FAQ items from questions for Schema.org
+    $faqItems = [];
+    foreach ($final as $catGroup) {
+        foreach ($catGroup['groups'] as $group) {
+            foreach ($group['questions'] as $q) {
+                $questionText = strip_tags($q['question'] ?? '');
+                $answerText   = strip_tags($q['correct_answer'] ?? '');
+                if ($questionText && $answerText) {
+                    $faqItems[] = [
+                        '@type'          => 'Question',
+                        'name'           => mb_substr($questionText, 0, 250),
+                        'acceptedAnswer' => [
+                            '@type' => 'Answer',
+                            'text'  => mb_substr($answerText, 0, 500),
+                        ],
+                    ];
+                }
+                // Limit to 20 questions for schema (Google recommends not overloading)
+                if (count($faqItems) >= 20) break 3;
+            }
+        }
+    }
+
+    // BreadcrumbList from breadcrumbs
+    $breadcrumbItems = [];
+    $breadcrumbItems[] = ['@type' => 'ListItem', 'position' => 1, 'name' => 'Home', 'item' => url('/')];
+    if (isset($breadcrumbs)) {
+        $pos = 2;
+        foreach ($breadcrumbs as $bc) {
+            $breadcrumbItems[] = [
+                '@type'    => 'ListItem',
+                'position' => $pos++,
+                'name'     => $bc->name ?? '',
+                'item'     => url($bc->slug ?? ''),
+            ];
+        }
+    }
+    $breadcrumbItems[] = [
+        '@type'    => 'ListItem',
+        'position' => count($breadcrumbItems) + 1,
+        'name'     => $model->name ?? '',
+        'item'     => url()->current(),
+    ];
+@endphp
+
+@if(count($faqItems) > 0)
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": {!! json_encode($faqItems, JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT) !!}
+}
+</script>
+@endif
+
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": {!! json_encode($breadcrumbItems, JSON_UNESCAPED_UNICODE) !!}
+}
+</script>
+@endpush
+
 @endsection
 
 @push('scripts')

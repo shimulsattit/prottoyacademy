@@ -10,6 +10,7 @@ use App\Models\Category;
 use App\Models\Exam;
 use App\Models\JobCategory;
 use App\Models\Page;
+use App\Models\Question;
 use Carbon\Carbon;
 
 class SitemapController extends Controller
@@ -137,6 +138,23 @@ class SitemapController extends Controller
                 ];
             }
         }
+
+        // 9. Questions (individual question pages indexed via their slug)
+        Question::where('status', 1)
+            ->whereNotNull('slug')
+            ->where('slug', '!=', '')
+            ->select(['slug', 'updated_at'])
+            ->orderBy('id', 'desc')
+            ->chunk(500, function ($questions) use (&$urls, $formatDate) {
+                foreach ($questions as $question) {
+                    $urls[] = [
+                        'loc'        => url($question->slug),
+                        'lastmod'    => $formatDate($question->updated_at),
+                        'changefreq' => 'monthly',
+                        'priority'   => '0.7',
+                    ];
+                }
+            });
 
         return response()->view('web.sitemap', compact('urls'))
             ->header('Content-Type', 'text/xml');

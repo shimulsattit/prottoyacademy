@@ -83,6 +83,11 @@ class Question extends Model
         return $this->HasOne(Option::class);
     }
 
+    public function questionTags()
+    {
+        return $this->belongsToMany(QuestionTag::class, 'question_question_tag');
+    }
+
     /**
      * Accessor to dynamically replace absolute live storage URLs with relative paths.
      */
