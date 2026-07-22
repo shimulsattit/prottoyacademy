@@ -14,6 +14,41 @@
         p {
             margin-bottom: 15px;
         }
+
+        .checkout-page-style {
+            color: var(--text-light) !important;
+            font-size: 16px;
+            line-height: 1.8;
+        }
+
+        .checkout-page-style *,
+        .checkout-page-style p,
+        .checkout-page-style span,
+        .checkout-page-style li,
+        .checkout-page-style div {
+            color: var(--text-light) !important;
+        }
+
+        .checkout-page-style h1,
+        .checkout-page-style h2,
+        .checkout-page-style h3,
+        .checkout-page-style h4,
+        .checkout-page-style h5,
+        .checkout-page-style h6,
+        .checkout-page-style strong,
+        .checkout-page-style b {
+            color: #ffffff !important;
+        }
+
+        .checkout-page-style a {
+            color: var(--accent-gold) !important;
+            text-decoration: none;
+            transition: opacity 0.2s;
+        }
+
+        .checkout-page-style a:hover {
+            opacity: 0.8;
+        }
     </style>
 @endpush
 

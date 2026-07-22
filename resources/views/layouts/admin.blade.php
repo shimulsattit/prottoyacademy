@@ -83,16 +83,14 @@
         .logo-icon {
             width: 44px;
             height: 44px;
-            background: linear-gradient(135deg, #F39C12, #E74C3C);
+            background: #ffffff;
             border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            font-weight: 700;
-            color: #fff;
             flex-shrink: 0;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            padding: 3px;
         }
 
         .logo-text {
@@ -600,7 +598,7 @@
     <script src="{{ asset('portal-resource/js/parsley.min.js') }}"></script>
     <script src="{{ asset('portal-resource/js/toastr.min.js') }}"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    <script src="{{ asset('portal-resource/js/main.js') }}"></script>
+    <script src="{{ asset('portal-resource/js/main.js') }}?v={{ time() }}"></script>
 
     <!-- Custom Collapsing and Dropdown scripts -->
     <script>

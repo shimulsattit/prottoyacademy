@@ -5,7 +5,15 @@
 @endpush
 
 @push('style')
-
+<style>
+  .btn-blog-tab {
+    transition: all 0.3s ease;
+  }
+  .btn-blog-tab:not(.active):hover {
+    background: rgba(255, 255, 255, 0.05) !important;
+    color: var(--accent-gold) !important;
+  }
+</style>
 @endpush
 
 @section('content')
@@ -63,46 +71,54 @@
 
     <div class="edu-elements-area edu-section-gap bg-color-white">
         <div class="container">
+            <!-- Start Category Tabs -->
+            <div class="row mb-5 justify-content-center">
+                <div class="col-lg-12 text-center">
+                    <div class="blog-tabs-wrapper" style="display: inline-flex; flex-wrap: wrap; gap: 10px; background: rgba(255, 255, 255, 0.02); border: 1px solid rgba(255, 255, 255, 0.05); padding: 6px; border-radius: 50px; justify-content: center;">
+                        <button class="btn-blog-tab active" data-filter="all" style="padding: 10px 24px; border-radius: 40px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.3s ease; background: linear-gradient(90deg, #f5c518 0%, #ffdd53 100%); color: #0d122b; box-shadow: 0 4px 12px rgba(245, 197, 24, 0.2);">সব ব্লগ</button>
+                        @php
+                            $blogCategories = \App\Models\BlogCategory::where('status', 1)->get();
+                        @endphp
+                        @foreach ($blogCategories as $cat)
+                            <button class="btn-blog-tab" data-filter="{{ $cat->slug }}" style="padding: 10px 24px; border-radius: 40px; font-weight: 600; font-size: 14px; border: none; cursor: pointer; transition: all 0.3s ease; background: transparent; color: #ffffff;">{{ $cat->name }}</button>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            <!-- End Category Tabs -->
+
             <div class="row g-5">
                 <div class="col-lg-12">
                     <div class="row g-5">
                         @if (count($blogs))
                             @foreach ($blogs as $blog)
-                                <!-- Start Blog Grid  -->
-                                <div class="col-lg-4 col-md-6 col-12" data-sal-delay="150" data-sal="slide-up" data-sal-duration="800">
-                                    <div class="edu-blog blog-type-2 radius-small">
-                                        <div class="inner">
-                                            <div class="thumbnail">
-                                                <a href="{{ route('slug.handle', $blog->slug) }}">
-                                                    <img src="{{ asset($blog->thumbnail_image) }}" alt="{{ $blog->title }} Image">
+                                <div class="col-lg-4 col-md-6 col-12 blog-card-item" data-category="{{ $blog->category ? $blog->category->slug : '' }}" data-sal-delay="150" data-sal="slide-up" data-sal-duration="800">
+                                    <div class="blog-card-exact">
+                                        <div class="blog-thumb-exact">
+                                            <a href="{{ route('slug.handle', $blog->slug) }}">
+                                                <img src="{{ $blog->thumbnail_image ? asset($blog->thumbnail_image) : ($blog->thumbnail ? asset('storage/' . $blog->thumbnail) : asset('assets/images/logo/logo.png')) }}" alt="{{ $blog->title }} Image">
+                                            </a>
+                                        </div>
+                                        <div class="blog-content-exact">
+                                            @if ($blog->category)
+                                                <a href="{{ route('slug.handle', $blog->category->slug) }}" class="blog-cat-badge" style="text-decoration: none;">
+                                                    {{ $blog->category->name }}
                                                 </a>
-                                            </div>
-                                            <div class="content">
-                                                @if ($blog->category)
-                                                    <div class="status-group">
-                                                        <a href="{{ route('slug.handle', $blog->category->slug) }}" class="eduvibe-status status-05">
-                                                            <i class="icon-price-tag-3-line"></i> 
-                                                            {{ $blog->category->name }}
-                                                        </a>
-                                                    </div>
-                                                @endif
-                                                
-                                                <h5 class="title">
-                                                    <a href="{{ route('slug.handle', $blog->slug) }}">
-                                                        {{ $blog->title }}
-                                                    </a>
-                                                </h5>
-                                                <div class="blog-card-bottom">
-                                                    <ul class="blog-meta">
-                                                        <li><i class="icon-calendar-2-line"></i>{{ date('d f, Y', strtotime($blog->created_at)) }}</li>
-                                                    </ul>
-                                                    <div class="read-more-btn">
-                                                        <a class="btn-transparent" href="{{ route('slug.handle', $blog->slug) }}">
-                                                            Read More
-                                                            <i class="icon-arrow-right-line-right"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
+                                            @endif
+                                            
+                                            <h4>
+                                                <a href="{{ route('slug.handle', $blog->slug) }}">
+                                                    {{ $blog->title }}
+                                                </a>
+                                            </h4>
+                                            <p>
+                                                {{ Str::limit(strip_tags($blog->short_description ?? $blog->content ?? ''), 120) }}
+                                            </p>
+                                            <div class="blog-meta-exact">
+                                                <span><i class="ri-calendar-line" style="margin-right: 5px; color: var(--accent-gold);"></i>{{ date('d M, Y', strtotime($blog->created_at)) }}</span>
+                                                <a href="{{ route('slug.handle', $blog->slug) }}">
+                                                    পড়ুন <i class="ri-arrow-right-line"></i>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>
@@ -165,6 +181,28 @@
 
 @push('scripts')
     <script>
-        
+        $(document).ready(function() {
+            $('.btn-blog-tab').on('click', function() {
+                // Change active state
+                $('.btn-blog-tab').removeClass('active').css({
+                    'background': 'transparent',
+                    'color': '#ffffff',
+                    'box-shadow': 'none'
+                });
+                $(this).addClass('active').css({
+                    'background': 'linear-gradient(90deg, #f5c518 0%, #ffdd53 100%)',
+                    'color': '#0d122b',
+                    'box-shadow': '0 4px 12px rgba(245, 197, 24, 0.2)'
+                });
+
+                var filter = $(this).data('filter');
+                if (filter === 'all') {
+                    $('.blog-card-item').fadeIn(300);
+                } else {
+                    $('.blog-card-item').hide();
+                    $('.blog-card-item[data-category="' + filter + '"]').fadeIn(300);
+                }
+            });
+        });
     </script>
 @endpush    

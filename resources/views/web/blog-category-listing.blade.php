@@ -78,39 +78,32 @@
                             @foreach ($blogs as $blog)
                                 <!-- Start Blog Grid  -->
                                 <div class="col-lg-4 col-md-6 col-12" data-sal-delay="150" data-sal="slide-up" data-sal-duration="800">
-                                    <div class="edu-blog blog-type-2 radius-small">
-                                        <div class="inner">
-                                            <div class="thumbnail">
-                                                <a href="{{ route('slug.handle', $blog->slug) }}">
-                                                    <img src="{{ asset($blog->thumbnail_image) }}" alt="{{ $blog->title }} Image">
+                                    <div class="blog-card-exact">
+                                        <div class="blog-thumb-exact">
+                                            <a href="{{ route('slug.handle', $blog->slug) }}">
+                                                <img src="{{ $blog->thumbnail_image ? asset($blog->thumbnail_image) : ($blog->thumbnail ? asset('storage/' . $blog->thumbnail) : asset('assets/images/logo/logo.png')) }}" alt="{{ $blog->title }} Image">
+                                            </a>
+                                        </div>
+                                        <div class="blog-content-exact">
+                                            @if ($blog->category)
+                                                <a href="{{ route('slug.handle', $blog->category->slug) }}" class="blog-cat-badge" style="text-decoration: none;">
+                                                    {{ $blog->category->name }}
                                                 </a>
-                                            </div>
-                                            <div class="content">
-                                                @if ($blog->category)
-                                                    <div class="status-group">
-                                                        <a href="{{ route('slug.handle', $blog->category->slug) }}" class="eduvibe-status status-05">
-                                                            <i class="icon-price-tag-3-line"></i> 
-                                                            {{ $blog->category->name }}
-                                                        </a>
-                                                    </div>
-                                                @endif
-                                                
-                                                <h5 class="title">
-                                                    <a href="{{ route('slug.handle', $blog->slug) }}">
-                                                        {{ $blog->title }}
-                                                    </a>
-                                                </h5>
-                                                <div class="blog-card-bottom">
-                                                    <ul class="blog-meta">
-                                                        <li><i class="icon-calendar-2-line"></i>{{ date('d f, Y', strtotime($blog->created_at)) }}</li>
-                                                    </ul>
-                                                    <div class="read-more-btn">
-                                                        <a class="btn-transparent" href="{{ route('slug.handle', $blog->slug) }}">
-                                                            Read More
-                                                            <i class="icon-arrow-right-line-right"></i>
-                                                        </a>
-                                                    </div>
-                                                </div>
+                                            @endif
+                                            
+                                            <h4>
+                                                <a href="{{ route('slug.handle', $blog->slug) }}">
+                                                    {{ $blog->title }}
+                                                </a>
+                                            </h4>
+                                            <p>
+                                                {{ Str::limit(strip_tags($blog->short_description ?? $blog->content ?? ''), 120) }}
+                                            </p>
+                                            <div class="blog-meta-exact">
+                                                <span><i class="ri-calendar-line" style="margin-right: 5px; color: var(--accent-gold);"></i>{{ date('d M, Y', strtotime($blog->created_at)) }}</span>
+                                                <a href="{{ route('slug.handle', $blog->slug) }}">
+                                                    পড়ুন <i class="ri-arrow-right-line"></i>
+                                                </a>
                                             </div>
                                         </div>
                                     </div>

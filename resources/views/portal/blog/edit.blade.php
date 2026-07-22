@@ -62,18 +62,13 @@
                                 </div>
 
                                 <div class="col-md-6 mb-3 form-group">
-                                    <label for="name">Name <span class="text-danger">*</span></label>
+                                    <label for="name">Title <span class="text-danger">*</span></label>
                                     <input type="text" name="title" id="name" class="form-control" required value="{{ $model->title }}">
                                 </div>
 
                                 <div class="col-md-6 mb-3 form-group">
-                                    <label for="slug">Slug <span class="text-danger">*</span></label>
-                                    <input type="text" name="slug" id="slug" class="form-control" required value="{{ $model->slug }}">
-                                </div>
-
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="short_description">Short Description <span class="text-danger">*</span></label>
-                                    <textarea name="short_description" id="short_description" cols="30" rows="3" class="form-control">{{ $model->short_description }}</textarea>
+                                    <label for="slug">Slug</label>
+                                    <input type="text" name="slug" id="slug" class="form-control" value="{{ $model->slug }}">
                                 </div>
                                 
                                 <div class="col-md-12 mb-3 form-group">
@@ -81,19 +76,11 @@
                                     <textarea name="content" id="content" cols="30" rows="3" class="form-control">{{ $model->content }}</textarea>
                                 </div>
 
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="thumbnail_image">Thumbnail Image</label>
+                                <div class="col-md-12 form-group mb-3">
+                                    <label for="thumbnail_image">Image</label>
                                     <input type="file" name="thumbnail_image" id="thumbnail_image" class="form-control dropify">
                                     @if ($model->thumbnail_image)
-                                        <img src="{{ asset($model->thumbnail_image) }}" alt="Thumbnail Image" style="width: 100px;">
-                                    @endif
-                                </div>
-
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="banner_image">Banner Image</label>
-                                    <input type="file" name="banner_image" id="banner_image" class="form-control dropify">
-                                    @if ($model->banner_image)
-                                        <img src="{{ asset($model->banner_image) }}" alt="Banner Image" style="width: 100px;">
+                                        <img src="{{ asset($model->thumbnail_image) }}" alt="Image" class="mt-2 rounded" style="max-height: 120px; object-fit: contain;">
                                     @endif
                                 </div>
 
@@ -122,31 +109,8 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                
-                                <div class="col-md-12 form-group mb-3">
-                                    <label for="site_title">Site Title <span class="text-danger">*</span></label>
-                                    <input type="text" name="site_title" id="site_title" class="form-control" required value="{{ $model->site_title }}">
-                                </div>
-                                
-                                <div class="col-md-12 form-group mb-3">
-                                    <label for="meta_title">Meta Title <span class="text-danger">*</span></label>
-                                    <input type="text" name="meta_title" id="meta_title" class="form-control" required value="{{ $model->meta_title }}">
-                                </div>
 
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="meta_keyword">Meta Keywords</label>
-                                    <textarea name="meta_keyword" id="meta_keyword" cols="30" rows="3" class="form-control">{{ $model->meta_keyword }}</textarea>
-                                </div>
 
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="meta_description">Meta Description</label>
-                                    <textarea name="meta_description" id="meta_description" cols="30" rows="3" class="form-control">{{ $model->meta_description }}</textarea>
-                                </div>
-
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="meta_google_schema">Google Schema</label>
-                                    <textarea name="meta_google_schema" id="meta_google_schema" cols="30" rows="3" class="form-control">{{ $model->meta_google_schema }}</textarea>
-                                </div>
 
                                 <div class="col-md-12 mb-3 text-center">
                                     <button type="submit" class="btn btn-sm btn-block btn-primary" id="submit">
@@ -229,6 +193,5 @@
                 }
             });
         });
-
     </script>
 @endpush

@@ -5,7 +5,9 @@
 <!-- SIDEBAR -->
 <aside class="sidebar" id="sidebar">
     <div class="sidebar-logo">
-        <div class="logo-icon">প্র</div>
+        <div class="logo-icon">
+            <img src="{{ asset('assets/images/logo/logo-icon.png') }}" alt="Prottoy Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+        </div>
         <div class="logo-text">
             <h2>প্রত্যয় একাডেমি</h2>
             <span>অ্যাডমিন পোর্টাল</span>

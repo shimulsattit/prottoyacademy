@@ -424,8 +424,7 @@ var _formValidation = function () {
         var editor = $('.content_form').data('editor');
         if (editor && editor != '') {
             const descriptionData = CKEDITOR.instances[editor].getData();
-            console.log(descriptionData);
-            formData.append('description', descriptionData);
+            formData.set(editor, descriptionData);
         }
 
         //Start Ajax

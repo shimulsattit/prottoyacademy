@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Yajra\DataTables\Facades\DataTables;
 use App\Http\Images;
+use Illuminate\Support\Str;
 
 class BlogController extends Controller
 {
@@ -61,13 +62,22 @@ class BlogController extends Controller
         return view('portal.blog.create', compact('categories','authors','tags'));
     }
 
+    public static function makeSlug($title)
+    {
+        $slug = mb_strtolower($title, 'UTF-8');
+        $slug = preg_replace('/[^\x{0980}-\x{09FF}a-z0-9\s\-]/u', '', $slug);
+        $slug = preg_replace('/[\s]+/u', '-', $slug);
+        $slug = preg_replace('/\-+/u', '-', $slug);
+        return trim($slug, '-');
+    }
+
     public function store(Request $request)
     {
         $validator = Validator::make($request->all(), [
             'blog_category_id' => 'required|exists:blog_categories,id',
             'blog_author_id'   => 'required|exists:blog_authors,id',
             'title'            => 'required|string|max:255',
-            'slug'             => 'nullable|string|max:255|unique:blogs,slug',
+            'slug'             => 'nullable|string|max:255',
             'short_description'=> 'nullable|string|max:500',
             'content'          => 'nullable|string',
             'thumbnail_image'  => 'nullable|image',
@@ -88,11 +98,41 @@ class BlogController extends Controller
         $model->fill($request->all());
         $model->content = $request->content;
 
+        $slugInput = $request->slug ?: $request->title;
+        $model->slug = self::makeSlug($slugInput);
+
+        // Make slug unique if already exists
+        $originalSlug = $model->slug;
+        $count = 1;
+        while (Blog::where('slug', $model->slug)->exists()) {
+            $model->slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        if (!$model->short_description) {
+            $plainText = strip_tags($request->content ?? '');
+            $model->short_description = Str::limit($plainText, 150) ?: $request->title;
+        }
+
+        if (!$model->site_title) {
+            $model->site_title = $request->title;
+        }
+        if (!$model->meta_title) {
+            $model->meta_title = $request->title;
+        }
+
         if($request->hasFile('thumbnail_image')){
             $model->thumbnail_image = Images::upload('blogs',$request->thumbnail_image);
         }
         if($request->hasFile('banner_image')){
             $model->banner_image = Images::upload('blogs',$request->banner_image);
+        }
+
+        if (!$model->banner_image && $model->thumbnail_image) {
+            $model->banner_image = $model->thumbnail_image;
+        }
+        if (!$model->thumbnail_image && $model->banner_image) {
+            $model->thumbnail_image = $model->banner_image;
         }
 
         $model->save();
@@ -127,7 +167,7 @@ class BlogController extends Controller
             'blog_category_id' => 'required|exists:blog_categories,id',
             'blog_author_id'   => 'required|exists:blog_authors,id',
             'title'            => 'required|string|max:255',
-            'slug'             => 'nullable|string|max:255|unique:blogs,slug,'.$id,
+            'slug'             => 'nullable|string|max:255',
             'short_description'=> 'nullable|string|max:500',
             'content'          => 'nullable|string',
             'thumbnail_image'  => 'nullable|image',
@@ -148,11 +188,41 @@ class BlogController extends Controller
         $model->fill($request->all());
         $model->content = $request->content;
 
+        $slugInput = $request->slug ?: $request->title;
+        $model->slug = self::makeSlug($slugInput);
+
+        // Make slug unique if already exists (except for current blog)
+        $originalSlug = $model->slug;
+        $count = 1;
+        while (Blog::where('slug', $model->slug)->where('id', '!=', $model->id)->exists()) {
+            $model->slug = $originalSlug . '-' . $count;
+            $count++;
+        }
+
+        if (!$model->short_description) {
+            $plainText = strip_tags($request->content ?? '');
+            $model->short_description = Str::limit($plainText, 150) ?: $request->title;
+        }
+
+        if (!$model->site_title) {
+            $model->site_title = $request->title;
+        }
+        if (!$model->meta_title) {
+            $model->meta_title = $request->title;
+        }
+
         if($request->hasFile('thumbnail_image')){
             $model->thumbnail_image = Images::upload('blogs',$request->thumbnail_image);
         }
         if($request->hasFile('banner_image')){
             $model->banner_image = Images::upload('blogs',$request->banner_image);
+        }
+
+        if (!$model->banner_image && $model->thumbnail_image) {
+            $model->banner_image = $model->thumbnail_image;
+        }
+        if (!$model->thumbnail_image && $model->banner_image) {
+            $model->thumbnail_image = $model->banner_image;
         }
 
         $model->save();

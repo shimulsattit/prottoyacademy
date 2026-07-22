@@ -10,13 +10,11 @@
   .logo-box { display: flex; align-items: center; gap: 12px; text-decoration: none; color: #fff; }
   .logo-icon {
     width: 44px; height: 44px;
-    background: linear-gradient(135deg, var(--accent-gold), var(--accent-orange));
+    background: #ffffff;
     border-radius: 11px;
     display: flex; align-items: center; justify-content: center;
-    font-family: 'Noto Serif Bengali', serif;
-    font-size: 22px; font-weight: 900;
-    color: #07091e;
-    box-shadow: 0 4px 18px rgba(245,197,24,0.35);
+    box-shadow: 0 4px 18px rgba(245,197,24,0.15);
+    padding: 3px;
   }
   .logo-text { font-family: 'Noto Serif Bengali', serif; font-size: 19px; font-weight: 700; line-height: 1.25; }
   .logo-text span { color: var(--accent-gold); }
@@ -81,7 +79,9 @@
 
 <nav>
   <a href="{{ route('home') }}" class="logo-box">
-    <div class="logo-icon">প্র</div>
+    <div class="logo-icon">
+      <img src="{{ asset('assets/images/logo/logo-icon.png') }}" alt="Prottoy Logo" style="width: 100%; height: 100%; object-fit: contain; border-radius: 8px;">
+    </div>
     <div class="logo-text">
       প্রত্যয় <span>একাডেমি</span>
       <div class="logo-sub">PROTTOY ACADEMY</div>

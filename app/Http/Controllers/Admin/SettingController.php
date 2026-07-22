@@ -101,7 +101,7 @@ class SettingController extends Controller
             }
 
             $data = array();
-            if ($key == 'header_menu_labels' || $key == 'header_menu_links' || $key == 'footer_menu_one_labels' || $key == 'footer_menu_one_links' || $key == 'footer_menu_two_labels' || $key == 'footer_menu_two_links' || $key == 'footer_menu_three_labels' || $key == 'footer_menu_three_links') {
+            if ($key == 'header_menu_labels' || $key == 'header_menu_links' || $key == 'footer_menu_one_labels' || $key == 'footer_menu_one_links' || $key == 'footer_menu_two_labels' || $key == 'footer_menu_two_links' || $key == 'footer_menu_three_labels' || $key == 'footer_menu_three_links' || $key == 'footer_menu_four_labels' || $key == 'footer_menu_four_links') {
                 $data['value'] = json_encode($value);
             } else {
                 $data['value'] = $value;

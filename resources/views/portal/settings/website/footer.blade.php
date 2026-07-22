@@ -31,7 +31,7 @@
                         <form action="{{ route('portal.settings.update') }}" method="POST" enctype="multipart/form-data" class="content_form">
                             <div class="row">
                                 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="card">
                                         <div class="card-header">
                                             <h2 class="h6 card-title">
@@ -83,7 +83,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="card">
                                         <div class="card-header">
                                             <h2 class="h6 card-title">
@@ -135,7 +135,7 @@
                                     </div>
                                 </div>
 
-                                <div class="col-md-4">
+                                <div class="col-md-3">
                                     <div class="card">
                                         <div class="card-header">
                                             <h2 class="h6 card-title">
@@ -187,8 +187,60 @@
                                     </div>
                                 </div>
 
+                                <div class="col-md-3">
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <h2 class="h6 card-title">
+                                                <strong>Link Widget Four</strong>
+                                            </h2>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-md-12 form-group mb-3">
+                                                    <label for="footer_menu_four_label_text">Title</label>
+                                                    <input type="text" name="footer_menu_four_label_text" id="footer_menu_four_label_text" class="form-control" value="{{ get_settings('footer_menu_four_label_text') }}">
+                                                </div>
+                                                <div class="col-md-12 form-group mb-3">
+                                                    <div class="footer-nav-menu-four">
+                                                        @if (get_settings('footer_menu_four_labels') != null)
+                                                            @foreach ( json_decode(get_settings('footer_menu_four_labels')) as $key => $value)
+                                                                @php
+                                                                    $rand = rand(10000, 1000000);
+                                                                @endphp
+                                                                <div class="row mt-3" id="data-{{ $rand}}">
+                                                                    <div class="col-4">
+                                                                        <div class="form-group">
+                                                                            <input type="text" class="form-control" placeholder="Label" name="footer_menu_four_labels[]" required value="{{ $value }}">
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col">
+                                                                        <div class="form-group">
+                                                                            <input type="text" class="form-control" placeholder="Link with http:// or https://" name="footer_menu_four_links[]" value="{{ json_decode(App\Models\Setting::where('name', 'footer_menu_four_links')->first()->value, true)[$key] }}" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-auto">
+                                                                        <button type="button" class="mt-1 btn btn-icon btn-circle btn-sm btn-outline-danger remove-parent" data-parent="{{ $rand }}">
+                                                                            <i class="fas fa-times"></i>
+                                                                        </button>
+                                                                    </div>
+                                                                </div>
+                                                            @endforeach
+                                                        @endif
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="card-footer">
+                                            <button type="button" class="btn btn-sm btn-outline-primary btn-sm add-more-four">
+                                                <i class="bi bi-plus"></i>        
+                                                Add New
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
                                 @if (Auth::guard('admin')->user()->hasPermissionTo('settings.update'))
-                                    <div class="col-md-4 mt-3 mx-auto">
+                                    <div class="col-md-4 mt-5 mx-auto">
                                         <button type="submit" class="btn btn-sm btn-block btn-primary" id="submit">
                                             <i class="fas fa-paper-plane fa-fw"></i> Update    
                                         </button>
@@ -298,6 +350,33 @@
         });
 
         $(document).on('click', '.remove-parent-three', function() {
+            let id = $(this).data('parent');
+            $('#data-'+id).remove();
+        });
+
+        $(document).on('click', '.add-more-four', function() {
+            let id = Math.floor((Math.random() * 10000000) + 1);
+            let content = `<div class="row mt-3" id="data-`+ id +`">
+                    <div class="col-4">
+                        <div class="form-group">
+                            <input type="text" required class="form-control" placeholder="Label" name="footer_menu_four_labels[]">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <input type="text" required class="form-control" placeholder="Link with http:// or https://" name="footer_menu_four_links[]">
+                        </div>
+                    </div>
+                    <div class="col-auto">
+                        <button type="button" class="mt-1 btn btn-icon btn-circle btn-sm btn-outline-danger remove-parent-four" data-parent="`+ id+`">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>`;
+            $('.footer-nav-menu-four').append(content);
+        });
+
+        $(document).on('click', '.remove-parent-four', function() {
             let id = $(this).data('parent');
             $('#data-'+id).remove();
         });

@@ -42,8 +42,8 @@
                                     <label for="blog_category_id">Category <span class="text-danger">*</span></label>
                                     <select name="blog_category_id" id="blog_category_id" class="form-control select" data-placeholder="Select One" required data-parsley-errors-container="#blog_category_id_error">
                                         <option value="">Select One</option>
-                                        @foreach ($categories as $category)
-                                            <option value="{{ $category->id }}">{{ $category->name }}</option>
+                                        @foreach ($categories as $index => $category)
+                                            <option {{ $index == 0 ? 'selected' : '' }} value="{{ $category->id }}">{{ $category->name }}</option>
                                         @endforeach
                                     </select>
                                     <span id="blog_category_id_error"></span>
@@ -54,26 +54,21 @@
                                     <label for="blog_author_id">Author <span class="text-danger">*</span></label>
                                     <select name="blog_author_id" id="blog_author_id" class="form-control select" data-placeholder="Select One" required data-parsley-errors-container="#blog_author_id_error">
                                         <option value="">Select One</option>
-                                        @foreach ($authors as $author)
-                                            <option value="{{ $author->id }}">{{ $author->name }}</option>
+                                        @foreach ($authors as $index => $author)
+                                            <option {{ $index == 0 ? 'selected' : '' }} value="{{ $author->id }}">{{ $author->name }}</option>
                                         @endforeach
                                     </select>
                                     <span id="blog_author_id_error"></span>
                                 </div>
 
                                 <div class="col-md-6 mb-3 form-group">
-                                    <label for="name">Name <span class="text-danger">*</span></label>
+                                    <label for="name">Title <span class="text-danger">*</span></label>
                                     <input type="text" name="title" id="name" class="form-control" required value="">
                                 </div>
 
                                 <div class="col-md-6 mb-3 form-group">
-                                    <label for="slug">Slug <span class="text-danger">*</span></label>
-                                    <input type="text" name="slug" id="slug" class="form-control" required value="">
-                                </div>
-
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="short_description">Short Description <span class="text-danger">*</span></label>
-                                    <textarea name="short_description" id="short_description" cols="30" rows="3" class="form-control"></textarea>
+                                    <label for="slug">Slug</label>
+                                    <input type="text" name="slug" id="slug" class="form-control" value="">
                                 </div>
                                 
                                 <div class="col-md-12 mb-3 form-group">
@@ -81,14 +76,9 @@
                                     <textarea name="content" id="content" cols="30" rows="3" class="form-control"></textarea>
                                 </div>
 
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="thumbnail_image">Thumbnail Image <span class="text-danger">*</span></label>
+                                <div class="col-md-12 form-group mb-3">
+                                    <label for="thumbnail_image">Image <span class="text-danger">*</span></label>
                                     <input type="file" name="thumbnail_image" id="thumbnail_image" class="form-control dropify" required>
-                                </div>
-
-                                <div class="col-md-6 form-group mb-3">
-                                    <label for="banner_image">Banner Image <span class="text-danger">*</span></label>
-                                    <input type="file" name="banner_image" id="banner_image" class="form-control dropify" required>
                                 </div>
 
                                 <div class="col-md-6 form-group mb-3">
@@ -116,31 +106,8 @@
                                         @endforeach
                                     </select>
                                 </div>
-                                
-                                <div class="col-md-12 form-group mb-3">
-                                    <label for="site_title">Site Title <span class="text-danger">*</span></label>
-                                    <input type="text" name="site_title" id="site_title" class="form-control" required>
-                                </div>
-                                
-                                <div class="col-md-12 form-group mb-3">
-                                    <label for="meta_title">Meta Title <span class="text-danger">*</span></label>
-                                    <input type="text" name="meta_title" id="meta_title" class="form-control" required>
-                                </div>
 
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="meta_keyword">Meta Keywords</label>
-                                    <textarea name="meta_keyword" id="meta_keyword" cols="30" rows="3" class="form-control"></textarea>
-                                </div>
 
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="meta_description">Meta Description</label>
-                                    <textarea name="meta_description" id="meta_description" cols="30" rows="3" class="form-control"></textarea>
-                                </div>
-
-                                <div class="col-md-12 mb-3 form-group">
-                                    <label for="meta_google_schema">Google Schema</label>
-                                    <textarea name="meta_google_schema" id="meta_google_schema" cols="30" rows="3" class="form-control"></textarea>
-                                </div>
 
                                 <div class="col-md-12 mb-3 text-center">
                                     <button type="submit" class="btn btn-sm btn-block btn-primary" id="submit">

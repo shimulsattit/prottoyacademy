@@ -466,62 +466,74 @@
   </div>
 </section>
 
-<!-- RECENT QUESTIONS (HUBUHU) - FULLY DYNAMIC & WHITE FONT -->
+<style>
+  .blog-card-exact:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 30px rgba(245, 197, 24, 0.08) !important;
+    border-color: rgba(245, 197, 24, 0.3) !important;
+  }
+  .blog-card-exact:hover img {
+    transform: scale(1.05);
+  }
+  .blog-card-exact:hover h4 a {
+    color: var(--accent-gold) !important;
+  }
+  .btn-all-blogs:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(245, 197, 24, 0.35) !important;
+    background: linear-gradient(90deg, #ffdd53 0%, #f5c518 100%) !important;
+  }
+</style>
+
+<!-- DYNAMIC RECENT BLOGS SECTION -->
 <section class="section-premium" style="padding-top:0">
   <div class="sec-top-premium">
     <div class="sec-label-premium">সাম্প্রতিক</div>
-    <div class="sec-title-premium">নতুন যোগ হওয়া প্রশ্নসমূহ</div>
+    <div class="sec-title-premium">আমাদের নতুন ব্লগ ও আপডেটসমূহ</div>
   </div>
-  <div class="q-list-premium">
+  
+  <div class="row g-4 mt-2 justify-content-center">
     @php
-        $recentQuestions = \App\Models\Question::with(['category.parent', 'job_category', 'exam', 'year'])->latest()->take(5)->get();
-        $qColors = ['#f5c518', '#00b4d8', '#a78bfa', '#22c55e', '#ff6b35'];
-        $catMapping = [
-            'BCS' => 'Job Solution', 'বিসিএস' => 'Job Solution',
-            'Bank' => 'Bank Recruitment', 'ব্যাংক' => 'Bank Recruitment',
-            'Admission' => 'Admission', 'ভর্তি' => 'Admission',
-            'School' => 'School & College', 'স্কুল' => 'School & College'
-        ];
+        $recentBlogs = \App\Models\Blog::with('category')->where('status', 1)->orderBy('id', 'DESC')->take(3)->get();
     @endphp
-    @foreach ($recentQuestions as $index => $q)
-        @php
-            $color = $qColors[$index % 5];
-            $origCat = $q->category->name ?? 'General';
-            $displayCat = $origCat;
-            foreach($catMapping as $key => $val) {
-                if (str_contains(strtolower($origCat), strtolower($key))) {
-                    $displayCat = $val;
-                    break;
-                }
-            }
-            
-            // Build dynamic title with fallbacks
-            $examName = $q->exam->name ?? $q->job_category->name ?? $q->category->name ?? '';
-            $yearName = $q->year->name ?? '';
-            $prefix = trim($examName . ($yearName ? ' (' . $toBn($yearName) . ')' : ''));
-            $fullQuestion = $prefix ? $prefix . ' — ' . $q->question : $q->question;
-            
-            // Subject/Topic logic
-            $subject = $q->category->name ?? 'সাধারণ জ্ঞান';
-            $parentCat = $q->category->parent->name ?? $displayCat;
-        @endphp
-        <a href="{{ $q->job_category ? route('slug.handle', $q->job_category->slug) : '#' }}" class="q-row-premium">
-          <div class="q-badge-premium" style="background:{{ $color }}26; color:{{ $color }}">
-            {{ $toBn($index + 1) }}
+    @foreach ($recentBlogs as $blog)
+      <div class="col-lg-4 col-md-6 col-12">
+        <div class="blog-card-exact" style="background: rgba(255, 255, 255, 0.02); border: 1.5px solid rgba(255, 255, 255, 0.05); border-radius: 16px; overflow: hidden; height: 100%; transition: all 0.3s ease; display: flex; flex-direction: column;">
+          <div class="blog-thumb-exact" style="position: relative; overflow: hidden; aspect-ratio: 16/9; width: 100%;">
+            <a href="{{ route('slug.handle', $blog->slug) }}" style="display: block; width: 100%; height: 100%;">
+              <img src="{{ $blog->thumbnail_image ? asset($blog->thumbnail_image) : ($blog->thumbnail ? asset('storage/' . $blog->thumbnail) : asset('assets/images/logo/logo.png')) }}" alt="{{ $blog->title }}" style="width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease;">
+            </a>
           </div>
-          <div class="q-body-premium">
-            <p style="color: #ffffff !important; font-weight: 700; opacity: 1;">{{ Str::limit($fullQuestion, 160) }}</p>
-            <div class="q-chips-premium">
-                <span class="chip-premium">{{ $parentCat }}</span>
-                @if($examName)
-                    <span class="chip-premium">{{ $examName }}</span>
-                @endif
-                <span class="chip-premium">{{ $subject }}</span>
+          <div class="blog-content-exact" style="padding: 24px; display: flex; flex-direction: column; flex-grow: 1;">
+            @if ($blog->category)
+              <a href="{{ route('slug.handle', $blog->category->slug) }}" class="blog-cat-badge" style="background: rgba(245, 197, 24, 0.08); color: var(--accent-gold); padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; align-self: flex-start; margin-bottom: 15px; text-decoration: none; transition: all 0.2s ease;">
+                {{ $blog->category->name }}
+              </a>
+            @endif
+            <h4 style="font-size: 18px; font-weight: 700; margin-bottom: 12px; line-height: 1.45;">
+              <a href="{{ route('slug.handle', $blog->slug) }}" style="color: #ffffff; text-decoration: none; transition: color 0.2s;">
+                {{ $blog->title }}
+              </a>
+            </h4>
+            <p style="color: var(--text-light); opacity: 0.8; font-size: 13.5px; line-height: 1.6; margin-bottom: 20px; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; flex-grow: 1;">
+              {{ Str::limit(strip_tags($blog->short_description ?? $blog->content ?? ''), 120) }}
+            </p>
+            <div class="blog-meta-exact" style="display: flex; align-items: center; justify-content: space-between; border-top: 1px solid rgba(255, 255, 255, 0.05); padding-top: 15px; margin-top: auto; font-size: 12.5px; color: var(--text-light); opacity: 0.7;">
+              <span><i class="ri-calendar-line" style="margin-right: 5px; color: var(--accent-gold);"></i>{{ date('d M, Y', strtotime($blog->created_at)) }}</span>
+              <a href="{{ route('slug.handle', $blog->slug) }}" style="color: var(--accent-gold); text-decoration: none; font-weight: 600; display: flex; align-items: center; gap: 4px;">
+                পড়ুন <i class="ri-arrow-right-line"></i>
+              </a>
             </div>
           </div>
-          <span class="q-arrow-premium">›</span>
-        </a>
+        </div>
+      </div>
     @endforeach
+  </div>
+
+  <div class="text-center mt-5">
+    <a href="{{ route('blogs') }}" class="btn btn-all-blogs" style="background: linear-gradient(90deg, #f5c518 0%, #ffdd53 100%); color: #0d122b; font-weight: 700; font-size: 15px; padding: 12px 35px; border-radius: 50px; border: none; box-shadow: 0 4px 15px rgba(245, 197, 24, 0.2); transition: all 0.3s ease; display: inline-flex; align-items: center; gap: 8px; text-decoration: none;">
+      সকল ব্লগ <i class="ri-arrow-right-line" style="font-size: 18px;"></i>
+    </a>
   </div>
 </section>
 
