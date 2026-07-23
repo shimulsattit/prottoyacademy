@@ -116,6 +116,15 @@
     .pz-correct-ans.revealed p, .pz-correct-ans.revealed span {
         color: #28a745 !important;
     }
+    .pz-option-item:hover .pz-option-label {
+        border-color: var(--accent-gold) !important;
+        color: var(--accent-gold) !important;
+    }
+    .pz-correct-ans.revealed .pz-option-label {
+        background-color: #28a745 !important;
+        border-color: #28a745 !important;
+        color: #fff !important;
+    }
 </style>
 @endpush
 
@@ -258,8 +267,8 @@
                                         $ans = strtolower($q['correct_answer']);
                                         if ($ans == ($oi+1) || $ans == strtolower($opt) || str_contains($ans, 'option_'.(['one','two','three','four','five'][$oi]))) $isCorrect = true;
                                     @endphp
-                                    <div class="pz-option-item {{ $isCorrect ? 'pz-correct-ans' : '' }}" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 16px; font-size:14px; color:#ccc; transition:all 0.3s; display:flex; align-items:flex-start; gap:10px;">
-                                        <span style="font-weight:800; color:var(--accent-gold); min-width:20px; flex-shrink:0;">{{ ['ক','খ','গ','ঘ','ঙ'][$oi] }}.</span>
+                                    <div class="pz-option-item {{ $isCorrect ? 'pz-correct-ans' : '' }}" style="background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.08); border-radius:10px; padding:10px 16px; font-size:14px; color:#ccc; transition:all 0.3s; display:flex; align-items:center; gap:10px;">
+                                        <span class="pz-option-label" style="font-weight:800; color:#cbd5e1; display:inline-flex; align-items:center; justify-content:center; width:28px; height:28px; border-radius:50%; border:1.5px solid rgba(255, 255, 255, 0.2); margin-right:12px; flex-shrink:0; transition:all 0.2s;">{{ ['ক','খ','গ','ঘ','ঙ'][$oi] }}</span>
                                         <span>{!! $opt !!}</span>
                                     </div>
                                 @endif
