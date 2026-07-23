@@ -121,7 +121,30 @@
     .opt-correct p, .opt-correct span:not(.opt-label) {
         color: #22c55e !important;
     }
-    .opt-label { font-weight: 800; color: var(--accent-gold); margin-right: 10px; }
+    .opt-label {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        color: #cbd5e1;
+        font-weight: 700;
+        font-size: 14px;
+        margin-right: 12px;
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+    .opt-box:hover .opt-label {
+        border-color: var(--accent-gold);
+        color: var(--accent-gold);
+    }
+    .opt-correct .opt-label {
+        background-color: #22c55e !important;
+        border-color: #22c55e !important;
+        color: #fff !important;
+    }
 
     /* SIDEBAR */
     .sidebar-widget-premium {
