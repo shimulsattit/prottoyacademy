@@ -93,7 +93,16 @@ class Question extends Model
      */
     public function getQuestionAttribute($value)
     {
-        return str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+        $value = str_replace('&nbsp;', ' ', $value);
+        $value = str_replace('https://prottoyacademy.com/storage/', '/storage/', $value);
+        
+        // Auto-format statement indices (Roman and Bengali numerals) to start on new lines
+        $value = preg_replace('/(?:\s+|^|>)(i|ii|iii|iv|v|vi|vii|viii|ix|x|I|II|III|IV|V|VI|VII|VIII|IX|X|১|২|৩|৪|৫)([\.\)])\s+/iu', '<br>$1$2 ', $value);
+        
+        // Auto-format "নিচের কোনটি সঠিক?" to have spacing before it
+        $value = preg_replace('/\s*(নিচের কোনটি সঠিক\s*\??)/u', '<br><br>$1', $value);
+        
+        return $value;
     }
 
     /**
