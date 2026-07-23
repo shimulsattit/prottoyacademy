@@ -376,38 +376,36 @@
         gap: 10px;
     }
     .q-option-prefix {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        border: 1.5px solid rgba(255, 255, 255, 0.2);
+        color: #cbd5e1;
         font-weight: 700;
-        color: #fff;
+        font-size: 14px;
+        margin-right: 2px;
+        flex-shrink: 0;
+        transition: all 0.2s;
+    }
+    .q-option-item-academy:hover .q-option-prefix {
+        border-color: var(--accent-gold) !important;
+        color: var(--accent-gold) !important;
     }
     .q-option-item-academy.correct {
         border-color: rgba(34, 197, 94, 0.3);
         background: rgba(34, 197, 94, 0.06);
         color: #22c55e;
     }
+    .q-option-item-academy.correct .q-option-prefix {
+        background-color: #22c55e !important;
+        border-color: #22c55e !important;
+        color: #fff !important;
+    }
     .option-bubble {
-        width: 14px;
-        height: 14px;
-        border: 1.5px solid rgba(255, 255, 255, 0.25);
-        border-radius: 50%;
-        display: inline-block;
-        flex-shrink: 0;
-        transition: all 0.2s ease;
-        position: relative;
-        box-sizing: border-box;
-    }
-    .option-bubble.filled {
-        background-color: #22c55e;
-        border-color: #22c55e;
-    }
-    .option-bubble.filled::after {
-        content: "";
-        display: block;
-        width: 6px;
-        height: 6px;
-        margin: 2.5px;
-        background-color: #fff;
-        border-radius: 50%;
-        box-sizing: border-box;
+        display: none !important;
     }
 
     /* SUBTITLE DESCRIPTION */
@@ -1284,19 +1282,19 @@
                     <div class="q-options-academy">
                         <div class="q-option-item-academy ${q.correct_answer === '1' ? 'correct' : ''}">
                             <span class="option-bubble ${q.correct_answer === '1' ? 'filled' : ''}"></span>
-                            <span class="q-option-prefix">ক.</span> ${q.options.option_a || ''}
+                            <span class="q-option-prefix">ক</span> ${q.options.option_a || ''}
                         </div>
                         <div class="q-option-item-academy ${q.correct_answer === '2' ? 'correct' : ''}">
                             <span class="option-bubble ${q.correct_answer === '2' ? 'filled' : ''}"></span>
-                            <span class="q-option-prefix">খ.</span> ${q.options.option_b || ''}
+                            <span class="q-option-prefix">খ</span> ${q.options.option_b || ''}
                         </div>
                         <div class="q-option-item-academy ${q.correct_answer === '3' ? 'correct' : ''}">
                             <span class="option-bubble ${q.correct_answer === '3' ? 'filled' : ''}"></span>
-                            <span class="q-option-prefix">গ.</span> ${q.options.option_c || ''}
+                            <span class="q-option-prefix">গ</span> ${q.options.option_c || ''}
                         </div>
                         <div class="q-option-item-academy ${q.correct_answer === '4' ? 'correct' : ''}">
                             <span class="option-bubble ${q.correct_answer === '4' ? 'filled' : ''}"></span>
-                            <span class="q-option-prefix">ঘ.</span> ${q.options.option_d || ''}
+                            <span class="q-option-prefix">ঘ</span> ${q.options.option_d || ''}
                         </div>
                     </div>
                 `;
